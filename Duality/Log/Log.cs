@@ -150,11 +150,21 @@ namespace Duality
 			this.state.Indent--;
 		}
 
-		private void Write(LogMessageType type, string msg)
+		private void Write(LogMessageType type, string format, params object[] obj)
 		{
+			string message = format;
+			try
+			{
+				message = String.Format(System.Globalization.CultureInfo.InvariantCulture, format, obj);
+			}
+			catch (Exception e)
+			{
+				Write(LogMessageType.Error, string.Format("Was expecting a parameter or more in the message but could not find them {0}", e));
+			}
+
 			Performance.TimeLog.BeginMeasure();
 			foreach (ILogOutput log in this.strOut)
-				log.Write(this, type, msg);
+				log.Write(this, type, message);
 			Performance.TimeLog.EndMeasure();
 		}
 
@@ -165,7 +175,7 @@ namespace Duality
 		/// <param name="obj"></param>
 		public void Write(string format, params object[] obj)
 		{
-			this.Write(LogMessageType.Message, String.Format(System.Globalization.CultureInfo.InvariantCulture, format, obj));
+			this.Write(LogMessageType.Message, format, obj);
 		}
 		/// <summary>
 		/// Writes a new warning log entry.
@@ -174,7 +184,7 @@ namespace Duality
 		/// <param name="obj"></param>
 		public void WriteWarning(string format, params object[] obj)
 		{
-			this.Write(LogMessageType.Warning, String.Format(System.Globalization.CultureInfo.InvariantCulture, format, obj));
+			this.Write(LogMessageType.Warning, format, obj);
 		}
 		/// <summary>
 		/// Writes a new error log entry.
@@ -183,7 +193,9 @@ namespace Duality
 		/// <param name="obj"></param>
 		public void WriteError(string format, params object[] obj)
 		{
-			this.Write(LogMessageType.Error, String.Format(System.Globalization.CultureInfo.InvariantCulture, format, obj));
+
+			this.Write(LogMessageType.Error, format, obj);
+
 		}
 
 		/// <summary>
