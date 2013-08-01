@@ -734,12 +734,19 @@ namespace DualityEditor
 				if (File.Exists(userFileCore))
 				{
 					userDoc = new XmlDocument();
-					userDoc.Load(userFileCore);
-					foreach (XmlElement element in userDoc.GetElementsByTagName("StartProgram").OfType<XmlElement>())
-						element.InnerText = Path.GetFullPath(DualityEditorApp.LauncherAppPath);
-					foreach (XmlElement element in userDoc.GetElementsByTagName("StartWorkingDirectory").OfType<XmlElement>())
-						element.InnerText = Path.GetFullPath(".");
-					userDoc.Save(userFileCore);
+					try
+					{
+						userDoc.Load(userFileCore);
+						foreach (XmlElement element in userDoc.GetElementsByTagName("StartProgram").OfType<XmlElement>())
+							element.InnerText = Path.GetFullPath(DualityEditorApp.LauncherAppPath);
+						foreach (XmlElement element in userDoc.GetElementsByTagName("StartWorkingDirectory").OfType<XmlElement>())
+							element.InnerText = Path.GetFullPath(".");
+						userDoc.Save(userFileCore);
+					}
+					catch (XmlException e)
+					{
+						Log.Editor.WriteError("An error occured while updating the core plugin file {0}: {1}", userFileCore, e.Message);
+					}
 				}
 				
 				if (!File.Exists(userFileEditor))
@@ -757,13 +764,20 @@ namespace DualityEditor
 				}
 				if (File.Exists(userFileEditor))
 				{
-					userDoc = new XmlDocument();
-					userDoc.Load(userFileEditor);
-					foreach (XmlElement element in userDoc.GetElementsByTagName("StartProgram").OfType<XmlElement>())
-						element.InnerText = Path.GetFullPath("DualityEditor.exe");
-					foreach (XmlElement element in userDoc.GetElementsByTagName("StartWorkingDirectory").OfType<XmlElement>())
-						element.InnerText = Path.GetFullPath(".");
-					userDoc.Save(userFileEditor);
+					try
+					{
+						userDoc = new XmlDocument();
+						userDoc.Load(userFileEditor);
+						foreach (XmlElement element in userDoc.GetElementsByTagName("StartProgram").OfType<XmlElement>())
+							element.InnerText = Path.GetFullPath("DualityEditor.exe");
+						foreach (XmlElement element in userDoc.GetElementsByTagName("StartWorkingDirectory").OfType<XmlElement>())
+							element.InnerText = Path.GetFullPath(".");
+						userDoc.Save(userFileEditor);
+					}
+					catch (XmlException e)
+					{
+						Log.Editor.WriteError("An error occured while updating the editor plugin file {0}: {1}", userFileEditor, e.Message);
+					}
 				}
 
 				if (gamePluginZip != null)
