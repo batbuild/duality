@@ -60,6 +60,23 @@ namespace Duality.Tests.Messaging
 			Assert.IsFalse(listener.MessageHandled);
 		}
 
+		[Test]
+		public void SpawningNewObjectsInMessageHandlersDoesNotCauseAnException()
+		{
+			var gameObject = new GameObject { Name = "TestGameObject" };
+			var receiver = new SpawnerComponent();
+			gameObject.AddComponent(receiver);
+			Scene.Current.RegisterObj(gameObject);
+
+			var gameObject2 = new GameObject() { Name = "TestGameObject" };
+			var receiver2 = new SpawnerComponent();
+			gameObject2.AddComponent(receiver2);
+			Scene.Current.RegisterObj(gameObject2);
+
+			Assert.DoesNotThrow(receiver2.TestBroadcastMessageToNamedGameObject);
+			
+		}
+
 		private static Component RegisterInactiveObject()
 		{
 			var gameObject = new GameObject {Active = false};
@@ -85,6 +102,23 @@ namespace Duality.Tests.Messaging
 			public void TestBroadcastMessageToNamedGameObject()
 			{
 				this.BroadcastMessage(new TestGameMessage(), "TestGameObject");
+			}
+		}
+
+		private class SpawnerComponent : Component, ICmpHandlesMessages
+		{
+			public void TestBroadcastMessageToNamedGameObject()
+			{
+				this.BroadcastMessage(new TestGameMessage(), "TestGameObject");
+			}
+
+			public void HandleMessage(Component sender, GameMessage msg)
+			{
+				var gameObject = new GameObject() { Name = "SpawnedTestGameObject" };
+				Scene.Current.RegisterObj(gameObject);
+
+				var gameObject2 = new GameObject() { Name = "TestSpawnedGameObject" };
+				Scene.Current.RegisterObj(gameObject2);
 			}
 		}
 

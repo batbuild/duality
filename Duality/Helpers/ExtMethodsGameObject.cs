@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Duality.Resources;
 
 namespace Duality.Helpers
@@ -12,7 +13,7 @@ namespace Duality.Helpers
 			if (targetName != null)
 			{
 				var targetObject = Scene.Current.FindGameObjects(targetName);
-				receivers = targetObject.GetComponentsDeep<ICmpHandlesMessages>();
+				receivers = targetObject.GetComponents<ICmpHandlesMessages>().ToList();
 			}
 			else
 			{
