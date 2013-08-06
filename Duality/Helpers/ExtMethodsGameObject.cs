@@ -28,5 +28,17 @@ namespace Duality.Helpers
 				receiver.HandleMessage(sender, msg);
 			}
 		}
+
+		public static void BroadcastMessage(this Component sender, GameMessage msg, GameObject target)
+		{
+			if (target != null)
+			{
+				var receiver = target.GetComponent<ICmpHandlesMessages>();
+				if ((receiver as Component).Active)
+				{
+					receiver.HandleMessage(sender, msg);
+				}
+			}
+		}
 	}
 }

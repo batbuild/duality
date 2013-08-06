@@ -77,6 +77,35 @@ namespace Duality.Tests.Messaging
 			
 		}
 
+		[Test]
+		public void CanBroadcastToGameObject()
+		{
+			var gameObject = new GameObject();
+			var receiver = new TestComponent();
+			gameObject.AddComponent(receiver);
+			Scene.Current.RegisterObj(gameObject);
+
+			var gameObject2 = new GameObject();
+			var receiver2 = new TestComponent();
+			gameObject2.AddComponent(receiver2);
+			Scene.Current.RegisterObj(gameObject2);
+
+			receiver2.TestBroadcastMessageToGameObject(gameObject);
+
+			Assert.IsTrue(receiver.MessageHandled);
+			Assert.IsFalse(receiver2.MessageHandled);
+		}
+
+		[Test]
+		public void DoesNotBroadcastToInactiveGameObject()
+		{
+			var listener = (TestComponent)RegisterInactiveObject();
+
+			listener.TestBroadcastMessage();
+
+			Assert.IsFalse(listener.MessageHandled);
+		}
+
 		private static Component RegisterInactiveObject()
 		{
 			var gameObject = new GameObject {Active = false};
@@ -102,6 +131,11 @@ namespace Duality.Tests.Messaging
 			public void TestBroadcastMessageToNamedGameObject()
 			{
 				this.BroadcastMessage(new TestGameMessage(), "TestGameObject");
+			}
+
+			public void TestBroadcastMessageToGameObject(GameObject target)
+			{
+				this.BroadcastMessage(new TestGameMessage(), target);
 			}
 		}
 
