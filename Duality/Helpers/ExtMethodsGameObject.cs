@@ -31,9 +31,17 @@ namespace Duality.Helpers
 
 		public static void BroadcastMessage(this Component sender, GameMessage msg, GameObject target)
 		{
-			if (target != null)
+			if (target == null)
+				return;
+			if (msg == null)
+				return;
+			if (!target.Active)
+				return;
+
+			var receivers = target.GetComponents<ICmpHandlesMessages>();
+
+			foreach(var receiver in receivers)
 			{
-				var receiver = target.GetComponent<ICmpHandlesMessages>();
 				if ((receiver as Component).Active)
 				{
 					receiver.HandleMessage(sender, msg);

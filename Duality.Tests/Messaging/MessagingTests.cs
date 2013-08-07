@@ -40,6 +40,27 @@ namespace Duality.Tests.Messaging
 		}
 
 		[Test]
+		public void BroadcastsToAllRecieversInNamedObject()
+		{
+			var gameObject = new GameObject { Name = "TestGameObject" };
+			var receiver = new TestComponent();
+			gameObject.AddComponent(receiver);
+			var receiver2 = new SecondaryComponent();
+			gameObject.AddComponent(receiver2);
+			Scene.Current.RegisterObj(gameObject);
+
+			var gameObject2 = new GameObject();
+			var receiver3 = new TestComponent();
+			gameObject2.AddComponent(receiver3);
+			Scene.Current.RegisterObj(gameObject2);
+
+			receiver3.TestBroadcastMessageToNamedGameObject();
+
+			Assert.IsTrue(receiver.MessageHandled);
+			Assert.IsTrue(receiver2.MessageHandled);
+		}
+
+		[Test]
 		public void OnlyBroadcastsToActiveGameObjects()
 		{
 			var listener = (TestComponent)RegisterInactiveObject();
@@ -73,8 +94,7 @@ namespace Duality.Tests.Messaging
 			gameObject2.AddComponent(receiver2);
 			Scene.Current.RegisterObj(gameObject2);
 
-			Assert.DoesNotThrow(receiver2.TestBroadcastMessageToNamedGameObject);
-			
+			Assert.DoesNotThrow(receiver2.TestBroadcastMessageToNamedGameObject);			
 		}
 
 		[Test]
@@ -94,6 +114,27 @@ namespace Duality.Tests.Messaging
 
 			Assert.IsTrue(receiver.MessageHandled);
 			Assert.IsFalse(receiver2.MessageHandled);
+		}
+
+		[Test]
+		public void BroadcastsToAllRecieversInGameObject()
+		{
+			var gameObject = new GameObject();
+			var receiver = new TestComponent();
+			gameObject.AddComponent(receiver);
+			var receiver2 = new SecondaryComponent();
+			gameObject.AddComponent(receiver2);
+			Scene.Current.RegisterObj(gameObject);
+
+			var gameObject2 = new GameObject();
+			var receiver3 = new TestComponent();
+			gameObject2.AddComponent(receiver3);
+			Scene.Current.RegisterObj(gameObject2);
+
+			receiver3.TestBroadcastMessageToGameObject(gameObject);
+
+			Assert.IsTrue(receiver.MessageHandled);
+			Assert.IsTrue(receiver2.MessageHandled);
 		}
 
 		[Test]
@@ -136,6 +177,16 @@ namespace Duality.Tests.Messaging
 			public void TestBroadcastMessageToGameObject(GameObject target)
 			{
 				this.BroadcastMessage(new TestGameMessage(), target);
+			}
+		}
+
+		private class SecondaryComponent : Component, ICmpHandlesMessages
+		{
+			public bool MessageHandled { get; set; }
+
+			public void HandleMessage(Component sender, GameMessage msg)
+			{
+				MessageHandled = true;
 			}
 		}
 
