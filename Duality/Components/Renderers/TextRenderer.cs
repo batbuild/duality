@@ -32,7 +32,7 @@ namespace Duality.Components.Renderers
 			{
 				Rect textRect = Rect.Align(this.blockAlign, 0.0f, 0.0f, 
 					MathF.Max(this.text.Size.X, this.text.MaxWidth), 
-					MathF.Min(this.text.Size.Y, this.text.MaxHeight));
+					MathF.Max(this.text.Size.Y, this.text.MaxHeight));
 				return textRect.Transform(this.gameobj.Transform.Scale, this.gameobj.Transform.Scale).BoundingRadius;
 			}
 		}
@@ -105,11 +105,13 @@ namespace Duality.Components.Renderers
 
 			// Apply block alignment
 			Vector2 textOffset = Vector2.Zero;
-			this.blockAlign.ApplyTo(ref textOffset, this.text.Size);
+			Vector2 textSize = this.text.Size;
+			if (this.text.MaxWidth > 0) textSize.X = this.text.MaxWidth;
+			this.blockAlign.ApplyTo(ref textOffset, textSize);
 			MathF.TransformDotVec(ref textOffset, ref xDot, ref yDot);
 			posTemp.X += textOffset.X;
 			posTemp.Y += textOffset.Y;
-			if (this.text.Fonts != null && this.text.Fonts.Any(r => r.IsAvailable && !r.Res.Filtering))
+			if (this.text.Fonts != null && this.text.Fonts.Any(r => r.IsAvailable && r.Res.IsPixelGridAligned))
 			{
 				posTemp.X = MathF.Round(posTemp.X);
 				posTemp.Y = MathF.Round(posTemp.Y);

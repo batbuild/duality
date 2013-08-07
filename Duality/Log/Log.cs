@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Reflection;
 
 namespace Duality
@@ -8,7 +9,7 @@ namespace Duality
 	/// <summary>
 	/// Listens for log entries and writes them to registered <see cref="ILogOutput">ILogOutputs</see>.
 	/// </summary>
-	public class Log
+	public sealed class Log
 	{
 		/// <summary>
 		/// Holds a Logs state values.
@@ -164,8 +165,39 @@ namespace Duality
 
 			Performance.TimeLog.BeginMeasure();
 			foreach (ILogOutput log in this.strOut)
-				log.Write(this, type, message);
+			{
+				try
+				{
+					log.Write(this, type, string.Format(format, obj));
+				}
+				catch (Exception)
+				{
+					// Don't allow log outputs to throw unhandled exceptions,
+					// because they would result in another log - and more exceptions.
+				}
+			}
 			Performance.TimeLog.EndMeasure();
+		}
+		private string FormatMessage(string format, object[] obj)
+		{
+			string msg;
+			try
+			{
+				msg = string.Format(System.Globalization.CultureInfo.InvariantCulture, format, obj);
+			}
+			catch (Exception e)
+			{
+				// Don't allow log message formatting to throw unhandled exceptions,
+				// because they would result in another log - and probably more exceptions.
+
+				// Instead, embed format, arguments and the exception in the resulting
+				// log message, so the user can retrieve all necessary information for
+				// fixing his log call.
+				msg = format + Environment.NewLine;
+				if (obj != null) msg += obj.ToString(", ") + Environment.NewLine;
+				msg += Log.Exception(e);
+			}
+			return msg;
 		}
 
 		/// <summary>
@@ -175,7 +207,7 @@ namespace Duality
 		/// <param name="obj"></param>
 		public void Write(string format, params object[] obj)
 		{
-			this.Write(LogMessageType.Message, format, obj);
+			this.Write(LogMessageType.Message, this.FormatMessage(format, obj));
 		}
 		/// <summary>
 		/// Writes a new warning log entry.
@@ -184,7 +216,7 @@ namespace Duality
 		/// <param name="obj"></param>
 		public void WriteWarning(string format, params object[] obj)
 		{
-			this.Write(LogMessageType.Warning, format, obj);
+			this.Write(LogMessageType.Warning, this.FormatMessage(format, obj));
 		}
 		/// <summary>
 		/// Writes a new error log entry.
@@ -193,9 +225,7 @@ namespace Duality
 		/// <param name="obj"></param>
 		public void WriteError(string format, params object[] obj)
 		{
-
-			this.Write(LogMessageType.Error, format, obj);
-
+			this.Write(LogMessageType.Error, this.FormatMessage(format, obj));
 		}
 
 		/// <summary>
