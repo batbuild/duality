@@ -4,7 +4,6 @@
 
 #Tooling
 _ReSharper*/
-/Other/NightlyBuild/Package/Duality.zip
 *.resharper
 [Tt]est[Rr]esult*
 _dotCover*/
@@ -56,9 +55,10 @@ Ankh.NoLoad
 #Unix temporary files
 *~
 
+#Duality based
 /Duality/Duality.xml
 /DualityEditor/DualityEditor.xml
-
+/Other/NightlyBuild/Package/Duality.zip
 /DualityEditorPlugins/EditorBase/bin/*
 /DualityEditorPlugins/EditorBase/obj/*
 
