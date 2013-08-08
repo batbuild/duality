@@ -33,8 +33,10 @@ namespace Duality.Helpers
 		{
 			if (target == null)
 				return;
+
 			if (msg == null)
 				return;
+
 			if (!target.Active)
 				return;
 
@@ -42,10 +44,10 @@ namespace Duality.Helpers
 
 			foreach(var receiver in receivers)
 			{
-				if ((receiver as Component).Active)
-				{
-					receiver.HandleMessage(sender, msg);
-				}
+				if ((receiver as Component).Active == false)
+					continue;
+
+				receiver.HandleMessage(sender, msg);
 			}
 		}
 	}
