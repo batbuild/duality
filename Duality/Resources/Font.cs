@@ -161,6 +161,10 @@ namespace Duality.Resources
 			/// </summary>
 			MonochromeBitmap,
 			/// <summary>
+			/// A greyscale bitmap is used to store glyphs. Rendering is unfiltered and pixel-perfect.
+			/// </summary>
+			GrayscaleBitmap,
+			/// <summary>
 			/// A greyscale bitmap is used to store glyphs. Rendering is properly filtered but may blur text display a little.
 			/// </summary>
 			SmoothBitmap,
@@ -353,7 +357,12 @@ namespace Duality.Resources
 		/// </summary>
 		public bool IsPixelGridAligned
 		{
-			get { return this.renderMode == RenderMode.MonochromeBitmap; }
+			get
+			{ 
+				return 
+					this.renderMode == RenderMode.MonochromeBitmap || 
+					this.renderMode == RenderMode.GrayscaleBitmap;
+			}
 		}
 		/// <summary>
 		/// [GET] The Fonts height.
@@ -623,7 +632,7 @@ namespace Duality.Resources
 			int rows;
 			cols = rows = (int)Math.Ceiling(Math.Sqrt(SupportedChars.Length));
 
-			Pixmap.Layer pixelLayer = new Pixmap.Layer(MathF.RoundToInt(cols * this.internalFont.Size), MathF.RoundToInt(rows * (this.internalFont.Height + 1)));
+			Pixmap.Layer pixelLayer = new Pixmap.Layer(MathF.RoundToInt(cols * this.internalFont.Size * 1.2f), MathF.RoundToInt(rows * this.internalFont.Height * 1.2f));
 			Pixmap.Layer glyphTemp;
 			Pixmap.Layer glyphTempTypo;
 			Bitmap bm;
@@ -639,8 +648,8 @@ namespace Duality.Resources
 				StringFormat formatTypo = StringFormat.GenericTypographic;
 				formatTypo.LineAlignment = StringAlignment.Near;
 
-				int x = 0;
-				int y = 0;
+				int x = 1;
+				int y = 1;
 				for (int i = 0; i < SupportedChars.Length; ++i)
 				{
 					string str = SupportedChars[i].ToString(CultureInfo.InvariantCulture);
@@ -683,8 +692,8 @@ namespace Duality.Resources
 					// Update xy values if it doesn't fit anymore
 					if (x + glyphTemp.Width + 2 > pixelLayer.Width)
 					{
-						x = 0;
-						y += (this.internalFont.Height + 1) + 2;
+						x = 1;
+						y += this.internalFont.Height + MathF.Clamp((int)MathF.Ceiling(this.internalFont.Height * 0.1875f), 3, 10);
 					}
 					
 					// Memorize atlas coordinates & glyph data
@@ -705,7 +714,7 @@ namespace Duality.Resources
 					// Draw it onto the font surface
 					glyphTemp.DrawOnto(pixelLayer, BlendMode.Solid, x, y);
 
-					x += glyphTemp.Width + 2;
+					x += glyphTemp.Width + MathF.Clamp((int)MathF.Ceiling(this.internalFont.Height * 0.125f), 2, 10);
 				}
 			}
 
@@ -727,12 +736,14 @@ namespace Duality.Resources
 			this.pixelData.Atlas = new List<Rect>(atlas);
 			this.texture = new Texture(this.pixelData, 
 				Texture.SizeMode.Enlarge, 
-				(this.renderMode == RenderMode.MonochromeBitmap) ? TextureMagFilter.Nearest : TextureMagFilter.Linear,
-				(this.renderMode == RenderMode.MonochromeBitmap) ? TextureMinFilter.Nearest : TextureMinFilter.LinearMipmapLinear);
+				this.IsPixelGridAligned ? TextureMagFilter.Nearest : TextureMagFilter.Linear,
+				this.IsPixelGridAligned ? TextureMinFilter.Nearest : TextureMinFilter.LinearMipmapLinear);
 
 			ContentRef<DrawTechnique> technique;
 			if (this.renderMode == RenderMode.MonochromeBitmap)
 				technique = DrawTechnique.Mask;
+			else if (this.renderMode == RenderMode.GrayscaleBitmap)
+				technique = DrawTechnique.Alpha;
 			else if (this.renderMode == RenderMode.SmoothBitmap)
 				technique = DrawTechnique.Alpha;
 			else
