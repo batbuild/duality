@@ -1,0 +1,3 @@
+[submodule "Other/TechDemos"]
+	path = Other/TechDemos
+	url = https://github.com/Andrea/dualityTechDemos.git
