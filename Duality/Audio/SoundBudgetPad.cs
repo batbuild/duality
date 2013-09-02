@@ -173,7 +173,7 @@ namespace Duality
 		/// <param name="budget"></param>
 		public void Update(bool nonWeakAbove, ref float budget)
 		{
-			if (this.instance.Disposed || this.instance == null)
+			if (this.instance == null || this.instance.Disposed)
 			{
 				this.Dispose();
 				return;
@@ -216,7 +216,7 @@ namespace Duality
 		/// <returns>True, if there is, false if not.</returns>
 		public bool IsAnyScheduled
 		{
-			get { return this.budgetPads.Any(pad => pad.Instance.FadeTarget > 0.0f); }
+			get { return this.budgetPads.Any(pad => pad.Instance != null && pad.Instance.FadeTarget > 0.0f); }
 		}
 		/// <summary>
 		/// [GET] Returns the main active pad, i.e. the one that is scheduled with the highest priority.
