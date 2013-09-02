@@ -13,7 +13,7 @@ namespace Duality.Tests.Messaging
 			var gameObject = new GameObject();
 			var receiver = new TestComponent();
 			gameObject.AddComponent(receiver);
-			Scene.Current.RegisterObj(gameObject);
+			Scene.Current.AddObject(gameObject);
 
 			receiver.TestBroadcastMessage();
 
@@ -26,12 +26,12 @@ namespace Duality.Tests.Messaging
 			var gameObject = new GameObject {Name = "TestGameObject"};
 			var receiver = new TestComponent();
 			gameObject.AddComponent(receiver);
-			Scene.Current.RegisterObj(gameObject);
+			Scene.Current.AddObject(gameObject);
 
 			var gameObject2 = new GameObject();
 			var receiver2 = new TestComponent();
 			gameObject2.AddComponent(receiver2);
-			Scene.Current.RegisterObj(gameObject2);
+			Scene.Current.AddObject(gameObject2);
 
 			receiver2.TestBroadcastMessageToNamedGameObject();
 
@@ -47,12 +47,12 @@ namespace Duality.Tests.Messaging
 			gameObject.AddComponent(receiver);
 			var receiver2 = new SecondaryComponent();
 			gameObject.AddComponent(receiver2);
-			Scene.Current.RegisterObj(gameObject);
+			Scene.Current.AddObject(gameObject);
 
 			var gameObject2 = new GameObject();
 			var receiver3 = new TestComponent();
 			gameObject2.AddComponent(receiver3);
-			Scene.Current.RegisterObj(gameObject2);
+			Scene.Current.AddObject(gameObject2);
 
 			receiver3.TestBroadcastMessageToNamedGameObject();
 
@@ -87,12 +87,12 @@ namespace Duality.Tests.Messaging
 			var gameObject = new GameObject { Name = "TestGameObject" };
 			var receiver = new SpawnerComponent();
 			gameObject.AddComponent(receiver);
-			Scene.Current.RegisterObj(gameObject);
+			Scene.Current.AddObject(gameObject);
 
 			var gameObject2 = new GameObject() { Name = "TestGameObject" };
 			var receiver2 = new SpawnerComponent();
 			gameObject2.AddComponent(receiver2);
-			Scene.Current.RegisterObj(gameObject2);
+			Scene.Current.AddObject(gameObject2);
 
 			Assert.DoesNotThrow(receiver2.TestBroadcastMessageToNamedGameObject);			
 		}
@@ -103,12 +103,12 @@ namespace Duality.Tests.Messaging
 			var gameObject = new GameObject();
 			var receiver = new TestComponent();
 			gameObject.AddComponent(receiver);
-			Scene.Current.RegisterObj(gameObject);
+			Scene.Current.AddObject(gameObject);
 
 			var gameObject2 = new GameObject();
 			var receiver2 = new TestComponent();
 			gameObject2.AddComponent(receiver2);
-			Scene.Current.RegisterObj(gameObject2);
+			Scene.Current.AddObject(gameObject2);
 
 			receiver2.TestBroadcastMessageToGameObject(gameObject);
 
@@ -124,12 +124,12 @@ namespace Duality.Tests.Messaging
 			gameObject.AddComponent(receiver);
 			var receiver2 = new SecondaryComponent();
 			gameObject.AddComponent(receiver2);
-			Scene.Current.RegisterObj(gameObject);
+			Scene.Current.AddObject(gameObject);
 
 			var gameObject2 = new GameObject();
 			var receiver3 = new TestComponent();
 			gameObject2.AddComponent(receiver3);
-			Scene.Current.RegisterObj(gameObject2);
+			Scene.Current.AddObject(gameObject2);
 
 			receiver3.TestBroadcastMessageToGameObject(gameObject);
 
@@ -151,7 +151,7 @@ namespace Duality.Tests.Messaging
 		{
 			var gameObject = new GameObject {Active = false};
 			var component = gameObject.AddComponent<TestComponent>();
-			Scene.Current.RegisterObj(gameObject);
+			Scene.Current.AddObject(gameObject);
 			return component;
 		}
 
@@ -200,10 +200,10 @@ namespace Duality.Tests.Messaging
 			public void HandleMessage(Component sender, GameMessage msg)
 			{
 				var gameObject = new GameObject() { Name = "SpawnedTestGameObject" };
-				Scene.Current.RegisterObj(gameObject);
+				Scene.Current.AddObject(gameObject);
 
 				var gameObject2 = new GameObject() { Name = "TestSpawnedGameObject" };
-				Scene.Current.RegisterObj(gameObject2);
+				Scene.Current.AddObject(gameObject2);
 			}
 		}
 
