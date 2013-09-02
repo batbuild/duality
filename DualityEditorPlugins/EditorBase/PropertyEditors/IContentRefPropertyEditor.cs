@@ -7,6 +7,8 @@ using System.Drawing.Drawing2D;
 
 using AdamsLair.PropertyGrid;
 using AdamsLair.PropertyGrid.Renderer;
+using Aga.Controls.Tree;
+using EditorBase.Modules;
 using ButtonState = AdamsLair.PropertyGrid.Renderer.ButtonState;
 using BorderStyle = AdamsLair.PropertyGrid.Renderer.BorderStyle;
 
@@ -50,6 +52,24 @@ namespace EditorBase.PropertyEditors
 			}
 		}
 
+		public override void ShowObjectSelector()
+		{
+			var objectSelector = new ObjectSelector
+			{
+				StartPosition = FormStartPosition.CenterScreen,
+				Text = "Select " + ((IContentRef) DisplayedValue).ResType.Name
+			};
+			objectSelector.SetTreeViewItems(ContentProvider.GetAvailableContent(((IContentRef) DisplayedValue).ResType)
+				.Select(c => new Node(c.Name){Tag = c})
+				.OrderBy(n => n.Text));
+
+			var result = objectSelector.ShowDialog();
+			if (result == DialogResult.Cancel)
+				return;
+
+			var selectedObject = objectSelector.SelectedObject;
+			UpdateContentPath(selectedObject != null ? selectedObject.Path : null);
+		}
 
 		public override void ShowReferencedContent()
 		{
@@ -58,6 +78,7 @@ namespace EditorBase.PropertyEditors
 			view.FlashNode(view.NodeFromPath(this.contentPath));
 			System.Media.SystemSounds.Beep.Play();
 		}
+
 		public override void ResetReference()
 		{
 			if (this.ReadOnly) return;
@@ -66,6 +87,7 @@ namespace EditorBase.PropertyEditors
 			this.PerformGetValue();
 			this.OnEditingFinished(FinishReason.LeapValue);
 		}
+
 		public override void PerformGetValue()
 		{
 			base.PerformGetValue();
@@ -118,6 +140,7 @@ namespace EditorBase.PropertyEditors
 				this.prevSound = PreviewProvider.GetPreviewSound(res);
 			}
 		}
+
 		protected override int GetPreviewHash()
 		{
 			if (this.contentPath == null) return 0;
@@ -140,11 +163,12 @@ namespace EditorBase.PropertyEditors
 
 			return this.contentPath.GetHashCode();
 		}
-		
+
 		protected override void SerializeToData(DataObject data)
 		{
 			data.SetContentRefs(new[] { this.DisplayedValue as IContentRef });
 		}
+
 		protected override void DeserializeFromData(DataObject data)
 		{
 			ConvertOperation convert = new ConvertOperation(data, ConvertOperation.Operation.All);
@@ -154,13 +178,11 @@ namespace EditorBase.PropertyEditors
 				if (refQuery != null)
 				{
 					Resource[] refArray = refQuery.Cast<Resource>().ToArray();
-					this.contentPath = (refArray != null && refArray.Length > 0) ? refArray[0].Path : null;
-					this.PerformSetValue();
-					this.PerformGetValue();
-					this.OnEditingFinished(FinishReason.LeapValue);
+					UpdateContentPath((refArray != null && refArray.Length > 0) ? refArray[0].Path : null);
 				}
 			}
 		}
+
 		protected override bool CanDeserializeFromData(DataObject data)
 		{
 			return new ConvertOperation(data, ConvertOperation.Operation.All).CanPerform(this.editedResType);
@@ -173,6 +195,14 @@ namespace EditorBase.PropertyEditors
 				this.editedResType = this.EditedType.GetGenericArguments()[0];
 			else
 				this.editedResType = typeof(Resource);
+		}
+
+		private void UpdateContentPath(string contentPath)
+		{
+			this.contentPath = contentPath;
+			this.PerformSetValue();
+			this.PerformGetValue();
+			this.OnEditingFinished(FinishReason.LeapValue);
 		}
 	}
 }

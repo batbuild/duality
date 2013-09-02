@@ -35,6 +35,11 @@ namespace EditorBase.PropertyEditors
 		}
 
 
+		public override void ShowObjectSelector()
+		{
+			
+		}
+
 		public override void ShowReferencedContent()
 		{
 			if (this.component == null) return;

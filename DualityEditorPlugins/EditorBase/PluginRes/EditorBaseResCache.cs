@@ -60,6 +60,7 @@ namespace EditorBase.PluginRes
 		public static readonly Bitmap	IconLogWarning				= EditorBaseRes.IconLogWarning;
 		public static readonly Bitmap	IconAbortCross				= EditorBaseRes.IconAbortCross;
 		public static readonly Bitmap	IconEyeCross				= EditorBaseRes.IconEyeCross;
+		public static readonly Bitmap	IconDatabase				= EditorBaseRes.IconDatabase;
 		public static readonly Bitmap	IconLock					= EditorBaseRes.IconLock;
 	}
 }
