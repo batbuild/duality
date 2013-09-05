@@ -23,15 +23,19 @@ namespace EditorBase.PropertyEditors
 	{
 		private static readonly IconImage iconShow = new IconImage(PluginRes.EditorBaseResCache.IconEye.ToBitmap());
 		private static readonly IconImage iconReset = new IconImage(PluginRes.EditorBaseResCache.IconAbortCross);
+		private static readonly IconImage iconSet = new IconImage(PluginRes.EditorBaseResCache.IconDatabase);
 
 		protected	bool		multiple			= false;
 		protected	bool		dragHover			= false;
 		protected	Rectangle	rectPanel			= Rectangle.Empty;
 		protected	Rectangle	rectButtonReset		= Rectangle.Empty;
 		protected	Rectangle	rectButtonShow		= Rectangle.Empty;
+		protected	Rectangle	rectButtonSet		= Rectangle.Empty;
 		protected	Rectangle	rectPrevSound		= Rectangle.Empty;
 		protected	bool		buttonResetHovered	= false;
 		protected	bool		buttonResetPressed	= false;
+		protected	bool		buttonSetHovered	= false;
+		protected	bool		buttonSetPressed	= false;
 		protected	bool		buttonShowHovered	= false;
 		protected	bool		buttonShowPressed	= false;
 		protected	bool		panelHovered		= false;
@@ -51,6 +55,7 @@ namespace EditorBase.PropertyEditors
 			this.Height = 22;
 		}
 
+		public abstract void ShowObjectSelector();
 		public abstract void ShowReferencedContent();
 		public abstract void ResetReference();
 		
@@ -191,6 +196,20 @@ namespace EditorBase.PropertyEditors
 				BorderStyle.ContentBox, 
 				(this.ReadOnly || !this.Enabled) ? BorderState.Disabled : BorderState.Normal);
 
+			ButtonState buttonStateSet = ButtonState.Disabled;
+			if(!this.ReadOnly && this.Enabled && this.ReferenceName != null)
+			{
+				if (this.buttonSetPressed) buttonStateSet = ButtonState.Pressed;
+				else if (this.buttonSetHovered) buttonStateSet = ButtonState.Hot;
+				else buttonStateSet = ButtonState.Normal;
+			}
+			ControlRenderer.DrawButton(
+				e.Graphics,
+				this.rectButtonSet,
+				buttonStateSet,
+				null,
+				iconSet);
+
 			ButtonState buttonStateReset = ButtonState.Disabled;
 			if (!this.ReadOnly && this.Enabled && this.ReferenceName != null)
 			{
@@ -246,15 +265,18 @@ namespace EditorBase.PropertyEditors
 		{
 			base.OnMouseMove(e);
 
+			bool lastButtonSetHovered = this.buttonSetHovered;
 			bool lastButtonResetHovered = this.buttonResetHovered;
 			bool lastButtonShowHovered = this.buttonShowHovered;
 			bool lastPanelHovered = this.panelHovered;
 
+			this.buttonSetHovered = !this.ReadOnly && this.rectButtonSet.Contains(e.Location);
 			this.buttonResetHovered = !this.ReadOnly && this.rectButtonReset.Contains(e.Location);
 			this.buttonShowHovered = this.rectButtonShow.Contains(e.Location);
 			this.panelHovered = this.rectPanel.Contains(e.Location);
 
-			if (lastButtonResetHovered != this.buttonResetHovered || 
+			if (lastButtonShowHovered != this.buttonSetHovered ||
+				lastButtonResetHovered != this.buttonResetHovered || 
 				lastButtonShowHovered != this.buttonShowHovered || 
 				lastPanelHovered != this.panelHovered)
 				this.Invalidate();
@@ -289,7 +311,12 @@ namespace EditorBase.PropertyEditors
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.OnMouseDown(e);
-			if (this.buttonResetHovered && (e.Button & MouseButtons.Left) != MouseButtons.None)
+			if (this.buttonSetHovered && (e.Button & MouseButtons.Left) != MouseButtons.None)
+			{
+				this.buttonSetPressed = true;
+				this.Invalidate();
+			}
+			else if (this.buttonResetHovered && (e.Button & MouseButtons.Left) != MouseButtons.None)
 			{
 				this.buttonResetPressed = true;
 				this.Invalidate();
@@ -308,7 +335,13 @@ namespace EditorBase.PropertyEditors
 		{
 			base.OnMouseUp(e);
 			this.panelDragBegin = Point.Empty;
-			if (this.buttonResetPressed && (e.Button & MouseButtons.Left) != MouseButtons.None)
+			if (this.buttonSetPressed && (e.Button & MouseButtons.Left) != MouseButtons.None)
+			{
+				if (this.buttonSetPressed && this.buttonSetHovered) this.ShowObjectSelector();
+				this.buttonSetPressed = false;
+				this.Invalidate();
+			}
+			else if (this.buttonResetPressed && (e.Button & MouseButtons.Left) != MouseButtons.None)
 			{
 				if (this.buttonResetPressed && this.buttonResetHovered) this.ResetReference();
 				this.buttonResetPressed = false;
@@ -372,9 +405,14 @@ namespace EditorBase.PropertyEditors
 
 			if (this.Height >= 44)
 			{
+				this.rectButtonSet = new Rectangle(
+					this.ClientRectangle.Right - buttonWidth,
+					this.ClientRectangle.Top + this.ClientRectangle.Height / 3 - buttonWidth,
+					buttonWidth,
+					buttonWidth);
 				this.rectButtonShow = new Rectangle(
 					this.ClientRectangle.Right - buttonWidth,
-					this.ClientRectangle.Top + this.ClientRectangle.Height / 2 - buttonWidth,
+					this.rectButtonSet.Bottom,
 					buttonWidth,
 					buttonWidth);
 				this.rectButtonReset = new Rectangle(
@@ -390,6 +428,11 @@ namespace EditorBase.PropertyEditors
 			}
 			else
 			{
+				this.rectButtonSet = new Rectangle(
+					this.ClientRectangle.Right - buttonWidth - buttonWidth - buttonWidth,
+					this.ClientRectangle.Top,
+					buttonWidth,
+					this.ClientRectangle.Height);
 				this.rectButtonShow = new Rectangle(
 					this.ClientRectangle.Right - buttonWidth - buttonWidth,
 					this.ClientRectangle.Top,
@@ -403,7 +446,7 @@ namespace EditorBase.PropertyEditors
 				this.rectPanel = new Rectangle(
 					this.ClientRectangle.X,
 					this.ClientRectangle.Y,
-					this.ClientRectangle.Width - buttonWidth * 2,
+					this.ClientRectangle.Width - buttonWidth * 3,
 					this.ClientRectangle.Height);
 			}
 
