@@ -55,13 +55,6 @@ Ankh.NoLoad
 #Unix temporary files
 *~
 
-#Duality based
-/Duality/Duality.xml
-/DualityEditor/DualityEditor.xml
-/Other/NightlyBuild/Package/Duality.zip
-/DualityEditorPlugins/EditorBase/bin/*
-/DualityEditorPlugins/EditorBase/obj/*
-
 
 # Others
 [Bb]in
@@ -69,3 +62,7 @@ Ankh.NoLoad
 sql
 TestResults
 *.Cache
+
+#Duality Specific
+DualityEditor/DualityEditor.xml
+Duality/Duality.xml
