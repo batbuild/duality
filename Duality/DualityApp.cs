@@ -12,6 +12,7 @@ using OpenTK.Audio.OpenAL;
 
 using Duality.Resources;
 using Duality.Serialization;
+using Duality.Profiling;
 
 namespace Duality
 {
@@ -449,7 +450,7 @@ namespace Duality
 				}
 				sound.Dispose();
 				UnloadPlugins();
-				Performance.SaveTextReport(environment == ExecutionEnvironment.Editor ? "perflog_editor.txt" : "perflog.txt");
+				Profile.SaveTextReport(environment == ExecutionEnvironment.Editor ? "perflog_editor.txt" : "perflog.txt");
 				Log.Core.Write("DualityApp terminated");
 			}
 
@@ -469,10 +470,10 @@ namespace Duality
 		public static void Update()
 		{
 			isUpdating = true;
-			Performance.TimeUpdate.BeginMeasure();
+			Profile.TimeUpdate.BeginMeasure();
 
 			Time.FrameTick();
-			Performance.FrameTick();
+			Profile.FrameTick();
 			OnBeforeUpdate();
 			UpdateUserInput();
 			Scene.Current.Update();
@@ -482,7 +483,7 @@ namespace Duality
 			//CheckOpenGLErrors();
 			RunCleanup();
 
-			Performance.TimeUpdate.EndMeasure();
+			Profile.TimeUpdate.EndMeasure();
 			isUpdating = false;
 
 			if (terminateScheduled) Terminate();
@@ -516,6 +517,7 @@ namespace Duality
 		}
 		private static void RunCleanup()
 		{
+			// Perform scheduled object disposals
 			foreach (object o in disposeSchedule)
 			{
 				IManageableObject m = o as IManageableObject;
@@ -524,6 +526,8 @@ namespace Duality
 				if (d != null) { d.Dispose(); continue; }
 			}
 			disposeSchedule.Clear();
+
+			// Perform late finalization and remove disposed object references
 			Resource.RunCleanup();
 			Scene.Current.RunCleanup();
 		}
@@ -531,10 +535,10 @@ namespace Duality
 		internal static void EditorUpdate(IEnumerable<GameObject> updateObjects, bool freezeScene, bool forceFixedStep)
 		{
 			isUpdating = true;
-			Performance.TimeUpdate.BeginMeasure();
+			Profile.TimeUpdate.BeginMeasure();
 
 			Time.FrameTick(forceFixedStep);
-			Performance.FrameTick();
+			Profile.FrameTick();
 			OnBeforeUpdate();
 			if (execContext == ExecutionContext.Game)
 			{
@@ -560,7 +564,7 @@ namespace Duality
 			//CheckOpenGLErrors();
 			RunCleanup();
 
-			Performance.TimeUpdate.EndMeasure();
+			Profile.TimeUpdate.EndMeasure();
 			isUpdating = false;
 
 			if (terminateScheduled) Terminate();

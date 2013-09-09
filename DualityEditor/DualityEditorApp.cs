@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using Duality;
 using Duality.Serialization;
 using Duality.Resources;
+using Duality.Profiling;
 
 using DualityEditor.Forms;
 using DualityEditor.CorePluginInterface;
@@ -576,15 +577,15 @@ namespace DualityEditor
 			// Perform a buffer swap
 			if (glSwapBuffers.Count > 0)
 			{
-				Performance.TimeRender.BeginMeasure();
-				Performance.TimeSwapBuffers.BeginMeasure();
+				Profile.TimeRender.BeginMeasure();
+				Profile.TimeSwapBuffers.BeginMeasure();
 				foreach (IWindowInfo window in glSwapBuffers)
 				{
 					mainContextControl.Context.MakeCurrent(window);
 					mainContextControl.SwapBuffers();
 				}
-				Performance.TimeSwapBuffers.EndMeasure();
-				Performance.TimeRender.EndMeasure();
+				Profile.TimeSwapBuffers.EndMeasure();
+				Profile.TimeRender.EndMeasure();
 				glSwapBuffers.Clear();
 			}
 		}
@@ -1213,20 +1214,23 @@ namespace DualityEditor
 		{
 			Application.Idle -= Application_Idle;
 
-			// Trigger idle event if no modal dialog is open.
+			// Perform some global operations, if no modal dialog is open
 			if (mainForm.Visible && mainForm.CanFocus)
+			{
+				// Trigger global idle event.
 				OnIdling();
 
-			// Trigger autosave after a while
-			if (autosaveFrequency != AutosaveFrequency.Disabled)
-			{
-				TimeSpan timeSinceLastAutosave = DateTime.Now - autosaveLast;
-				if ((autosaveFrequency == AutosaveFrequency.OneHour && timeSinceLastAutosave.TotalMinutes > 60) ||
-					(autosaveFrequency == AutosaveFrequency.ThirtyMinutes && timeSinceLastAutosave.TotalMinutes > 30) ||
-					(autosaveFrequency == AutosaveFrequency.TenMinutes && timeSinceLastAutosave.TotalMinutes > 10))
+				// Trigger autosave after a while
+				if (autosaveFrequency != AutosaveFrequency.Disabled)
 				{
-					SaveAllProjectData();
-					autosaveLast = DateTime.Now;
+					TimeSpan timeSinceLastAutosave = DateTime.Now - autosaveLast;
+					if ((autosaveFrequency == AutosaveFrequency.OneHour && timeSinceLastAutosave.TotalMinutes > 60) ||
+						(autosaveFrequency == AutosaveFrequency.ThirtyMinutes && timeSinceLastAutosave.TotalMinutes > 30) ||
+						(autosaveFrequency == AutosaveFrequency.TenMinutes && timeSinceLastAutosave.TotalMinutes > 10))
+					{
+						SaveAllProjectData();
+						autosaveLast = DateTime.Now;
+					}
 				}
 			}
 
