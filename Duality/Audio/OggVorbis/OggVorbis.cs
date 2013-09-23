@@ -1,153 +1,211 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
+
+using NVorbis;
+using NVorbis.Ogg;
 
 namespace Duality.OggVorbis
 {
 	public struct PcmData
 	{
-		public	byte[]	data;
+		public const int SizeOfDataElement = sizeof(short);
+
+		public	short[]	data;
+		public	int		dataLength;
 		public	int		channelCount;
 		public	int		sampleRate;
 	}
 
+	public class VorbisStreamHandle : IDisposable
+	{
+		private bool disposed;
+		private VorbisReader ovStream;
+
+		public bool Disposed
+		{
+			get { return this.disposed; }
+		}
+		internal VorbisReader VorbisInstance
+		{
+			get { return this.ovStream; }
+		}
+		
+		internal VorbisStreamHandle(byte[] memory)
+		{
+			this.ovStream = new VorbisReader(new MemoryStream(memory), true);
+		}
+		internal VorbisStreamHandle(string fileName)
+		{
+			this.ovStream = new VorbisReader(fileName);
+		}
+
+		~VorbisStreamHandle()
+		{
+			this.Dispose(false);
+		}
+		private void Dispose(bool manually)
+		{
+			if (this.disposed) return;
+			
+			if (this.ovStream != null)
+			{
+				this.ovStream.Dispose();
+				this.ovStream = null;
+			}
+
+			this.disposed = true;
+		}
+		public void Dispose()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+	}
+
 	public static class OV
 	{
+		private const int DefaultBufferSize = 1024 * 8;
+
 		public static PcmData LoadFromFile(string filename)
 		{
-			MemoryStream dataStream = null;
-			PcmData result;
-			IntPtr ovStream;
+			PcmData pcm;
+			VorbisStreamHandle handle;
 
-			BeginStreamFromFile(filename, out ovStream);
-			while (StreamChunk(ovStream, ref dataStream, out result.channelCount, out result.sampleRate));
-			EndStream(ref ovStream);
+			BeginStreamFromFile(filename, out handle);
+			ReadAll(handle, out pcm);
+			EndStream(ref handle);
 
-			// Return data
-			result.data = (dataStream != null) ? dataStream.ToArray() : null;
-			return result;
+			return pcm;
 		}
-		public static PcmData LoadFromMemory(byte[] memory, int maxPcmByteCount = 0)
+		public static PcmData LoadFromMemory(byte[] memory)
 		{
-			MemoryStream dataStream = null;
-			PcmData result;
-			IntPtr ovStream;
+			PcmData pcm;
+			VorbisStreamHandle handle;
 
-			BeginStreamFromMemory(memory, out ovStream);
-			while (StreamChunk(ovStream, ref dataStream, out result.channelCount, out result.sampleRate))
+			BeginStreamFromMemory(memory, out handle);
+			ReadAll(handle, out pcm);
+			EndStream(ref handle);
+
+			return pcm;
+		}
+		public static PcmData LoadChunkFromMemory(byte[] memory, uint sampleCount)
+		{
+			PcmData pcm;
+			VorbisStreamHandle handle;
+
+			BeginStreamFromMemory(memory, out handle);
+			StreamChunk(handle, out pcm, sampleCount);
+			EndStream(ref handle);
+
+			return pcm;
+		}
+
+		public static void BeginStreamFromFile(string filename, out VorbisStreamHandle handle)
+		{
+			handle = new VorbisStreamHandle(filename);
+		}
+		public static void BeginStreamFromMemory(byte[] memory, out VorbisStreamHandle handle)
+		{
+			handle = new VorbisStreamHandle(memory);
+		}
+		public static bool IsStreamValid(VorbisStreamHandle handle)
+		{
+			return handle != null && !handle.Disposed;
+		}
+		public static void EndStream(ref VorbisStreamHandle handle)
+		{
+			if (handle != null)
 			{
-				if (maxPcmByteCount != 0 && dataStream.Length > maxPcmByteCount) break;
+				handle.Dispose();
+				handle = null;
 			}
-			EndStream(ref ovStream);
-
-			// Return data
-			result.data = (dataStream != null) ? dataStream.ToArray() : null;
-			return result;
 		}
-
-		public static void BeginStreamFromFile(string filename, out IntPtr vFPtr)
+		public static bool StreamChunk(VorbisStreamHandle handle, out PcmData pcm, uint bufferSize = DefaultBufferSize)
 		{
-			vFPtr = IntPtr.Zero;
+			pcm.dataLength = 0;
+			pcm.channelCount = handle.VorbisInstance.Channels;
+			pcm.sampleRate = handle.VorbisInstance.SampleRate;
 
-			unsafe
+			bool eof = false;
+			float[] buffer = new float[bufferSize];
+			while (pcm.dataLength < buffer.Length)
 			{
-				void* vorbisFile = null;
-				NativeMethods.ErrorCode err = (NativeMethods.ErrorCode)NativeMethods.init_for_ogg_decode(filename, &vorbisFile);
-				if (err != NativeMethods.ErrorCode.None)
+				int samplesRead = handle.VorbisInstance.ReadSamples(buffer, pcm.dataLength, buffer.Length - pcm.dataLength);
+				if (samplesRead > 0)
 				{
-					throw new ApplicationException(
-						String.Format("An OggVorbis error occurred: {0}", err));
+					pcm.dataLength += samplesRead;
 				}
-				vFPtr = (IntPtr)vorbisFile;
-			}
-		}
-		public static void BeginStreamFromMemory(byte[] memory, out IntPtr vFPtr)
-		{
-			vFPtr = IntPtr.Zero;
-
-			unsafe
-			{
-				void* vorbisFile = null;
-				NativeMethods.ErrorCode err = (NativeMethods.ErrorCode)NativeMethods.memory_stream_for_ogg_decode(memory, memory.Length, &vorbisFile);
-				if (err != NativeMethods.ErrorCode.None)
+				else
 				{
-					throw new ApplicationException(
-						String.Format("An OggVorbis error occurred: {0}", err));
+					eof = true;
+					break;
 				}
-				vFPtr = (IntPtr)vorbisFile;
 			}
-		}
-		public static void EndStream(ref IntPtr vFPtr)
-		{
-			if (vFPtr != IntPtr.Zero)
-			{
-				unsafe { NativeMethods.final_ogg_cleanup((void*)vFPtr); }
-				vFPtr = IntPtr.Zero;
-			}
-		}
-		/// <summary>
-		/// Streams a pcm chunk from an opened ogg vorbis file to the specified OpenAL buffer.
-		/// </summary>
-		/// <param name="alBufferId">OpenAL buffer id to stream to</param>
-		/// <param name="vFPtr">Ogg Vorbis file handle</param>
-		/// <returns>Returns false, if EOF is reached.</returns>
-		public static bool StreamChunk(IntPtr vFPtr, ref MemoryStream pcmOutputStream, out int channelCount, out int sampleRate)
-		{
-			unsafe
-			{
-				void* vorbisFile = (void*)vFPtr;
-				byte[] pcmBuffer = new byte[1024 * 32]; // was 1024 * 16
-				int chnCount = 0;
-				int smpRate = 0;
-				int errHoleCount = 0;
-				int errBadLinkCount = 0;
-				int totalPcmSize = 0;
-				bool eof = false;
 
-				while(totalPcmSize < pcmBuffer.Length)
+			pcm.data = new short[pcm.dataLength];
+			CastBuffer(buffer, pcm.data, 0, pcm.dataLength);
+
+			return pcm.dataLength > 0 && !eof;
+		}
+		public static bool ReadAll(VorbisStreamHandle handle, out PcmData pcm)
+		{
+			pcm.channelCount = handle.VorbisInstance.Channels;
+			pcm.sampleRate = handle.VorbisInstance.SampleRate;
+			pcm.dataLength = 0;
+
+			List<float[]> allBuffers = new List<float[]>();
+			bool eof = false;
+			int totalSamplesRead = 0;
+			while (!eof)
+			{
+				float[] buffer = new float[DefaultBufferSize];
+				int bufferSamplesRead = 0;
+				while(bufferSamplesRead < buffer.Length)
 				{
-					int pcmBytes;
-					fixed(byte* buf = &pcmBuffer[0])
+					int samplesRead = handle.VorbisInstance.ReadSamples(buffer, pcm.dataLength, buffer.Length - pcm.dataLength);
+					if (samplesRead > 0)
 					{
-						pcmBytes = NativeMethods.ogg_decode_one_vorbis_packet(
-							vorbisFile, 
-							buf + totalPcmSize, 
-							pcmBuffer.Length - totalPcmSize,
-							16,
-							&chnCount, &smpRate,
-							&errHoleCount, &errBadLinkCount);
+						bufferSamplesRead += samplesRead;
 					}
-
-					if (pcmBytes > 0)
-						totalPcmSize += pcmBytes;
 					else
 					{
 						eof = true;
 						break;
 					}
 				}
-
-				if (totalPcmSize > 0)
+				allBuffers.Add(buffer);
+				totalSamplesRead += bufferSamplesRead;
+			}
+				
+			if (totalSamplesRead > 0)
+			{
+				pcm.dataLength = totalSamplesRead;
+				pcm.data = new short[totalSamplesRead];
+				int offset = 0;
+				for (int i = 0; i < allBuffers.Count; i++)
 				{
-					channelCount = chnCount;
-					sampleRate = smpRate;
-					if (pcmOutputStream == null) pcmOutputStream = new MemoryStream(pcmBuffer.Length);
-					pcmOutputStream.Write(pcmBuffer, 0, totalPcmSize);
-					return !eof;
+					int len = Math.Min(pcm.data.Length - offset, allBuffers[i].Length);
+					CastBuffer(allBuffers[i], pcm.data, offset, len);
+					offset += len;
 				}
-				else
-				{
-					channelCount = 0;
-					sampleRate = 0;
-					return false;
-				}
+				return !eof;
+			}
+			else
+			{
+				pcm.data = new short[0];
+				return false;
 			}
 		}
-		public static bool StreamChunk(IntPtr vFPtr, out PcmData result)
-		{
-			MemoryStream dataStream = null;
-			bool notEof = StreamChunk(vFPtr, ref dataStream, out result.channelCount, out result.sampleRate);
-			result.data = dataStream != null ? dataStream.ToArray() : new byte[0];
-			return notEof;
-		}
+        private static void CastBuffer(float[] source, short[] target, int targetOffset, int length)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                var temp = (int)(32767f * source[i]);
+                if (temp > short.MaxValue) temp = short.MaxValue;
+                else if (temp < short.MinValue) temp = short.MinValue;
+                target[targetOffset + i] = (short)temp;
+            }
+        }
 	}
 }

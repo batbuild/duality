@@ -332,6 +332,7 @@ namespace Duality.Resources
 				Profile.TimeUpdatePhysics.BeginMeasure();
 				FarseerPhysics.Settings.VelocityThreshold = PhysicsConvert.ToPhysicalUnit(Time.TimeMult * DualityApp.AppData.PhysicsVelocityThreshold / Time.SPFMult);
 				physicsWorld.Step(Time.TimeMult * Time.SPFMult);
+				if (Time.TimeMult == 0.0f) physicsWorld.ClearForces(); // Complete freeze? Clear forces, so they don't accumulate.
 				physicsAcc = PhysicsAccStart;
 				physUpdate = true;
 				Profile.TimeUpdatePhysics.EndMeasure();
@@ -741,21 +742,21 @@ namespace Duality.Resources
 			s.objectManager.Clear();
 			s.objectManager.AddObject(this.RootObjects.Select(o => provider.RequestObjectClone(o)));
 		}
-		protected override void OnSaving()
+		protected override void OnSaving(string saveAsPath)
 		{
-			base.OnSaving();
+			base.OnSaving(saveAsPath);
 			foreach (GameObject obj in this.objectManager.AllObjects)
 				obj.OnSaving();
 
 			this.serializeObj = this.objectManager.AllObjects.ToArray();
 			this.serializeObj.StableSort(SerializeGameObjectComparison);
 		}
-		protected override void OnSaved()
+		protected override void OnSaved(string saveAsPath)
 		{
 			if (this.serializeObj != null)
 				this.serializeObj = null;
 
-			base.OnSaved();
+			base.OnSaved(saveAsPath);
 			foreach (GameObject obj in this.objectManager.AllObjects)
 				obj.OnSaved();
 		}

@@ -132,7 +132,7 @@ namespace Duality
 			get
 			{
 				if (this.contentInstance != null && !this.contentInstance.Disposed) return true;
-				return ContentProvider.IsContentAvailable(this.contentPath);
+				return ContentProvider.HasContent(this.contentPath);
 			}
 		}
 		/// <summary>
@@ -140,7 +140,7 @@ namespace Duality
 		/// </summary>
 		public bool IsDefaultContent
 		{
-			get { return this.contentPath != null && this.contentPath.Contains(':'); }
+			get { return this.contentPath != null && ContentProvider.IsDefaultContentPath(this.contentPath); }
 		}
 		/// <summary>
 		/// [GET] Returns whether the Resource has been generated at runtime and cannot be retrieved via content path.
@@ -246,6 +246,14 @@ namespace Duality
 		public void MakeAvailable()
 		{
 			if (this.contentInstance == null || this.contentInstance.Disposed) this.RetrieveInstance();
+		}
+		/// <summary>
+		/// Discards the resolved content reference cache to allow garbage-collecting the Resource
+		/// without losing its reference. Accessing it will result in reloading the Resource.
+		/// </summary>
+		public void Detach()
+		{
+			this.contentInstance = null;
 		}
 		private void RetrieveInstance()
 		{

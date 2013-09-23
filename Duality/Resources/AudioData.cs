@@ -147,7 +147,7 @@ namespace Duality.Resources
 			if (oggVorbisPath == null) oggVorbisPath = this.sourcePath;
 
 			// We're saving this data for the first time
-			if (!this.path.Contains(':') && this.sourcePath == null) this.sourcePath = oggVorbisPath;
+			if (!this.IsDefaultContent && this.sourcePath == null) this.sourcePath = oggVorbisPath;
 
 			if (this.data != null)
 				File.WriteAllBytes(oggVorbisPath, this.data);
@@ -213,7 +213,7 @@ namespace Duality.Resources
 						this.alBuffer,
 						pcm.channelCount == 1 ? ALFormat.Mono16 : ALFormat.Stereo16,
 						pcm.data.ToArray(), 
-						(int)pcm.data.Length, 
+						pcm.dataLength * PcmData.SizeOfDataElement, 
 						pcm.sampleRate);
 				}
 				else
@@ -226,8 +226,13 @@ namespace Duality.Resources
 		protected override void OnDisposing(bool manually)
 		{
 			base.OnDisposing(manually);
+
+			// Dispose unmanages Resources
 			if (DualityApp.ExecContext != DualityApp.ExecutionContext.Terminated)
 				this.DisposeAlBuffer();
+
+			// Get rid of the big data blob, so the GC can collect it.
+			this.data = null;
 		}
 
 		protected override void OnCopyTo(Resource r, Duality.Cloning.CloneProvider provider)

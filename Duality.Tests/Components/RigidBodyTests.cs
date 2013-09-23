@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Duality.Components;
 using Duality.Components.Physics;
 using NUnit.Framework;
