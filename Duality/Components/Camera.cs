@@ -248,14 +248,6 @@ namespace Duality.Components
 		}
 
 		/// <summary>
-		/// [GET] The drawing device which this Camera uses for rendering.
-		/// </summary>
-		[EditorHintFlags(MemberFlags.Invisible)]
-		public IDrawDevice DrawDevice
-		{
-			get { return this.drawDevice; }
-		}
-		/// <summary>
 		/// [GET] The drawing devices target size for rendering the Scene.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
@@ -586,7 +578,7 @@ namespace Duality.Components
 				try
 				{
 					this.CollectDrawcalls();
-					p.NotifyCollectDrawcalls(this.DrawDevice);
+					p.NotifyCollectDrawcalls(this.drawDevice);
 				}
 				catch (Exception e)
 				{
@@ -609,7 +601,7 @@ namespace Duality.Components
 				else
 					targetRect = new Rect(this.drawDevice.TargetSize);
 
-				IDrawDevice device = this.DrawDevice;
+				IDrawDevice device = this.drawDevice;
 				device.AddVertices(p.Input, VertexMode.Quads,
 					new VertexC1P3T2(targetRect.MinimumX,	targetRect.MinimumY,	0.0f,	0.0f,		0.0f),
 					new VertexC1P3T2(targetRect.MaximumX,	targetRect.MinimumY,	0.0f,	uvRatio.X,	0.0f),
@@ -626,7 +618,7 @@ namespace Duality.Components
 			if ((this.drawDevice.VisibilityMask & VisibilityFlag.AllGroups) == VisibilityFlag.None) return;
 
 			// Query renderers
-			IEnumerable<ICmpRenderer> rendererQuery = Scene.Current.QueryVisibleRenderers(this.DrawDevice);
+			IEnumerable<ICmpRenderer> rendererQuery = Scene.Current.QueryVisibleRenderers(this.drawDevice);
 			foreach (Predicate<ICmpRenderer> p in this.editorRenderFilter) rendererQuery = rendererQuery.Where(r => p(r));
 
 			// Collect drawcalls

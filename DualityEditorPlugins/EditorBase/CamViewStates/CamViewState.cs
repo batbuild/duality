@@ -530,7 +530,14 @@ namespace EditorBase.CamViewStates
 					}
 					canvas.PopState();
 				}
-			
+				
+				// Normalize action text position
+				if (this.actionText.Fonts != null && this.actionText.Fonts.Any(r => r.IsAvailable && r.Res.IsPixelGridAligned))
+				{
+					actionTextPos.X = MathF.Round(actionTextPos.X);
+					actionTextPos.Y = MathF.Round(actionTextPos.Y);
+				}
+
 				// Draw current action text
 				if (!this.actionText.IsEmpty)
 				{
@@ -1577,7 +1584,7 @@ namespace EditorBase.CamViewStates
 		}
 		private void camPassEdScreen_CollectDrawcalls(object sender, CollectDrawcallEventArgs e)
 		{
-			Canvas canvas = new Canvas(this.CameraComponent.DrawDevice);
+			Canvas canvas = new Canvas(e.Device);
 			canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Mask, this.FgColor));
 			canvas.CurrentState.TextFont = OverlayFont;
 
@@ -1585,7 +1592,7 @@ namespace EditorBase.CamViewStates
 		}
 		private void camPassEdWorld_CollectDrawcalls(object sender, CollectDrawcallEventArgs e)
 		{
-			Canvas canvas = new Canvas(this.CameraComponent.DrawDevice);
+			Canvas canvas = new Canvas(e.Device);
 			canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Mask, this.FgColor));
 			canvas.CurrentState.TextFont = Duality.Resources.Font.GenericMonospace8;
 
@@ -1593,7 +1600,7 @@ namespace EditorBase.CamViewStates
 		}
 		private void camPassBg_CollectDrawcalls(object sender, CollectDrawcallEventArgs e)
 		{
-			Canvas canvas = new Canvas(this.CameraComponent.DrawDevice);
+			Canvas canvas = new Canvas(e.Device);
 			canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Mask, this.FgColor));
 			canvas.CurrentState.TextFont = Duality.Resources.Font.GenericMonospace8;
 
