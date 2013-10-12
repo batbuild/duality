@@ -57,9 +57,9 @@ namespace EditorBase.PropertyEditors
 			var objectSelector = new ObjectSelector
 			{
 				StartPosition = FormStartPosition.CenterScreen,
-				Text = "Select " + ((IContentRef) DisplayedValue).ResType.Name
+				Text = "Select " + editedResType.Name
 			};
-			objectSelector.SetTreeViewItems(ContentProvider.GetAvailableContent(((IContentRef) DisplayedValue).ResType)
+			objectSelector.SetTreeViewItems(ContentProvider.GetAvailableContent(editedResType)
 				.Select(c => new Node(c.Name){Tag = c})
 				.OrderBy(n => n.Text));
 
