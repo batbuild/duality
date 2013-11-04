@@ -262,6 +262,11 @@ namespace EditorBase.CamViewStates
 			get { return this.actionText.SourceText; }
 		}
 
+		public Vector3 SelectionCenter
+		{
+			get { return selectionCenter; }
+		}
+
 
 		internal protected virtual void OnEnterState()
 		{
@@ -530,7 +535,14 @@ namespace EditorBase.CamViewStates
 					}
 					canvas.PopState();
 				}
-			
+				
+				// Normalize action text position
+				if (this.actionText.Fonts != null && this.actionText.Fonts.Any(r => r.IsAvailable && r.Res.IsPixelGridAligned))
+				{
+					actionTextPos.X = MathF.Round(actionTextPos.X);
+					actionTextPos.Y = MathF.Round(actionTextPos.Y);
+				}
+
 				// Draw current action text
 				if (!this.actionText.IsEmpty)
 				{
@@ -770,6 +782,16 @@ namespace EditorBase.CamViewStates
 			this.drawSelGizmoState = ObjectAction.Move;
 			this.InvalidateSelectionStats();
 			this.Invalidate();
+		}
+		public void MoveSelectionTo(Vector3 target)
+		{
+			this.MoveSelectionBy(target - this.selectionCenter);
+		}
+		public void MoveSelectionToCursor()
+		{
+			Point mousePos = this.PointToClient(Cursor.Position);
+			Vector3 mouseSpaceCoord = this.GetSpaceCoord(new Vector3(mousePos.X, mousePos.Y, this.selectionCenter.Z));
+			this.MoveSelectionTo(mouseSpaceCoord);
 		}
 		public void RotateSelectionBy(float rotation)
 		{
@@ -1408,7 +1430,6 @@ namespace EditorBase.CamViewStates
 		}
 		private void LocalGLControl_KeyDown(object sender, KeyEventArgs e)
 		{
-			bool ctrlPressed = e.Control;
 			if (this.actionAllowed)
 			{
 				if (e.KeyCode == Keys.Delete)
@@ -1417,19 +1438,28 @@ namespace EditorBase.CamViewStates
 					this.ClearSelection();
 					this.DeleteObjects(deleteList);
 				}
-				else if (e.KeyCode == Keys.C && (Control.ModifierKeys & Keys.Control) != Keys.None)
+				else if (e.KeyCode == Keys.C && e.Control)
 				{
 					List<SelObj> cloneList = this.CloneObjects(this.actionObjSel);
 					this.SelectObjects(cloneList);
 				}
-				else if (!ctrlPressed && e.KeyCode == Keys.Left)		this.MoveSelectionBy(-Vector3.UnitX);
-				else if (!ctrlPressed && e.KeyCode == Keys.Right)		this.MoveSelectionBy(Vector3.UnitX);
-				else if (!ctrlPressed && e.KeyCode == Keys.Up)			this.MoveSelectionBy(-Vector3.UnitY);
-				else if (!ctrlPressed && e.KeyCode == Keys.Down)		this.MoveSelectionBy(Vector3.UnitY);
-				else if (!ctrlPressed && e.KeyCode == Keys.Add)			this.MoveSelectionBy(Vector3.UnitZ);
-				else if (!ctrlPressed && e.KeyCode == Keys.Subtract)	this.MoveSelectionBy(-Vector3.UnitZ);
-				else if (e.KeyCode == Keys.ShiftKey)					this.UpdateAction();
-				else if (e.KeyCode == Keys.ControlKey)					this.UpdateAction();
+				else if (e.KeyCode == Keys.G)
+				{
+					if (e.Alt)
+					{
+						this.SelectObjects(this.CloneObjects(this.actionObjSel));
+						e.SuppressKeyPress = true; // Prevent menustrip from getting focused
+					}
+					this.MoveSelectionToCursor();
+				}
+				else if (!e.Control && e.KeyCode == Keys.Left)		this.MoveSelectionBy(-Vector3.UnitX);
+				else if (!e.Control && e.KeyCode == Keys.Right)		this.MoveSelectionBy(Vector3.UnitX);
+				else if (!e.Control && e.KeyCode == Keys.Up)		this.MoveSelectionBy(-Vector3.UnitY);
+				else if (!e.Control && e.KeyCode == Keys.Down)		this.MoveSelectionBy(Vector3.UnitY);
+				else if (!e.Control && e.KeyCode == Keys.Add)		this.MoveSelectionBy(Vector3.UnitZ);
+				else if (!e.Control && e.KeyCode == Keys.Subtract)	this.MoveSelectionBy(-Vector3.UnitZ);
+				else if (e.KeyCode == Keys.ShiftKey)				this.UpdateAction();
+				else if (e.KeyCode == Keys.ControlKey)				this.UpdateAction();
 			}
 
 			if (this.camActionAllowed)
@@ -1447,7 +1477,7 @@ namespace EditorBase.CamViewStates
 					else
 						this.View.ResetCamera();
 				}
-				else if (ctrlPressed && e.KeyCode == Keys.Left)
+				else if (e.Control && e.KeyCode == Keys.Left)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
 					Vector3 pos = this.CameraObj.Transform.Pos;
@@ -1455,7 +1485,7 @@ namespace EditorBase.CamViewStates
 					this.CameraObj.Transform.Pos = pos;
 					this.Invalidate();
 				}
-				else if (ctrlPressed && e.KeyCode == Keys.Right)
+				else if (e.Control && e.KeyCode == Keys.Right)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
 					Vector3 pos = this.CameraObj.Transform.Pos;
@@ -1463,7 +1493,7 @@ namespace EditorBase.CamViewStates
 					this.CameraObj.Transform.Pos = pos;
 					this.Invalidate();
 				}
-				else if (ctrlPressed && e.KeyCode == Keys.Up)
+				else if (e.Control && e.KeyCode == Keys.Up)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
 					Vector3 pos = this.CameraObj.Transform.Pos;
@@ -1471,7 +1501,7 @@ namespace EditorBase.CamViewStates
 					this.CameraObj.Transform.Pos = pos;
 					this.Invalidate();
 				}
-				else if (ctrlPressed && e.KeyCode == Keys.Down)
+				else if (e.Control && e.KeyCode == Keys.Down)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
 					Vector3 pos = this.CameraObj.Transform.Pos;
@@ -1479,7 +1509,7 @@ namespace EditorBase.CamViewStates
 					this.CameraObj.Transform.Pos = pos;
 					this.Invalidate();
 				}
-				else if (ctrlPressed && e.KeyCode == Keys.Add)
+				else if (e.Control && e.KeyCode == Keys.Add)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
 					Vector3 pos = this.CameraObj.Transform.Pos;
@@ -1487,7 +1517,7 @@ namespace EditorBase.CamViewStates
 					this.CameraObj.Transform.Pos = pos;
 					this.Invalidate();
 				}
-				else if (ctrlPressed && e.KeyCode == Keys.Subtract)
+				else if (e.Control && e.KeyCode == Keys.Subtract)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
 					Vector3 pos = this.CameraObj.Transform.Pos;
@@ -1577,7 +1607,7 @@ namespace EditorBase.CamViewStates
 		}
 		private void camPassEdScreen_CollectDrawcalls(object sender, CollectDrawcallEventArgs e)
 		{
-			Canvas canvas = new Canvas(this.CameraComponent.DrawDevice);
+			Canvas canvas = new Canvas(e.Device);
 			canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Mask, this.FgColor));
 			canvas.CurrentState.TextFont = OverlayFont;
 
@@ -1585,7 +1615,7 @@ namespace EditorBase.CamViewStates
 		}
 		private void camPassEdWorld_CollectDrawcalls(object sender, CollectDrawcallEventArgs e)
 		{
-			Canvas canvas = new Canvas(this.CameraComponent.DrawDevice);
+			Canvas canvas = new Canvas(e.Device);
 			canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Mask, this.FgColor));
 			canvas.CurrentState.TextFont = Duality.Resources.Font.GenericMonospace8;
 
@@ -1593,7 +1623,7 @@ namespace EditorBase.CamViewStates
 		}
 		private void camPassBg_CollectDrawcalls(object sender, CollectDrawcallEventArgs e)
 		{
-			Canvas canvas = new Canvas(this.CameraComponent.DrawDevice);
+			Canvas canvas = new Canvas(e.Device);
 			canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Mask, this.FgColor));
 			canvas.CurrentState.TextFont = Duality.Resources.Font.GenericMonospace8;
 
@@ -1607,6 +1637,7 @@ namespace EditorBase.CamViewStates
 				return HelpInfo.FromText(EditorBaseRes.CamView_Help_ObjActions, 
 					EditorBaseRes.CamView_Help_ObjActions_Delete + "\n" +
 					EditorBaseRes.CamView_Help_ObjActions_Clone + "\n" +
+					EditorBaseRes.CamView_Help_ObjActions_EditClone + "\n" +
 					EditorBaseRes.CamView_Help_ObjActions_MoveStep + "\n" +
 					EditorBaseRes.CamView_Help_ObjActions_Focus + "\n" +
 					EditorBaseRes.CamView_Help_ObjActions_AxisLock);

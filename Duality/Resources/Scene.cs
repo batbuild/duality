@@ -142,11 +142,18 @@ namespace Duality.Resources
 		{
 			if (current.ResWeak != null)
 			{
+				// Apply physical properties
 				ResetPhysics();
 				physicsWorld.Gravity = PhysicsConvert.ToPhysicalUnit(current.ResWeak.GlobalGravity / Time.SPFMult);
+
 				// When in the editor, apply prefab links
 				if (DualityApp.ExecEnvironment == DualityApp.ExecutionEnvironment.Editor)
 					current.ResWeak.ApplyPrefabLinks();
+
+				// When running the game, break prefab links
+				if (DualityApp.ExecContext == DualityApp.ExecutionContext.Game)
+					current.ResWeak.BreakPrefabLinks();
+
 				// Activate GameObjects
 				foreach (GameObject o in current.ResWeak.ActiveObjects.ToArray())
 					o.OnActivate();
@@ -605,7 +612,7 @@ namespace Duality.Resources
 		/// <returns></returns>
 		public T FindComponent<T>(bool activeOnly = true) where T : class
 		{
-			return FindComponent(typeof(T)) as T;
+			return FindComponent(typeof(T), activeOnly) as T;
 		}
 		/// <summary>
 		/// Finds a single Component of the specified type in this Scene.
@@ -778,7 +785,6 @@ namespace Duality.Resources
 			base.OnLoaded();
 
 			this.ApplyPrefabLinks();
-			if (DualityApp.ExecContext == DualityApp.ExecutionContext.Game) this.BreakPrefabLinks();
 
 			foreach (GameObject obj in this.objectManager.AllObjects)
 				obj.OnLoaded();

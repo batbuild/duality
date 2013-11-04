@@ -77,9 +77,10 @@ namespace EditorBase.CamViewStates
 
 			public override bool IsActionAvailable(ObjectAction action)
 			{
-				if (action == ObjectAction.Move) return true;
-				if (action == ObjectAction.Rotate) return true;
-				if (action == ObjectAction.Scale) return true;
+				if (action == ObjectAction.Move ||
+					action == ObjectAction.Rotate ||
+					action == ObjectAction.Scale)
+					return this.HasTransform;
 				return false;
 			}
 			public override string UpdateActionText(ObjectAction action, bool performing)
@@ -104,9 +105,10 @@ namespace EditorBase.CamViewStates
 			}
 		}
 
-		private ObjectSelection selBeforeDrag	= null;
-		private	DateTime		dragTime		= DateTime.Now;
-		private	Point			dragLastLoc		= Point.Empty;
+		private ObjectSelection selBeforeDrag			= null;
+		private	DateTime		dragTime				= DateTime.Now;
+		private	Point			dragLastLoc				= Point.Empty;
+		private Point			mousePosOnContextMenu	= Point.Empty;
 
 		public override string StateName
 		{
@@ -142,8 +144,10 @@ namespace EditorBase.CamViewStates
 				var parentlessGameObj = current.GameObjects.Where(g => !current.GameObjects.Any(g2 => g.IsChildOf(g2))).ToList();
 				this.actionObjSel = parentlessGameObj.Select(g => new SelGameObj(g) as SelObj).Where(s => s.HasTransform).ToList();
 			}
+
 			this.InvalidateSelectionStats();
 		}
+
 		internal protected override void OnLeaveState()
 		{
 			base.OnLeaveState();
@@ -198,7 +202,9 @@ namespace EditorBase.CamViewStates
 		{
 			base.ClearSelection();
 			DualityEditorApp.Deselect(this, ObjectSelection.Category.GameObjCmp);
+			ClearContextMenu();
 		}
+
 		public override void SelectObjects(IEnumerable<CamViewState.SelObj> selObjEnum, SelectMode mode = SelectMode.Set)
 		{
 			base.SelectObjects(selObjEnum, mode);
@@ -246,6 +252,7 @@ namespace EditorBase.CamViewStates
 		}
 		public override List<SelObj> CloneObjects(IEnumerable<SelObj> objEnum)
 		{
+			if (objEnum == null || !objEnum.Any()) return base.CloneObjects(objEnum);
 			var objList = objEnum.Select(s => s.ActualObject as GameObject).ToList();
 
 			CloneGameObjectAction cloneAction = new CloneGameObjectAction(objList);
@@ -373,7 +380,11 @@ namespace EditorBase.CamViewStates
 		}
 		private void EditorForm_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			if ((e.AffectedCategories & ObjectSelection.Category.GameObjCmp) == ObjectSelection.Category.None) return;
+			if ((e.AffectedCategories & ObjectSelection.Category.GameObjCmp) == ObjectSelection.Category.None)
+			{
+				ClearContextMenu();
+				return;
+			}
 			if (e.SameObjects) return;
 
 			// Update object selection
@@ -413,6 +424,13 @@ namespace EditorBase.CamViewStates
 			GameObject obj = (r as Component).GameObj;
 			DesignTimeObjectData data = CorePluginRegistry.GetDesignTimeData(obj);
 			return !data.IsHidden;
+		}
+		private void ClearContextMenu()
+		{
+			if (this.LocalGLControl == null || this.LocalGLControl.ContextMenu == null)
+				return;
+
+			this.LocalGLControl.ContextMenu.MenuItems.Clear();
 		}
 	}
 }
