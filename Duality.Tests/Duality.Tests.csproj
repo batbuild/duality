@@ -35,7 +35,9 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerOpenTK, Version=3.3.4888.25971, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="FarseerOpenTK">
+      <HintPath>..\Duality\FarseerOpenTK.dll</HintPath>
+    </Reference>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
     </Reference>
