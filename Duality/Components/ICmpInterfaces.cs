@@ -130,7 +130,7 @@ namespace Duality
 	/// </summary>
 	public interface ICmpHandlesMessages
 	{
-		void HandleMessage(Component sender, GameMessage msg);
+		void HandleMessage(GameObject sender, GameMessage msg);
 	}
 
 	/// <summary>

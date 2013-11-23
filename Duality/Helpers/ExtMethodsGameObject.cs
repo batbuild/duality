@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Duality.Resources;
 
@@ -6,14 +7,39 @@ namespace Duality.Helpers
 {
 	public static class ExtMethodsGameObject
 	{
-		public static void BroadcastMessage(this Component sender, GameMessage msg, string targetName = null)
+		public static void SendMessage(this Component sender, GameMessage msg, string targetName)
 		{
-			IEnumerable<ICmpHandlesMessages> receivers;
-			
-			if (targetName != null)
+			if (string.IsNullOrEmpty(targetName))
 			{
-				var targetObject = Scene.Current.FindGameObjects(targetName);
-				receivers = targetObject.GetComponents<ICmpHandlesMessages>().ToList();
+				SendMessage(sender, msg);
+			}
+			else
+			{
+				SendMessage(sender, msg, Scene.Current.FindGameObject(targetName));
+			}
+		}
+
+		public static void SendMessage(this Component sender, GameMessage msg, GameObject target = null)
+		{
+			SendMessage(sender.GameObj, msg, target);
+		}
+
+		public static void SendMessage(this GameObject sender, GameMessage msg, GameObject target)
+		{
+			if (msg == null)
+			{
+				Log.Game.WriteWarning("ExtMethodsGameObject: Tried to send a null message.\n{0}", Environment.StackTrace);
+				return;
+			}
+
+			IEnumerable<ICmpHandlesMessages> receivers;
+
+			if (target != null)
+			{
+				if (!target.Active)
+					return;
+
+				receivers = target.GetComponents<ICmpHandlesMessages>().ToList();
 			}
 			else
 			{
@@ -22,29 +48,7 @@ namespace Duality.Helpers
 
 			foreach (var receiver in receivers)
 			{
-				if (((Component) receiver).Active == false)
-					continue;
-
-				receiver.HandleMessage(sender, msg);
-			}
-		}
-
-		public static void BroadcastMessage(this Component sender, GameMessage msg, GameObject target)
-		{
-			if (target == null)
-				return;
-
-			if (msg == null)
-				return;
-
-			if (!target.Active)
-				return;
-
-			var receivers = target.GetComponents<ICmpHandlesMessages>();
-
-			foreach(var receiver in receivers)
-			{
-				if ((receiver as Component).Active == false)
+				if (((Component)receiver).Active == false)
 					continue;
 
 				receiver.HandleMessage(sender, msg);
