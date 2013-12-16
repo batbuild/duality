@@ -1,11 +1,9 @@
 ﻿using System;
-using Duality;
 using Duality.Components;
 using NUnit.Framework;
 using OpenTK;
 
-
-namespace DualityDebuggingTest
+namespace Duality.Tests.Components
 {
 	[TestFixture]
 	public class TransformIntegrationTests

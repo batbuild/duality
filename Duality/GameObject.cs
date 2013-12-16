@@ -32,6 +32,7 @@ namespace Duality
 		private		string						name		= string.Format("obj{0}", MathF.Rnd.Next());
 		private		bool						active		= true;
 		private		InitState					initState	= InitState.Initialized;
+		private		List<int>					executionOrder = new List<int>(); 
 
 		// Built-in heavily used component lookup
 		private		Components.Transform		compTransform	= null;
@@ -602,6 +603,8 @@ namespace Duality
 			this.compMap.Add(cType, newComp);
 			this.compList.Add(newComp);
 
+			SetupComponentExecutionOrder();
+
 			if (newComp is Components.Transform) this.compTransform = (Components.Transform)(Component)newComp;
 
 			this.OnComponentAdded(newComp);
@@ -652,6 +655,8 @@ namespace Duality
 			if (cmp is Components.Transform) this.compTransform = null;
 
 			cmp.gameobj = null;
+
+			SetupComponentExecutionOrder();
 		}
 		/// <summary>
 		/// Removes all <see cref="Component">Components</see> from this GameObject.
@@ -772,8 +777,10 @@ namespace Duality
 		internal void Update()
 		{
 			// Update Components
-			foreach (Component c in this.compList)
+			for (var index = 0; index < this.executionOrder.Count; index++)
 			{
+				var c = this.compList[this.executionOrder[index]];
+
 				if (!c.Active) continue;
 				ICmpUpdatable selfUpd = c as ICmpUpdatable;
 				if (selfUpd != null) selfUpd.OnUpdate();
@@ -884,19 +891,24 @@ namespace Duality
 		}
 		internal void OnActivate()
 		{
+			SetupComponentExecutionOrder();
+
 			// Notify Components
-			foreach (Component c in this.compList)
+			for (var index = 0; index < this.executionOrder.Count; index++)
 			{
+				var c = this.compList[this.executionOrder[index]];
 				if (!c.ActiveSingle) continue;
 				ICmpInitializable cInit = c as ICmpInitializable;
 				if (cInit != null) cInit.OnInit(Component.InitContext.Activate);
 			}
 		}
+
 		internal void OnDeactivate()
 		{
 			// Notify Components
-			foreach (Component c in this.compList)
+			for (var index = 0; index < this.executionOrder.Count; index++)
 			{
+				var c = this.compList[this.executionOrder[index]];
 				if (!c.ActiveSingle) continue;
 				ICmpInitializable cInit = c as ICmpInitializable;
 				if (cInit != null) cInit.OnShutdown(Component.ShutdownContext.Deactivate);
@@ -947,6 +959,27 @@ namespace Duality
 			// Public event
 			if (this.eventComponentRemoving != null)
 				this.eventComponentRemoving(this, new ComponentEventArgs(cmp));
+		}
+
+		private void SetupComponentExecutionOrder()
+		{
+			this.executionOrder.Clear();
+			var compTypes = this.compList.Select(c => c.GetType()).ToList();
+
+			for (var i = 0; i < Scene.ComponentExecutionOrder.Count; i++)
+			{
+				var compIndex = compTypes.IndexOf(Scene.ComponentExecutionOrder[i]);
+				if (compIndex == -1)
+					continue;
+
+				this.executionOrder.Add(compIndex);
+			}
+
+			for (var i = 0; i < this.compList.Count; i++)
+			{
+				if(this.executionOrder.Contains(i) == false)
+					this.executionOrder.Add(i);
+			}
 		}
 
 		public override string ToString()

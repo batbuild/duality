@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Duality.Cloning;
+using FarseerPhysics;
 using OpenTK;
 using FarseerPhysics.Dynamics;
 
@@ -29,11 +32,12 @@ namespace Duality.Resources
 		private const float PhysicsAccStart = Time.MsPFMult;
 
 
-		private	static	World				physicsWorld	= new World(Vector2.Zero);
-		private	static	float				physicsAcc		= 0.0f;
-		private	static	bool				physicsLowFps	= false;
-		private	static	ContentRef<Scene>	current			= ContentRef<Scene>.Null;
-		private	static	bool				curAutoGen		= false;
+		private	static	World				physicsWorld			= new World(Vector2.Zero);
+		private	static	float				physicsAcc				= 0.0f;
+		private	static	bool				physicsLowFps			= false;
+		private	static	ContentRef<Scene> current					= ContentRef<Scene>.Null;
+		private	static	bool				curAutoGen				= false;
+		private static List<Type>			componentExecutionOrder = new List<Type>();
 
 
 		/// <summary>
@@ -197,9 +201,9 @@ namespace Duality.Resources
 		private	Vector2			globalGravity	= Vector2.UnitY * 33.0f;
 		private	GameObject[]	serializeObj	= null;
 		[NonSerialized] private	GameObjectManager					objectManager		= new GameObjectManager();
-		[NonSerialized] private	List<Camera>						cameras				= new List<Camera>();
-		[NonSerialized] private	List<Component>						renderers			= new List<Component>();
-		[NonSerialized] private Dictionary<Type,List<Component>>	componentyByType	= new Dictionary<Type,List<Component>>();
+		[NonSerialized] private	List<Camera> cameras				= new List<Camera>();
+		[NonSerialized] private	List<Component> renderers			= new List<Component>();
+		[NonSerialized] private Dictionary<Type, List<Component>> componentyByType	= new Dictionary<Type, List<Component>>();
 
 
 		/// <summary>
@@ -279,6 +283,8 @@ namespace Duality.Resources
 			get { return !this.objectManager.AllObjects.Any(); }
 		}
 
+		public static ReadOnlyCollection<Type> ComponentExecutionOrder { get { return new ReadOnlyCollection<Type>(componentExecutionOrder); } }
+
 
 		/// <summary>
 		/// Creates a new, empty scene which does not contain any <see cref="GameObject">GameObjects</see>.
@@ -322,7 +328,7 @@ namespace Duality.Resources
 					while (physicsAcc >= Time.MsPFMult)
 					{
 						// Catch up on updating progress
-						FarseerPhysics.Settings.VelocityThreshold = PhysicsConvert.ToPhysicalUnit(DualityApp.AppData.PhysicsVelocityThreshold / Time.SPFMult);
+						Settings.VelocityThreshold = PhysicsConvert.ToPhysicalUnit(DualityApp.AppData.PhysicsVelocityThreshold / Time.SPFMult);
 						physicsWorld.Step(Time.SPFMult);
 						physicsAcc -= Time.MsPFMult;
 						iterations++;
@@ -337,7 +343,7 @@ namespace Duality.Resources
 			else
 			{
 				Profile.TimeUpdatePhysics.BeginMeasure();
-				FarseerPhysics.Settings.VelocityThreshold = PhysicsConvert.ToPhysicalUnit(Time.TimeMult * DualityApp.AppData.PhysicsVelocityThreshold / Time.SPFMult);
+				Settings.VelocityThreshold = PhysicsConvert.ToPhysicalUnit(Time.TimeMult * DualityApp.AppData.PhysicsVelocityThreshold / Time.SPFMult);
 				physicsWorld.Step(Time.TimeMult * Time.SPFMult);
 				if (Time.TimeMult == 0.0f) physicsWorld.ClearForces(); // Complete freeze? Clear forces, so they don't accumulate.
 				physicsAcc = PhysicsAccStart;
@@ -349,11 +355,11 @@ namespace Duality.Resources
 			// Apply Farseers internal measurements to Duality
 			if (physUpdate)
 			{
-				Profile.TimeUpdatePhysicsAddRemove.Set(1000.0f * physicsWorld.AddRemoveTime / System.Diagnostics.Stopwatch.Frequency);
-				Profile.TimeUpdatePhysicsContacts.Set(1000.0f * physicsWorld.ContactsUpdateTime / System.Diagnostics.Stopwatch.Frequency);
-				Profile.TimeUpdatePhysicsContinous.Set(1000.0f * physicsWorld.ContinuousPhysicsTime / System.Diagnostics.Stopwatch.Frequency);
-				Profile.TimeUpdatePhysicsController.Set(1000.0f * physicsWorld.ControllersUpdateTime / System.Diagnostics.Stopwatch.Frequency);
-				Profile.TimeUpdatePhysicsSolve.Set(1000.0f * physicsWorld.SolveUpdateTime / System.Diagnostics.Stopwatch.Frequency);
+				Profile.TimeUpdatePhysicsAddRemove.Set(1000.0f * physicsWorld.AddRemoveTime / Stopwatch.Frequency);
+				Profile.TimeUpdatePhysicsContacts.Set(1000.0f * physicsWorld.ContactsUpdateTime / Stopwatch.Frequency);
+				Profile.TimeUpdatePhysicsContinous.Set(1000.0f * physicsWorld.ContinuousPhysicsTime / Stopwatch.Frequency);
+				Profile.TimeUpdatePhysicsController.Set(1000.0f * physicsWorld.ControllersUpdateTime / Stopwatch.Frequency);
+				Profile.TimeUpdatePhysicsSolve.Set(1000.0f * physicsWorld.SolveUpdateTime / Stopwatch.Frequency);
 			}
 
 			// Update low fps physics state
@@ -737,7 +743,7 @@ namespace Duality.Resources
 			if (this.IsCurrent) OnComponentRemoving(e);
 		}
 
-		protected override void OnCopyTo(Resource r, Duality.Cloning.CloneProvider provider)
+		protected override void OnCopyTo(Resource r, CloneProvider provider)
 		{
 			base.OnCopyTo(r, provider);
 			Scene s = r as Scene;
@@ -815,6 +821,12 @@ namespace Duality.Resources
 				++depthB;
 			}
 			return depthA - depthB;
+		}
+
+		public static void SetComponentExecutionOrder(params Type[] types)
+		{
+			componentExecutionOrder.Clear();
+			componentExecutionOrder.AddRange(types);
 		}
 	}
 }
