@@ -18,8 +18,6 @@ namespace AdamsLair.PropertyGrid.PropertyEditors
 
 		private	bool					buttonIsCreate	= false;
 		private	NumericPropertyEditor	sizeEditor		= null;
-		private	NumericPropertyEditor	offsetEditor	= null;
-		private	int						offset			= 0;
 		private	int						internalEditors	= 0;
 		private	IndexValueSetter		listIndexSetter	= null;
 		
@@ -48,12 +46,6 @@ namespace AdamsLair.PropertyGrid.PropertyEditors
 			this.sizeEditor.PropertyName = "Size";
 			this.sizeEditor.Getter = this.SizeValueGetter;
 			this.sizeEditor.Setter = this.SizeValueSetter;
-
-			this.offsetEditor = new NumericPropertyEditor();
-			this.offsetEditor.EditedType = typeof(uint);
-			this.offsetEditor.PropertyName = "Offset";
-			this.offsetEditor.Getter = this.OffsetValueGetter;
-			this.offsetEditor.Setter = this.OffsetValueSetter;
 		}
 
 		public override void InitContent()
@@ -64,11 +56,6 @@ namespace AdamsLair.PropertyGrid.PropertyEditors
 				this.PerformGetValue();
 			else
 				this.ClearContent();
-		}
-		public override void ClearContent()
-		{
-			base.ClearContent();
-			this.offset = 0;
 		}
 
 		public override void PerformGetValue()
@@ -143,24 +130,10 @@ namespace AdamsLair.PropertyGrid.PropertyEditors
 		{
 			PropertyInfo indexer = typeof(IList).GetProperty("Item");
 			int visibleElementCount = values.Where(o => o != null).Min(o => (int)o.Count);
-			bool showOffset = false;
-			if (visibleElementCount > 10)
-			{
-				this.offset = Math.Min(this.offset, visibleElementCount - 10);
-				this.offsetEditor.Maximum = visibleElementCount - 10;
-				visibleElementCount = 10;
-				showOffset = true;
-			}
-			else
-			{
-				this.offset = 0;
-			}
 
 			if (this.sizeEditor.ParentEditor == null) this.AddPropertyEditor(this.sizeEditor, 0);
-			if (showOffset && this.offsetEditor.ParentEditor == null) this.AddPropertyEditor(this.offsetEditor, 1);
-			else if (!showOffset && this.offsetEditor.ParentEditor != null) this.RemovePropertyEditor(this.offsetEditor);
 
-			this.internalEditors = showOffset ? 2 : 1;
+			this.internalEditors = 1;
 
 			this.BeginUpdate();
 
@@ -179,9 +152,9 @@ namespace AdamsLair.PropertyGrid.PropertyEditors
 					this.AddPropertyEditor(elementEditor);
 					this.ParentGrid.ConfigureEditor(elementEditor);
 				}
-				elementEditor.Getter = this.CreateElementValueGetter(indexer, i - this.internalEditors + this.offset);
-				elementEditor.Setter = this.CreateElementValueSetter(indexer, i - this.internalEditors + this.offset);
-				elementEditor.PropertyName = "[" + (i - this.internalEditors + this.offset) + "]";
+				elementEditor.Getter = this.CreateElementValueGetter(indexer, i - this.internalEditors);
+				elementEditor.Setter = this.CreateElementValueSetter(indexer, i - this.internalEditors);
+				elementEditor.PropertyName = "[" + (i - this.internalEditors) + "]";
 				//elementEditor.Hints |= HintFlags.HasButton | HintFlags.ButtonEnabled;
 			}
 			// Remove overflowing editors
@@ -192,11 +165,6 @@ namespace AdamsLair.PropertyGrid.PropertyEditors
 				this.RemovePropertyEditor(child);
 			}
 			this.EndUpdate();
-		}
-		protected override bool IsChildReadOnly(PropertyEditor childEditor)
-		{
-			if (childEditor == this.offsetEditor) return false;
-			return base.IsChildReadOnly(childEditor);
 		}
 
 		protected void RemoveElementAt(int index)
@@ -276,15 +244,6 @@ namespace AdamsLair.PropertyGrid.PropertyEditors
 				if (valuesEnum.MoveNext()) curValue = (uint)valuesEnum.Current;
 			}
 			if (writeBack || this.ForceWriteBack) this.SetValues(targetArray);
-			this.PerformGetValue();
-		}
-		protected IEnumerable<object> OffsetValueGetter()
-		{
-			yield return (uint)this.offset;
-		}
-		protected void OffsetValueSetter(IEnumerable<object> values)
-		{
-			this.offset = (int)Convert.ChangeType(values.First(), typeof(int));
 			this.PerformGetValue();
 		}
 		protected Func<IEnumerable<object>> CreateElementValueGetter(PropertyInfo indexer, int index)
