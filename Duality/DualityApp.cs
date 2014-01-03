@@ -789,9 +789,9 @@ namespace Duality
 					LoadPlugin(dllPath);
 				}
 			}
-
 			Log.Core.PopIndent();
 		}
+
 		private static CorePlugin LoadPlugin(string pluginFilePath)
 		{
 			Log.Core.Write("{0}...", pluginFilePath);
@@ -799,7 +799,8 @@ namespace Duality
 
 			string asmName = Path.GetFileNameWithoutExtension(pluginFilePath);
 			CorePlugin plugin = plugins.Values.FirstOrDefault(p => p.AssemblyName == asmName);
-			if (plugin != null) return plugin;
+			if (plugin != null) 
+				return plugin;
 			try
 			{
 				Assembly pluginAssembly;
@@ -823,6 +824,46 @@ namespace Duality
 			Log.Core.PopIndent();
 			return plugin;
 		}
+
+		/// <summary>
+		/// Andrea changes 
+		/// </summary>
+		/// <param name="pluginAssembly"></param>
+		/// <param name="pluginFilePath"></param>
+		/// <returns></returns>
+		public static CorePlugin AddPlugin(Assembly pluginAssembly, string pluginFilePath)
+		{
+			if (disposedPlugins.Contains(pluginAssembly)) 
+				return null;
+
+			string asmName = pluginAssembly.GetShortAssemblyName();
+			CorePlugin plugin = plugins.Values.FirstOrDefault(p => p.AssemblyName == asmName);
+			if (plugin != null) 
+				return plugin;
+
+			/*
+			 * Type pluginType = pluginAssembly.GetExportedTypes().FirstOrDefault(t => typeof(CorePlugin).IsAssignableFrom(t));
+			if (pluginType == null)
+			{
+				disposedPlugins.Add(pluginAssembly);
+			}
+			else
+			{
+
+				plugin = (CorePlugin)pluginType.CreateInstanceOf();
+				plugin.FilePath = pluginFilePath;
+				plugins.Add(plugin.AssemblyName, plugin);
+			}
+
+			return plugin;
+			 */
+			var pluginRelated = new PluginsAlternative();
+			pluginRelated.RegisterPlugins();
+			var defaultCorePlugin = pluginRelated.GetDefaultCorePlugin();
+			plugins.Add(defaultCorePlugin.AssemblyName, defaultCorePlugin);
+			return defaultCorePlugin;
+		}
+
 		/// <summary>
 		/// Adds an already loaded plugin Assembly to the internal Duality CorePlugin registry.
 		/// You shouldn't need to call this method in general, since Duality manages its plugins
@@ -832,12 +873,12 @@ namespace Duality
 		/// This method can be useful in certain cases when it is necessary to treat an Assembly as a
 		/// Duality plugin, even though it isn't located in the Plugins folder, or is not available
 		/// as a file at all. A typical case for this is Unit Testing where the testing Assembly may
-		/// specify additional Duality types such as Components, Resources, etc.
+		/// specify additional Duality types such as Components, Resources, etc. 
 		/// </remarks>
 		/// <param name="pluginAssembly"></param>
 		/// <param name="pluginFilePath"></param>
 		/// <returns></returns>
-		public static CorePlugin AddPlugin(Assembly pluginAssembly, string pluginFilePath)
+		public static CorePlugin AddPluginOld(Assembly pluginAssembly, string pluginFilePath)
 		{
 			if (disposedPlugins.Contains(pluginAssembly)) return null;
 
@@ -908,6 +949,7 @@ namespace Duality
 			}
 			Log.Core.PopIndent();
 		}
+
 		private static void ClearPlugins()
 		{
 			foreach (CorePlugin plugin in plugins.Values)
@@ -929,6 +971,7 @@ namespace Duality
 			CleanupAfterPlugins(plugins.Values);
 			plugins.Clear();
 		}
+
 		internal static void ReloadPlugin(string pluginFilePath)
 		{
 			if (!pluginFilePath.EndsWith(".core.dll", StringComparison.InvariantCultureIgnoreCase))
@@ -1081,9 +1124,10 @@ namespace Duality
 			foreach (Resource r in ContentProvider.EnumeratePluginContent().ToArray())
 				ContentProvider.RemoveContent(r.Path);
 		}
+
 		private static void CleanupAfterPlugins(IEnumerable<CorePlugin> oldPlugins)
 		{
-			oldPlugins = oldPlugins.NotNull().Distinct();
+			oldPlugins = oldPlugins.NotNull().Distinct().ToArray();
 			if (!oldPlugins.Any()) oldPlugins = null;
 
 			// Clean globally cached type values
@@ -1104,6 +1148,7 @@ namespace Duality
 					CleanEventBindings(plugin.PluginAssembly);
 			}
 		}
+
 		private static void CleanEventBindings(Assembly invalidAssembly)
 		{
 			// Note that this method is only a countermeasure against common mistakes. It doesn't guarantee

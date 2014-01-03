@@ -17,15 +17,15 @@ namespace DualityEditor.Forms
 	{
 		private class WorkerInterface
 		{
-			private	bool			finished		= false;
-			private	float			progress		= 0.0f;
-			private	Exception		error			= null;
-			private	List<string>	reloadSchedule	= null;
-			private	List<string>	reloadDone		= null;
-			private	bool			recoverMode		= false;
-			private	bool			shutdown		= false;
-			private	Scene			tempScene		= null;
-			private	MainForm		mainForm		= null;
+			private bool finished = false;
+			private float progress = 0.0f;
+			private Exception error = null;
+			private List<string> reloadSchedule = null;
+			private List<string> reloadDone = null;
+			private bool recoverMode = false;
+			private bool shutdown = false;
+			private Scene tempScene = null;
+			private MainForm mainForm = null;
 
 			public bool Finished
 			{
@@ -84,16 +84,16 @@ namespace DualityEditor.Forms
 		}
 
 
-		Thread			worker			= null;
-		WorkerInterface	workerInterface	= null;
-		MainForm		owner			= null;
-		List<string>	reloadSchedule	= new List<string>();
-		ReloaderState	state			= ReloaderState.Idle;
-		int				waitTime		= 0;
+		Thread worker = null;
+		WorkerInterface workerInterface = null;
+		MainForm owner = null;
+		List<string> reloadSchedule = new List<string>();
+		ReloaderState state = ReloaderState.Idle;
+		int waitTime = 0;
 
 
-		public	event	EventHandler	BeforeBeginReload	= null;
-		public	event	EventHandler	AfterEndReload		= null;
+		public event EventHandler BeforeBeginReload = null;
+		public event EventHandler AfterEndReload = null;
 
 
 		public List<string> ReloadSchedule
@@ -228,11 +228,11 @@ namespace DualityEditor.Forms
 
 		private void progressTimer_Tick(object sender, EventArgs e)
 		{
-            if (this.state == ReloaderState.WaitForPlugins)
+			if (this.state == ReloaderState.WaitForPlugins)
 			{
 				this.waitTime += this.progressTimer.Interval;
 				if (this.waitTime > 1000)
-                    this.State = ReloaderState.ReloadPlugins;
+					this.State = ReloaderState.ReloadPlugins;
 			}
 			else if (this.state == ReloaderState.ReloadPlugins)
 			{
@@ -246,9 +246,9 @@ namespace DualityEditor.Forms
 					try
 					{
 						this.owner.SetTaskbarProgressState(ThumbnailProgressState.Error);
-						MessageBox.Show(this, 
-							String.Format(GeneralRes.Msg_ErrorReloadCorePlugin_Desc, "\n", Log.Exception(this.workerInterface.Error)), 
-							GeneralRes.Msg_ErrorReloadCorePlugin_Caption, 
+						MessageBox.Show(this,
+							String.Format(GeneralRes.Msg_ErrorReloadCorePlugin_Desc, "\n", Log.Exception(this.workerInterface.Error)),
+							GeneralRes.Msg_ErrorReloadCorePlugin_Caption,
 							MessageBoxButtons.OK, MessageBoxIcon.Error);
 					}
 					catch (Exception exception)
@@ -273,7 +273,7 @@ namespace DualityEditor.Forms
 				}
 			}
 		}
-		
+
 		private static void WorkerThreadProc(object args)
 		{
 			WorkerInterface workInterface = args as WorkerInterface;
@@ -295,8 +295,8 @@ namespace DualityEditor.Forms
 					{
 						// Save the old logfile, in case someone wants to know what happened.
 						File.Copy(
-							DualityApp.LogfilePath, 
-							Path.GetFileNameWithoutExtension(DualityApp.LogfilePath) + "_reloadfailure" + Path.GetExtension(DualityApp.LogfilePath), 
+							DualityApp.LogfilePath,
+							Path.GetFileNameWithoutExtension(DualityApp.LogfilePath) + "_reloadfailure" + Path.GetExtension(DualityApp.LogfilePath),
 							true);
 					}
 
@@ -353,7 +353,7 @@ namespace DualityEditor.Forms
 				Log.Editor.Write("Saving data...");
 				SaveTemporaryData(workInterface, strScene, strData);
 				Thread.Sleep(20);
-			
+
 				// If required, perform a full editor system restart
 				if (fullRestart)
 				{
@@ -393,7 +393,7 @@ namespace DualityEditor.Forms
 		}
 		private static bool RequiresFullRestart(IEnumerable<string> reloadPluginPaths)
 		{
-			Assembly[] allPluginAssemblies = 
+			Assembly[] allPluginAssemblies =
 				DualityApp.LoadedPlugins.Select(p => p.PluginAssembly).Concat(
 				DualityEditorApp.Plugins.Select(p => p.PluginAssembly)).ToArray();
 
