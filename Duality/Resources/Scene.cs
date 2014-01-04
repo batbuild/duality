@@ -648,6 +648,17 @@ namespace Duality.Resources
 
 			return null;
 		}
+		/// <summary>
+		/// Specifies the order in which update will be called for components attached to 
+		/// a game objects.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public static void SetComponentExecutionOrder(params Type[] types)
+		{
+			componentExecutionOrder.Clear();
+			componentExecutionOrder.AddRange(types);
+		}
 
 		private void AddToManagers(GameObject obj)
 		{
@@ -821,12 +832,6 @@ namespace Duality.Resources
 				++depthB;
 			}
 			return depthA - depthB;
-		}
-
-		public static void SetComponentExecutionOrder(params Type[] types)
-		{
-			componentExecutionOrder.Clear();
-			componentExecutionOrder.AddRange(types);
 		}
 	}
 }

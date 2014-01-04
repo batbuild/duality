@@ -603,7 +603,7 @@ namespace Duality
 			this.compMap.Add(cType, newComp);
 			this.compList.Add(newComp);
 
-			SetupComponentExecutionOrder();
+			SetComponentExecutionOrder();
 
 			if (newComp is Components.Transform) this.compTransform = (Components.Transform)(Component)newComp;
 
@@ -656,7 +656,7 @@ namespace Duality
 
 			cmp.gameobj = null;
 
-			SetupComponentExecutionOrder();
+			SetComponentExecutionOrder();
 		}
 		/// <summary>
 		/// Removes all <see cref="Component">Components</see> from this GameObject.
@@ -891,7 +891,7 @@ namespace Duality
 		}
 		internal void OnActivate()
 		{
-			SetupComponentExecutionOrder();
+			SetComponentExecutionOrder();
 
 			// Notify Components
 			for (var index = 0; index < this.executionOrder.Count; index++)
@@ -961,7 +961,7 @@ namespace Duality
 				this.eventComponentRemoving(this, new ComponentEventArgs(cmp));
 		}
 
-		private void SetupComponentExecutionOrder()
+		private void SetComponentExecutionOrder()
 		{
 			this.executionOrder.Clear();
 			var compTypes = this.compList.Select(c => c.GetType()).ToList();

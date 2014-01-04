@@ -13,23 +13,21 @@ namespace Duality.Tests.Components
 		{
 			var updateOrder = new List<int>();
 			DualityApp.AppData = new DualityAppData();
-			Scene.SetComponentExecutionOrder(typeof (ComponentTwo), typeof(ComponentThree), typeof (ComponentOne));
+			Scene.SetComponentExecutionOrder(typeof(ComponentTwo), typeof(ComponentThree), typeof(ComponentOne));
 
 			var gameObject = new GameObject();
-			gameObject.AddComponent(new ComponentThree(updateOrder));
 			gameObject.AddComponent(new ComponentOne(updateOrder));
 			gameObject.AddComponent(new ComponentTwo(updateOrder));
+			gameObject.AddComponent(new ComponentThree(updateOrder));
 
 			Scene.Current.AddObject(gameObject);
 			Scene.Current.Update();
 
-			Assert.True(updateOrder.SequenceEqual(new []{2, 3, 1}));
-
-			Scene.Current.RemoveObject(gameObject);
+			Assert.True(updateOrder.SequenceEqual(new[] { 2, 3, 1 }));
 		}
 
 		[Test]
-		public void UnspecifiedComponentsRunLast()
+		public void UnspecifiedComponentsRunLastAndInTheOrderTheyWereAdded()
 		{
 			var updateOrder = new List<int>();
 			DualityApp.AppData = new DualityAppData();
@@ -37,9 +35,9 @@ namespace Duality.Tests.Components
 
 			var gameObject = new GameObject();
 			gameObject.AddComponent(new ComponentOne(updateOrder));
+			gameObject.AddComponent(new ComponentTwo(updateOrder));
 			gameObject.AddComponent(new ComponentFour(updateOrder));
 			gameObject.AddComponent(new ComponentThree(updateOrder));
-			gameObject.AddComponent(new ComponentTwo(updateOrder));
 
 			Scene.Current.AddObject(gameObject);
 			Scene.Current.Update();
@@ -56,12 +54,16 @@ namespace Duality.Tests.Components
 
 			var gameObject = new GameObject();
 			gameObject.AddComponent(new ComponentOne(updateOrder));
+			gameObject.AddComponent(new ComponentTwo(updateOrder));
 			gameObject.AddComponent(new ComponentFour(updateOrder));
 
 			Scene.Current.AddObject(gameObject);
 
 			gameObject.RemoveComponent<ComponentOne>();
-			Assert.DoesNotThrow(() => Scene.Current.Update());
+
+			Scene.Current.Update();
+
+			Assert.True(updateOrder.SequenceEqual(new[] { 2, 4 }));
 		}
 
 		[Test]
@@ -78,7 +80,7 @@ namespace Duality.Tests.Components
 			Scene.Current.AddObject(gameObject);
 
 			gameObject.AddComponent(new ComponentThree(updateOrder));
-			
+
 			Scene.Current.Update();
 
 			Assert.True(updateOrder.SequenceEqual(new[] { 1, 3, 4 }));
@@ -105,8 +107,8 @@ namespace Duality.Tests.Components
 
 		private class BaseComponent : Component, ICmpInitializable, ICmpUpdatable
 		{
-			protected readonly List<int> _updateOrder;
-			protected readonly List<int> _deactivateOrder; 
+			private readonly List<int> _updateOrder;
+			private readonly List<int> _deactivateOrder;
 
 			protected BaseComponent(List<int> updateOrder, List<int> deactivateOrder = null)
 			{
@@ -118,7 +120,7 @@ namespace Duality.Tests.Components
 
 			public void OnInit(InitContext context)
 			{
-				
+
 			}
 
 			public void OnShutdown(ShutdownContext context)
@@ -145,7 +147,7 @@ namespace Duality.Tests.Components
 			{
 			}
 
-			public override int Id { get { return 1; }}
+			public override int Id { get { return 1; } }
 		}
 
 		private class ComponentTwo : BaseComponent
