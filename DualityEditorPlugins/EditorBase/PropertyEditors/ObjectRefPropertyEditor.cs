@@ -197,7 +197,7 @@ namespace EditorBase.PropertyEditors
 				(this.ReadOnly || !this.Enabled) ? BorderState.Disabled : BorderState.Normal);
 
 			ButtonState buttonStateSet = ButtonState.Disabled;
-			if(!this.ReadOnly && this.Enabled && this.ReferenceName != null)
+			if(!this.ReadOnly && this.Enabled)
 			{
 				if (this.buttonSetPressed) buttonStateSet = ButtonState.Pressed;
 				else if (this.buttonSetHovered) buttonStateSet = ButtonState.Hot;
