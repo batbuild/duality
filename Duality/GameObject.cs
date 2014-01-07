@@ -32,6 +32,8 @@ namespace Duality
 		private		string						name		= string.Format("obj{0}", MathF.Rnd.Next());
 		private		bool						active		= true;
 		private		InitState					initState	= InitState.Initialized;
+		
+		[NonSerialized] 
 		private		List<int>					executionOrder = new List<int>(); 
 
 		// Built-in heavily used component lookup
