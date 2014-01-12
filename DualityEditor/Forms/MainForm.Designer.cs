@@ -75,6 +75,9 @@
 			this.formatXml = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
 			this.formatUpdateAll = new System.Windows.Forms.ToolStripMenuItem();
+			this.layoutDropDownButton = new System.Windows.Forms.ToolStripDropDownButton();
+			this.layoutNamesSeparator = new System.Windows.Forms.ToolStripSeparator();
+			this.saveLayoutMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.mainToolStrip.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -195,7 +198,8 @@
             this.actionPauseSandbox,
             this.actionStopSandbox,
             this.splitButtonBackupSettings,
-            this.selectFormattingMethod});
+            this.selectFormattingMethod,
+            this.layoutDropDownButton});
 			this.mainToolStrip.Location = new System.Drawing.Point(0, 24);
 			this.mainToolStrip.Name = "mainToolStrip";
 			this.mainToolStrip.Size = new System.Drawing.Size(916, 25);
@@ -414,6 +418,31 @@
 			this.formatUpdateAll.Text = "Update All";
 			this.formatUpdateAll.Click += new System.EventHandler(this.formatUpdateAll_Click);
 			// 
+			// layoutDropDownButton
+			// 
+			this.layoutDropDownButton.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+			this.layoutDropDownButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.layoutDropDownButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.layoutNamesSeparator,
+            this.saveLayoutMenuItem});
+			this.layoutDropDownButton.Image = ((System.Drawing.Image)(resources.GetObject("layoutDropDownButton.Image")));
+			this.layoutDropDownButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.layoutDropDownButton.Name = "layoutDropDownButton";
+			this.layoutDropDownButton.Size = new System.Drawing.Size(56, 22);
+			this.layoutDropDownButton.Text = "Layout";
+			// 
+			// layoutNamesSeparator
+			// 
+			this.layoutNamesSeparator.Name = "layoutNamesSeparator";
+			this.layoutNamesSeparator.Size = new System.Drawing.Size(149, 6);
+			// 
+			// saveLayoutMenuItem
+			// 
+			this.saveLayoutMenuItem.Name = "saveLayoutMenuItem";
+			this.saveLayoutMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.saveLayoutMenuItem.Text = "Save Layout...";
+			this.saveLayoutMenuItem.Click += new System.EventHandler(this.SaveLayout_Click);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -468,6 +497,9 @@
 		private System.Windows.Forms.ToolStripButton actionStepSandbox;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
 		private System.Windows.Forms.ToolStripMenuItem formatUpdateAll;
+		private System.Windows.Forms.ToolStripDropDownButton layoutDropDownButton;
+		private System.Windows.Forms.ToolStripMenuItem saveLayoutMenuItem;
+		private System.Windows.Forms.ToolStripSeparator layoutNamesSeparator;
 	}
 }
 

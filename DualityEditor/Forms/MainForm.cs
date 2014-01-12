@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
-
+using System.Xml;
 using Duality;
 using Duality.Resources;
 
@@ -20,6 +20,7 @@ namespace DualityEditor.Forms
 		private	bool				nonUserClosing	= false;
 		private	ToolStripMenuItem	activeMenu		= null;
 		private	Dictionary<string,ToolStripItem>	menuRegistry	= new Dictionary<string,ToolStripItem>();
+		private Workspace			workspace		= null;
 
 		// Hardcoded main menu items
 		private ToolStripMenuItem	menuRunSandboxPlay		= null;
@@ -42,7 +43,7 @@ namespace DualityEditor.Forms
 
 
 
-		internal MainForm()
+		internal MainForm(Workspace workspace)
 		{
 			this.InitializeComponent();
 			this.ApplyDockPanelSkin();
@@ -51,6 +52,9 @@ namespace DualityEditor.Forms
 
 			this.splitButtonBackupSettings.DropDown.Closing += this.splitButtonBackupSettings_Closing;
 			this.menuAutosave.DropDown.Closing += this.menuAutosave_Closing;
+
+			this.workspace = workspace;
+			this.workspace.SetDockPanel(this.dockPanel);
 
 			this.InitMenus();
 			this.UpdateLaunchAppActions();
@@ -342,6 +346,8 @@ namespace DualityEditor.Forms
 
 			// Initially update Undo / Redo menu
 			this.UndoRedoManager_StackChanged(null, EventArgs.Empty);
+
+			AddLayoutNamesToMenu(this.workspace.GetLayoutNames());
 		}
 		protected override void OnClosed(EventArgs e)
 		{
@@ -522,7 +528,25 @@ namespace DualityEditor.Forms
 		{
 			this.selectFormattingMethod.ShowDropDown();
 		}
-		
+		private void SaveLayout_Click(object sender, EventArgs eventArgs)
+		{
+			var saveLayoutDialog = new SaveLayoutDialog();
+
+			if (saveLayoutDialog.ShowDialog() == DialogResult.Cancel)
+				return;
+
+			this.workspace.SaveLayout(saveLayoutDialog.LayoutName);
+			AddLayoutNamesToMenu(this.workspace.GetLayoutNames());
+		}
+		private void layoutLoad_Click(object sender, EventArgs eventArgs)
+		{
+			var menuItem = (ToolStripMenuItem) sender;
+			DualityEditorApp.SaveUserData();
+			this.workspace.LoadLayout(menuItem.Text);
+			DualityEditorApp.LoadUserData();
+			DualityEditorApp.LoadEditorUserData();
+		}
+
 		private void Sandbox_StateChanged(object sender, EventArgs e)
 		{
 			this.UpdateToolbar();
@@ -670,6 +694,29 @@ namespace DualityEditor.Forms
 			this.menuRunApp.Enabled = launcherAvailable;
 			this.menuDebugApp.Enabled = launcherAvailable && EditorHelper.IsJITDebuggerAvailable;
 			this.menuProfileApp.Enabled = launcherAvailable;
+		}
+
+		private void AddLayoutNamesToMenu(IEnumerable<string> layouts)
+		{
+			ClearLayoutMenuItems();
+
+			foreach (var layout in layouts)
+			{
+				var menuItem = new ToolStripMenuItem(layout);
+				menuItem.Click += layoutLoad_Click;
+				this.layoutDropDownButton.DropDownItems.Insert(this.layoutDropDownButton.DropDownItems.Count - 2, menuItem);
+			}
+		}
+
+		private void ClearLayoutMenuItems()
+		{
+			if (this.layoutDropDownButton.DropDownItems.Count > 2)
+			{
+				for (var i = this.layoutDropDownButton.DropDownItems.Count - 3; i >= 0; i--)
+				{
+					this.layoutDropDownButton.DropDownItems.RemoveAt(i);
+				}
+			}
 		}
 
 		HelpInfo IHelpProvider.ProvideHoverHelp(Point localPos, ref bool captured)

@@ -139,6 +139,13 @@
     <Compile Include="CorePluginInterface\PreviewProvider.cs" />
     <Compile Include="DualityEditorApp.cs" />
     <Compile Include="EditorRes\GeneralResCache.cs" />
+    <Compile Include="EditorUserData.cs" />
+    <Compile Include="Forms\SaveLayoutDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SaveLayoutDialog.Designer.cs">
+      <DependentUpon>SaveLayoutDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\CursorHelper.cs" />
     <Compile Include="Helpers\EditorHelper.cs">
       <SubType>Code</SubType>
@@ -240,6 +247,7 @@
     <Compile Include="UndoRedoManager.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Workspace.cs" />
     <EmbeddedResource Include="EditorRes\GeneralRes.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>GeneralRes.Designer.cs</LastGenOutput>
@@ -265,6 +273,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ReloadCorePluginDialog.resx">
       <DependentUpon>ReloadCorePluginDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SaveLayoutDialog.resx">
+      <DependentUpon>SaveLayoutDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\SplashScreen.resx">
       <DependentUpon>SplashScreen.cs</DependentUpon>

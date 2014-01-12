@@ -45,8 +45,6 @@ namespace DualityEditor
 	public static class DualityEditorApp
 	{
 		private	const	string	DesignTimeDataFile		= "designtimedata.dat";
-		private	const	string	UserDataFile			= "editoruserdata.xml";
-		private	const	string	UserDataDockSeparator	= "<!-- DockPanel Data -->";
 		
 		private	static MainForm						mainForm			= null;
 		private	static GLControl					mainContextControl	= null;
@@ -69,6 +67,8 @@ namespace DualityEditor
 		private	static AutosaveFrequency			autosaveFrequency	= AutosaveFrequency.ThirtyMinutes;
 		private	static DateTime						autosaveLast		= DateTime.Now;
 		private	static string						launcherApp			= null;
+		private static Workspace					workspaceManager	= null;
+		private static EditorUserData				editorUserData		= new EditorUserData();
 
 
 		public	static	event	EventHandler	Terminating			= null;
@@ -154,8 +154,11 @@ namespace DualityEditor
 		}
 		
 		
-		public static void Init(MainForm mainForm, bool recover)
+		public static void Init(MainForm mainForm, bool recover, Workspace workspace)
 		{
+			workspaceManager = workspace;
+			workspaceManager.SetPlugins(plugins);
+
 			DualityEditorApp.needsRecovery = recover;
 			DualityEditorApp.mainForm = mainForm;
 
@@ -207,6 +210,8 @@ namespace DualityEditor
 			ContentProvider.InitDefaultContent();
 			LoadPlugins();
 			LoadUserData();
+			LoadDockPanelLayout();
+			LoadEditorUserData();
 			LoadDesignTimeObjectData();
 			InitPlugins();
 
@@ -397,35 +402,16 @@ namespace DualityEditor
 			return availTypes;
 		}
 
-		private static void SaveUserData()
+		internal static void SaveUserData()
 		{
 			Log.Editor.Write("Saving user data...");
 			Log.Editor.PushIndent();
 
-			using (FileStream str = File.Create(UserDataFile))
+			using (FileStream str = File.Create(EditorUserData.UserDataFile))
 			{
 				StreamWriter writer = new StreamWriter(str);
-				// --- Save custom user data here ---
-				XmlDocument xmlDoc = new XmlDocument();
-				XmlElement rootElement = xmlDoc.CreateElement("UserData");
-				xmlDoc.AppendChild(rootElement);
-				XmlElement editorAppElement = xmlDoc.CreateElement("EditorApp");
-				rootElement.AppendChild(editorAppElement);
-				editorAppElement.SetAttribute("backups", backupsEnabled.ToString(System.Globalization.CultureInfo.InvariantCulture));
-				editorAppElement.SetAttribute("autosaves", autosaveFrequency.ToString());
-				editorAppElement.SetAttribute("launcher", launcherApp);
-				foreach (EditorPlugin plugin in plugins)
-				{
-					XmlElement pluginXmlElement = xmlDoc.CreateElement("Plugin_" + plugin.Id);
-					rootElement.AppendChild(pluginXmlElement);
-					plugin.SaveUserData(pluginXmlElement);
-				}
-				xmlDoc.Save(writer.BaseStream);
-				// ----------------------------------
-				writer.WriteLine();
-				writer.WriteLine(UserDataDockSeparator);
-				writer.Flush();
-				mainForm.MainDockPanel.SaveAsXml(str, writer.Encoding);
+				editorUserData.SaveEditorUserData(writer, backupsEnabled, autosaveFrequency, launcherApp, plugins);
+				workspaceManager.SaveLayout(str, writer.Encoding);
 			}
 
 			Log.Editor.PopIndent();
@@ -434,122 +420,72 @@ namespace DualityEditor
 		{
 			CorePluginRegistry.SaveDesignTimeData(DesignTimeDataFile);
 		}
-		private static void LoadUserData()
-		{
-			if (!File.Exists(UserDataFile))
-			{
-				File.WriteAllText(UserDataFile, EditorRes.GeneralRes.DefaultEditorUserData);
-				if (!File.Exists(UserDataFile)) return;
-			}
 
+		internal static void LoadUserData()
+		{
 			Log.Editor.Write("Loading user data...");
 			Log.Editor.PushIndent();
 
-			using (StreamReader reader = new StreamReader(UserDataFile))
+			editorUserData.LoadUserData();
+
+			Log.Editor.PopIndent();
+		}
+
+		private static void LoadDockPanelLayout()
+		{
+			Log.Editor.Write("Loading DockPanel data...");
+			Log.Editor.PushIndent();
+
+			workspaceManager.LoadLayout(editorUserData.LayoutData);
+
+			Log.Editor.PopIndent();
+		}
+
+		internal static void LoadEditorUserData()
+		{
+			Log.Editor.Write("Loading editor user data...");
+			Log.Editor.PushIndent();
+
+			XmlDocument xmlDoc = new XmlDocument();
+			try
 			{
-				string line;
-				// Retrieve pre-DockPanel section
-				StringBuilder editorData = new StringBuilder();
-				while ((line = reader.ReadLine()) != null && line.Trim() != UserDataDockSeparator) 
-					editorData.AppendLine(line);
-				// Retrieve DockPanel section
-				StringBuilder dockPanelData = new StringBuilder();
-				while ((line = reader.ReadLine()) != null) 
-					dockPanelData.AppendLine(line);
-
-				// Load DockPanel Data
-				Log.Editor.Write("Loading DockPanel data...");
-				Log.Editor.PushIndent();
-				MemoryStream dockPanelDataStream = new MemoryStream(reader.CurrentEncoding.GetBytes(dockPanelData.ToString()));
-				try
+				xmlDoc.LoadXml(editorUserData.EditorData);
+				System.Xml.XmlNodeList editorAppElemQuery = xmlDoc.DocumentElement.GetElementsByTagName("EditorApp");
+				if (editorAppElemQuery.Count > 0)
 				{
-					mainForm.MainDockPanel.LoadFromXml(dockPanelDataStream, DeserializeDockContent);
+					XmlElement editorAppElement = editorAppElemQuery[0] as System.Xml.XmlElement;
+					bool.TryParse(editorAppElement.GetAttribute("backups"), out backupsEnabled);
+					Enum.TryParse<AutosaveFrequency>(editorAppElement.GetAttribute("autosaves"), out autosaveFrequency);
+					launcherApp = editorAppElement.GetAttribute("launcher");
 				}
-				catch (XmlException e)
-				{
-					Log.Editor.WriteError("Cannot load DockPanel data due to malformed or non-existent Xml: {0}", Log.Exception(e));
-				}
-				Log.Editor.PopIndent();
 
-				// --- Read custom user data from StringBuilder here ---
-				Log.Editor.Write("Loading editor user data...");
-				Log.Editor.PushIndent();
-				XmlDocument xmlDoc = new XmlDocument();
-				try
+				foreach (XmlElement child in xmlDoc.DocumentElement)
 				{
-					xmlDoc.LoadXml(editorData.ToString());
-					System.Xml.XmlNodeList editorAppElemQuery = xmlDoc.DocumentElement.GetElementsByTagName("EditorApp");
-					if (editorAppElemQuery.Count > 0)
+					if (child.Name.StartsWith("Plugin_"))
 					{
-						XmlElement editorAppElement = editorAppElemQuery[0] as System.Xml.XmlElement;
-						bool.TryParse(editorAppElement.GetAttribute("backups"), out backupsEnabled);
-						Enum.TryParse<AutosaveFrequency>(editorAppElement.GetAttribute("autosaves"), out autosaveFrequency);
-						launcherApp = editorAppElement.GetAttribute("launcher");
-					}
-					foreach (XmlElement child in xmlDoc.DocumentElement)
-					{
-						if (child.Name.StartsWith("Plugin_"))
+						string pluginName = child.Name.Substring(7, child.Name.Length - 7);
+						foreach (EditorPlugin plugin in plugins)
 						{
-							string pluginName = child.Name.Substring(7, child.Name.Length - 7);
-							foreach (EditorPlugin plugin in plugins)
+							if (plugin.Id == pluginName)
 							{
-								if (plugin.Id == pluginName)
-								{
-									plugin.LoadUserData(child);
-									break;
-								}
+								plugin.LoadUserData(child);
+								break;
 							}
 						}
 					}
 				}
-				catch (XmlException e)
-				{
-					Log.Editor.WriteError("Cannot load plugin user data due to malformed or non-existent Xml: {0}", Log.Exception(e));
-				}
-				Log.Editor.PopIndent();
-				// -----------------------------------------------------
 			}
-
+			catch (XmlException e)
+			{
+				Log.Editor.WriteError("Cannot load plugin user data due to malformed or non-existent Xml: {0}", Log.Exception(e));
+			}
+			
 			Log.Editor.PopIndent();
 		}
+
 		private static void LoadDesignTimeObjectData()
 		{
 			CorePluginRegistry.LoadDesignTimeData(DesignTimeDataFile);
-		}
-		private static IDockContent DeserializeDockContent(string persistName)
-		{
-			Log.Editor.Write("Deserializing layout: '" + persistName + "'");
-
-			Type dockContentType = null;
-			Assembly dockContentAssembly = null;
-			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-			foreach (Assembly a in assemblies)
-			{
-				if ((dockContentType = a.GetType(persistName)) != null)
-				{
-					dockContentAssembly = a;
-					break;
-				}
-			}
-			
-			if (dockContentType == null) 
-				return null;
-			else
-			{
-				// First ask plugins from the dock contents assembly for existing instances
-				IDockContent deserializeDockContent = null;
-				foreach (EditorPlugin plugin in plugins)
-				{
-					if (plugin.GetType().Assembly == dockContentAssembly)
-					{
-						deserializeDockContent = plugin.DeserializeDockContent(dockContentType);
-						if (deserializeDockContent != null) break;
-					}
-				}
-
-				// If none exists, create one
-				return deserializeDockContent ?? (dockContentType.CreateInstanceOf() as IDockContent);
-			}
 		}
 
 		public static void InitMainGLContext()

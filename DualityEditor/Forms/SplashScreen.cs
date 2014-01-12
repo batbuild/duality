@@ -20,8 +20,9 @@ namespace DualityEditor.Forms
 		}
 		protected MainForm InitEditor()
 		{
-			MainForm main = new MainForm();
-			DualityEditorApp.Init(main, this.recover);
+			var workspace = new Workspace();
+			MainForm main = new MainForm(workspace);
+			DualityEditorApp.Init(main, this.recover, workspace);
 			return main;
 		}
 
