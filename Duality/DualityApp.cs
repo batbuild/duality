@@ -454,7 +454,8 @@ namespace Duality
 					SaveMetaData();
 				}
 				sound.Dispose();
-				UnloadPlugins();
+				sound = null;
+				ClearPlugins();
 				Profile.SaveTextReport(environment == ExecutionEnvironment.Editor ? "perflog_editor.txt" : "perflog.txt");
 				Log.Core.Write("DualityApp terminated");
 			}
@@ -507,9 +508,9 @@ namespace Duality
 		/// Performs a single render cycle.
 		/// </summary>
 		/// <param name="camPredicate">Optional predicate to select which Cameras may be rendered and which not.</param>
-		public static void Render(Predicate<Duality.Components.Camera> camPredicate = null)
+		public static void Render(Rect viewportRect, Predicate<Duality.Components.Camera> camPredicate = null)
 		{
-			Scene.Current.Render(camPredicate);
+			Scene.Current.Render(viewportRect, camPredicate);
 		}
 
 		/// <summary>
@@ -520,7 +521,12 @@ namespace Duality
 		{
 			disposeSchedule.Add(o);
 		}
-		private static void RunCleanup()
+		/// <summary>
+		/// Performs all scheduled disposal calls and cleans up internal data. This is done automatically at the
+		/// end of each <see cref="Update">frame update</see> and you shouldn't need to call this in general.
+		/// Invoking this method while an update is still in progress may result in undefined behavior. Don't do this.
+		/// </summary>
+		public static void RunCleanup()
 		{
 			// Perform scheduled object disposals
 			foreach (object o in disposeSchedule)
@@ -554,7 +560,7 @@ namespace Duality
 
 				foreach (GameObject obj in updateObjects)
 				{
-					if (!freezeScene && Scene.Current.AllObjects.Contains(obj)) continue;
+					if (!freezeScene && obj.ParentScene == Scene.Current) continue;
 					obj.Update();
 				}
 			}
@@ -770,7 +776,7 @@ namespace Duality
 
 		private static void LoadPlugins()
 		{
-			UnloadPlugins();
+			ClearPlugins();
 
 			Log.Core.Write("Scanning for core plugins...");
 			Log.Core.PushIndent();
@@ -802,17 +808,10 @@ namespace Duality
 				else
 					pluginAssembly = Assembly.Load(File.ReadAllBytes(pluginFilePath));
 
-				Type pluginType = pluginAssembly.GetExportedTypes().FirstOrDefault(t => typeof(CorePlugin).IsAssignableFrom(t));
-				if (pluginType == null)
+				plugin = AddPlugin(pluginAssembly, pluginFilePath);
+				if (plugin == null)
 				{
 					Log.Core.WriteWarning("Can't find CorePlugin class. Discarding plugin...");
-					disposedPlugins.Add(pluginAssembly);
-				}
-				else
-				{
-					plugin = (CorePlugin)pluginType.CreateInstanceOf();
-					plugin.FilePath = pluginFilePath;
-					plugins.Add(plugin.AssemblyName, plugin);
 				}
 			}
 			catch (Exception e)
@@ -823,6 +822,68 @@ namespace Duality
 
 			Log.Core.PopIndent();
 			return plugin;
+		}
+		/// <summary>
+		/// Adds an already loaded plugin Assembly to the internal Duality CorePlugin registry.
+		/// You shouldn't need to call this method in general, since Duality manages its plugins
+		/// automatically. 
+		/// </summary>
+		/// <remarks>
+		/// This method can be useful in certain cases when it is necessary to treat an Assembly as a
+		/// Duality plugin, even though it isn't located in the Plugins folder, or is not available
+		/// as a file at all. A typical case for this is Unit Testing where the testing Assembly may
+		/// specify additional Duality types such as Components, Resources, etc.
+		/// </remarks>
+		/// <param name="pluginAssembly"></param>
+		/// <param name="pluginFilePath"></param>
+		/// <returns></returns>
+		public static CorePlugin AddPlugin(Assembly pluginAssembly, string pluginFilePath)
+		{
+			if (disposedPlugins.Contains(pluginAssembly)) return null;
+
+			string asmName = pluginAssembly.GetShortAssemblyName();
+			CorePlugin plugin = plugins.Values.FirstOrDefault(p => p.AssemblyName == asmName);
+			if (plugin != null) return plugin;
+
+			Type pluginType = pluginAssembly.GetExportedTypes().FirstOrDefault(t => typeof(CorePlugin).IsAssignableFrom(t));
+			if (pluginType == null)
+			{
+				disposedPlugins.Add(pluginAssembly);
+			}
+			else
+			{
+				plugin = (CorePlugin)pluginType.CreateInstanceOf();
+				plugin.FilePath = pluginFilePath;
+				plugins.Add(plugin.AssemblyName, plugin);
+			}
+
+			return plugin;
+		}
+		private static void RemovePlugin(Assembly pluginAssembly)
+		{
+			CorePlugin plugin;
+			if (plugins.TryGetValue(pluginAssembly.GetShortAssemblyName(), out plugin))
+			{
+				RemovePlugin(plugin);
+			}
+		}
+		private static void RemovePlugin(CorePlugin plugin)
+		{
+			// Dispose plugin and discard plugin related data
+			disposedPlugins.Add(plugin.PluginAssembly);
+			OnDiscardPluginData();
+			plugins.Remove(plugin.AssemblyName);
+			try
+			{
+				plugin.Dispose();
+			}
+			catch (Exception e)
+			{
+				Log.Core.WriteError("Error disposing plugin {1}: {0}", Log.Exception(e), plugin.AssemblyName);
+			}
+
+			// Discard temporary plugin-related data (cached Types, etc.)
+			CleanupAfterPlugins(new[] { plugin });
 		}
 		private static void InitPlugins()
 		{
@@ -841,13 +902,13 @@ namespace Duality
 				catch (Exception e)
 				{
 					Log.Core.WriteError("Error initializing plugin {1}: {0}", Log.Exception(e), plugin.AssemblyName);
-					UnloadPlugin(plugin);
+					RemovePlugin(plugin);
 				}
 				Log.Core.PopIndent();
 			}
 			Log.Core.PopIndent();
 		}
-		private static void UnloadPlugins()
+		private static void ClearPlugins()
 		{
 			foreach (CorePlugin plugin in plugins.Values)
 			{
@@ -867,21 +928,6 @@ namespace Duality
 			}
 			CleanupAfterPlugins(plugins.Values);
 			plugins.Clear();
-		}
-		private static void UnloadPlugin(CorePlugin plugin)
-		{
-			disposedPlugins.Add(plugin.PluginAssembly);
-			OnDiscardPluginData();
-			plugins.Remove(plugin.AssemblyName);
-			try
-			{
-				plugin.Dispose();
-			}
-			catch (Exception e)
-			{
-				Log.Core.WriteError("Error disposing plugin {1}: {0}", Log.Exception(e), plugin.AssemblyName);
-			}
-			CleanupAfterPlugins(new[] { plugin });
 		}
 		internal static void ReloadPlugin(string pluginFilePath)
 		{
@@ -924,31 +970,19 @@ namespace Duality
 			}
 		}
 		/// <summary>
-		/// Determines whether the plugin that is represented by the specified Assembly file is referenced by any other plugin.
+		/// Determines whether the plugin that is represented by the specified Assembly file is referenced by any of the
+		/// specified Assemblies.
 		/// </summary>
 		/// <param name="pluginFilePath"></param>
+		/// <param name="assemblies"></param>
 		/// <returns></returns>
-		public static bool IsDependencyPlugin(string pluginFilePath)
+		public static bool IsDependencyPlugin(string pluginFilePath, IEnumerable<Assembly> assemblies)
 		{
 			string asmName = Path.GetFileNameWithoutExtension(pluginFilePath);
-			foreach (CorePlugin plugin in plugins.Values)
+			foreach (Assembly assembly in assemblies)
 			{
-				AssemblyName[] refNames = plugin.PluginAssembly.GetReferencedAssemblies();
+				AssemblyName[] refNames = assembly.GetReferencedAssemblies();
 				if (refNames.Any(rn => rn.Name == asmName)) return true;
-			}
-			return false;
-		}
-		/// <summary>
-		/// Determines whether the specified plugin is referenced by any other plugin.
-		/// </summary>
-		/// <param name="plugin"></param>
-		/// <returns></returns>
-		public static bool IsDependencyPlugin(CorePlugin plugin)
-		{
-			foreach (CorePlugin loadedPlugin in plugins.Values)
-			{
-				AssemblyName[] refNames = loadedPlugin.PluginAssembly.GetReferencedAssemblies();
-				if (refNames.Any(rn => rn.Name == plugin.AssemblyName)) return true;
 			}
 			return false;
 		}

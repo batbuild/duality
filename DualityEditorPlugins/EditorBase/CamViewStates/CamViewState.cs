@@ -297,6 +297,7 @@ namespace EditorBase.CamViewStates
 			this.LocalGLControl.MouseLeave	+= this.LocalGLControl_MouseLeave;
 			this.LocalGLControl.KeyDown		+= this.LocalGLControl_KeyDown;
 			this.LocalGLControl.KeyUp		+= this.LocalGLControl_KeyUp;
+			this.LocalGLControl.GotFocus	+= this.LocalGLControl_GotFocus;
 			this.LocalGLControl.LostFocus	+= this.LocalGLControl_LostFocus;
 			this.LocalGLControl.DragDrop	+= this.LocalGLControl_DragDrop;
 			this.LocalGLControl.DragEnter	+= this.LocalGLControl_DragEnter;
@@ -400,7 +401,7 @@ namespace EditorBase.CamViewStates
 			canvas.PushState();
 			
 			// Draw indirectly selected object overlay
-			canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Mix(this.FgColor, this.BgColor, 0.75f)));
+			canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Lerp(this.FgColor, this.BgColor, 0.75f)));
 			this.DrawSelectionMarkers(canvas, this.indirectObjSel);
 			if (this.mouseoverObject != null && (this.mouseoverAction == ObjectAction.RectSelect || this.mouseoverSelect) && !transformObjSel.Contains(this.mouseoverObject)) 
 				this.DrawSelectionMarkers(canvas, new [] { this.mouseoverObject });
@@ -416,7 +417,7 @@ namespace EditorBase.CamViewStates
 				float maxZDiff = transformObjSel.Max(t => MathF.Abs(t.Pos.Z - midZ));
 				if (maxZDiff > 0.001f)
 				{
-					canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Mix(this.FgColor, this.BgColor, 0.5f)));
+					canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Lerp(this.FgColor, this.BgColor, 0.5f)));
 					canvas.DrawSphere(
 						this.selectionCenter.X, 
 						this.selectionCenter.Y, 
@@ -425,7 +426,7 @@ namespace EditorBase.CamViewStates
 				}
 				else
 				{
-					canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Mix(this.FgColor, this.BgColor, 0.5f)));
+					canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Lerp(this.FgColor, this.BgColor, 0.5f)));
 					canvas.DrawCircle(
 						this.selectionCenter.X, 
 						this.selectionCenter.Y, 
@@ -613,7 +614,7 @@ namespace EditorBase.CamViewStates
 		protected virtual void OnRenderState()
 		{
 			// Render CamView
-			this.CameraComponent.Render();
+			this.CameraComponent.Render(new Rect(this.ClientSize.Width, this.ClientSize.Height));
 		}
 		protected virtual void OnUpdateState()
 		{
@@ -737,6 +738,7 @@ namespace EditorBase.CamViewStates
 			this.Invalidate();
 		}
 		protected virtual void OnCurrentCameraChanged(CamView.CameraChangedEventArgs e) {}
+		protected virtual void OnGotFocus() {}
 		protected virtual void OnLostFocus() {}
 
 		protected virtual void OnDragEnter(DragEventArgs e) {}
@@ -890,17 +892,17 @@ namespace EditorBase.CamViewStates
 			canvas.PushState();
 			if (this.actionLockedAxis == LockedAxis.X)
 			{
-				canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Mix(this.FgColor, ColorRgba.Red, 0.5f)));
+				canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Lerp(this.FgColor, ColorRgba.Red, 0.5f)));
 				canvas.DrawLine(x - r, y, z, x + r, y, z);
 			}
 			if (this.actionLockedAxis == LockedAxis.Y)
 			{
-				canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Mix(this.FgColor, ColorRgba.Green, 0.5f)));
+				canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Lerp(this.FgColor, ColorRgba.Green, 0.5f)));
 				canvas.DrawLine(x, y - r, z, x, y + r, z);
 			}
 			if (this.actionLockedAxis == LockedAxis.Z)
 			{
-				canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Mix(this.FgColor, ColorRgba.Blue, 0.5f)));
+				canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, ColorRgba.Lerp(this.FgColor, ColorRgba.Blue, 0.5f)));
 				canvas.DrawLine(x, y, MathF.Max(z - r, refPos.Z + nearZ + 10), x, y, z);
 				canvas.DrawLine(x, y, z, x, y, z + r);
 			}
@@ -1255,7 +1257,6 @@ namespace EditorBase.CamViewStates
 
 			// Retrieve OpenGL context
  			try { DualityEditorApp.GLMakeCurrent(this.LocalGLControl); } catch (Exception) { return; }
-			this.MakeDualityTarget();
 
 			try
 			{
@@ -1547,6 +1548,11 @@ namespace EditorBase.CamViewStates
 				this.UpdateAction();
 
 			this.OnKeyUp(e);
+		}
+		private void LocalGLControl_GotFocus(object sender, EventArgs e)
+		{
+			this.MakeDualityTarget();
+			this.OnGotFocus();
 		}
 		private void LocalGLControl_LostFocus(object sender, EventArgs e)
 		{

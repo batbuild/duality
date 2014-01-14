@@ -18,11 +18,7 @@ namespace Duality.Profiling
 	/// </summary>
 	public static class Profile
 	{
-		private	static	Dictionary<string,ProfileCounter>	counterMap			= new Dictionary<string,ProfileCounter>();
-		private static	FormattedText						textReport			= null;
-		private static  VertexC1P3T2[]						textReportIconVert	= null;
-		private static  VertexC1P3T2[][]					textReportTextVert	= null;
-		private	static	TimeSpan							textReportLast		= TimeSpan.Zero;
+		private	static	Dictionary<string,ProfileCounter>	counterMap	= new Dictionary<string,ProfileCounter>();
 
 		public static readonly TimeCounter	TimeFrame;
 		public static readonly TimeCounter	TimeUpdate;
@@ -287,8 +283,8 @@ namespace Duality.Profiling
 					{
 						float severity = data.Severity;
 						ColorRgba lineColor = severity >= 0.5f ? 
-							ColorRgba.Mix(ColorRgba.White, ColorRgba.Red, 2.0f * (severity - 0.5f)) :
-							ColorRgba.Mix(ColorRgba.TransparentWhite, ColorRgba.White, 0.1f + 0.9f * (2.0f * severity));
+							ColorRgba.Lerp(ColorRgba.White, ColorRgba.Red, 2.0f * (severity - 0.5f)) :
+							ColorRgba.Lerp(ColorRgba.TransparentWhite, ColorRgba.White, 0.1f + 0.9f * (2.0f * severity));
 						reportBuilder.Append(FormattedText.FormatColor(lineColor));
 					}
 					reportBuilder.Append(' ', current.ParentDepth * 2);

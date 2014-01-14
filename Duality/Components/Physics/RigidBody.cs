@@ -925,6 +925,7 @@ namespace Duality.Components.Physics
 			this.CleanupJoints();
 			this.CleanupBody();
 			this.GameObj.Transform.EventTransformChanged -= this.OnTransformChanged;
+			this.ProcessCollisionEvents();
 
 			this.bodyInitState = InitState.Disposed;
 		}
