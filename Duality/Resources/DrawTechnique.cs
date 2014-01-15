@@ -28,73 +28,85 @@ namespace Duality.Resources
 		/// <summary>
 		/// Renders solid geometry without utilizing the alpha channel. This is the fastest default DrawTechnique.
 		/// </summary>
-		public static ContentRef<DrawTechnique> Solid		{ get; private set; }
+		public static ContentRef<DrawTechnique> Solid				{ get; private set; }
 		/// <summary>
 		/// Renders alpha-masked solid geometry. This is the recommended DrawTechnique for regular sprite rendering.
 		/// If multisampling is available, it is utilized to smooth masked edges.
 		/// </summary>
-		public static ContentRef<DrawTechnique> Mask		{ get; private set; }
+		public static ContentRef<DrawTechnique> Mask				{ get; private set; }
 		/// <summary>
 		/// Renders geometry using the alpha channel, but enforces sharp edges by using an adaptive antialiazing shader.
 		/// This is the recommended DrawTechnique for rendering text or stencil sprites.
 		/// </summary>
-		public static ContentRef<DrawTechnique> SharpAlpha	{ get; private set; }
+		public static ContentRef<DrawTechnique> SharpAlpha			{ get; private set; }
 		/// <summary>
-		/// Renders additive geometry. Ideal for glow effects.
+		/// Renders additive geometry. Ideal for glow effects. Only use this blend mode with textures that have not been
+		/// premultiplied by their alpha values.
 		/// </summary>
-		public static ContentRef<DrawTechnique> Add			{ get; private set; }
+		public static ContentRef<DrawTechnique> Add					{ get; private set; }
 		/// <summary>
 		/// Renders geometry and using the alpha channel. However, for stencil-sharp alpha edges, <see cref="Mask"/> might
 		/// be sufficient and is a lot faster. Consider using it.
 		/// </summary>
-		public static ContentRef<DrawTechnique> Alpha		{ get; private set; }
+		public static ContentRef<DrawTechnique> Alpha				{ get; private set; }
+		/// <summary>
+		/// Renders geometry using premultiplied alpha mode. Can also be used for additive blending of premultiplied textures
+		/// by setting the texture alpha to zero. Color values will then be additively blended. However, for stencil-sharp 
+		/// alpha edges, <see cref="Mask"/> might be sufficient and is a lot faster. Consider using it.
+		/// </summary>
+		public static ContentRef<DrawTechnique> PremultipliedAlpha	{ get; private set; }
 		/// <summary>
 		/// Renders geometry multiplying the existing background with incoming color values. Can be used for shadowing effects.
 		/// </summary>
-		public static ContentRef<DrawTechnique> Multiply	{ get; private set; }
+		public static ContentRef<DrawTechnique> Multiply			{ get; private set; }
 		/// <summary>
 		/// Renders geometry adding incoming color values weighted based on the existing background. Can be used for lighting effects.
 		/// </summary>
-		public static ContentRef<DrawTechnique> Light		{ get; private set; }
+		public static ContentRef<DrawTechnique> Light				{ get; private set; }
 		/// <summary>
 		/// Renders geometry inverting the background color.
 		/// </summary>
-		public static ContentRef<DrawTechnique> Invert		{ get; private set; }
+		public static ContentRef<DrawTechnique> Invert				{ get; private set; }
 		/// <summary>
 		/// Renders geometry for a picking operation. This isn't used for regular rendering.
 		/// </summary>
-		public static ContentRef<DrawTechnique> Picking		{ get; private set; }
+		public static ContentRef<DrawTechnique> Picking				{ get; private set; }
 		
 		/// <summary>
 		/// Renders SmoothAnim solid geometry without utilizing the alpha channel. This is the fastest default DrawTechnique.
 		/// </summary>
-		public static ContentRef<DrawTechnique> SmoothAnim_Solid	{ get; private set; }
+		public static ContentRef<DrawTechnique> SmoothAnim_Solid				{ get; private set; }
 		/// <summary>
 		/// Renders SmoothAnim alpha-masked solid geometry. This is the recommended DrawTechnique for regular sprite rendering.
 		/// If multisampling is available, it is utilized to smooth masked edges.
 		/// </summary>
-		public static ContentRef<DrawTechnique> SmoothAnim_Mask		{ get; private set; }
+		public static ContentRef<DrawTechnique> SmoothAnim_Mask					{ get; private set; }
 		/// <summary>
 		/// Renders SmoothAnim additive geometry. Ideal for glow effects.
 		/// </summary>
-		public static ContentRef<DrawTechnique> SmoothAnim_Add		{ get; private set; }
+		public static ContentRef<DrawTechnique> SmoothAnim_Add					{ get; private set; }
 		/// <summary>
 		/// Renders SmoothAnim geometry and using the alpha channel. However, for stencil-sharp alpha edges, <see cref="Mask"/> might
 		/// be sufficient and is a lot faster. Consider using it.
 		/// </summary>
-		public static ContentRef<DrawTechnique> SmoothAnim_Alpha	{ get; private set; }
+		public static ContentRef<DrawTechnique> SmoothAnim_Alpha				{ get; private set; }
+		/// <summary>
+		/// Renders SmoothAnim geometry and using the alpha channel. However, for stencil-sharp alpha edges, <see cref="Mask"/> might
+		/// be sufficient and is a lot faster. Consider using it.
+		/// </summary>
+		public static ContentRef<DrawTechnique> SmoothAnim_PremultipliedAlpha	{ get; private set; }
 		/// <summary>
 		/// Renders SmoothAnim geometry multiplying the existing background with incoming color values. Can be used for shadowing effects.
 		/// </summary>
-		public static ContentRef<DrawTechnique> SmoothAnim_Multiply	{ get; private set; }
+		public static ContentRef<DrawTechnique> SmoothAnim_Multiply				{ get; private set; }
 		/// <summary>
 		/// Renders SmoothAnim geometry adding incoming color values weighted based on the existing background. Can be used for lighting effects.
 		/// </summary>
-		public static ContentRef<DrawTechnique> SmoothAnim_Light	{ get; private set; }
+		public static ContentRef<DrawTechnique> SmoothAnim_Light				{ get; private set; }
 		/// <summary>
 		/// Renders SmoothAnim geometry inverting the background color.
 		/// </summary>
-		public static ContentRef<DrawTechnique> SmoothAnim_Invert	{ get; private set; }
+		public static ContentRef<DrawTechnique> SmoothAnim_Invert				{ get; private set; }
 
 		/// <summary>
 		/// [GET] Returns whether the <see cref="BlendMode.Mask">masked</see> DrawTechniques utilize OpenGL Alpha-to-Coverage to
@@ -116,60 +128,66 @@ namespace Duality.Resources
 			const string VirtualContentPath		= ContentProvider.VirtualContentPath + "DrawTechnique:";
 			const string ContentDir_SmoothAnim	= VirtualContentPath + "SmoothAnim:";
 		
-			const string ContentPath_Solid		= VirtualContentPath + "Solid";
-			const string ContentPath_Mask		= VirtualContentPath + "Mask";
-			const string ContentPath_Add		= VirtualContentPath + "Add";
-			const string ContentPath_Alpha		= VirtualContentPath + "Alpha";
-			const string ContentPath_SharpMask	= VirtualContentPath + "SharpAlpha";
-			const string ContentPath_Multiply	= VirtualContentPath + "Multiply";
-			const string ContentPath_Light		= VirtualContentPath + "Light";
-			const string ContentPath_Invert		= VirtualContentPath + "Invert";
-			const string ContentPath_Picking	= VirtualContentPath + "Picking";
+			const string ContentPath_Solid					= VirtualContentPath + "Solid";
+			const string ContentPath_Mask					= VirtualContentPath + "Mask";
+			const string ContentPath_Add					= VirtualContentPath + "Add";
+			const string ContentPath_Alpha					= VirtualContentPath + "Alpha";
+			const string ContentPath_PremultipliedAlpha		= VirtualContentPath + "PremultipliedAlpha";
+			const string ContentPath_SharpMask				= VirtualContentPath + "SharpAlpha";
+			const string ContentPath_Multiply				= VirtualContentPath + "Multiply";
+			const string ContentPath_Light					= VirtualContentPath + "Light";
+			const string ContentPath_Invert					= VirtualContentPath + "Invert";
+			const string ContentPath_Picking				= VirtualContentPath + "Picking";
 		
-			const string ContentPath_SmoothAnim_Solid		= ContentDir_SmoothAnim + "Solid";
-			const string ContentPath_SmoothAnim_Mask		= ContentDir_SmoothAnim + "Mask";
-			const string ContentPath_SmoothAnim_Add			= ContentDir_SmoothAnim + "Add";
-			const string ContentPath_SmoothAnim_Alpha		= ContentDir_SmoothAnim + "Alpha";
-			const string ContentPath_SmoothAnim_Multiply	= ContentDir_SmoothAnim + "Multiply";
-			const string ContentPath_SmoothAnim_Light		= ContentDir_SmoothAnim + "Light";
-			const string ContentPath_SmoothAnim_Invert		= ContentDir_SmoothAnim + "Invert";
+			const string ContentPath_SmoothAnim_Solid					= ContentDir_SmoothAnim + "Solid";
+			const string ContentPath_SmoothAnim_Mask					= ContentDir_SmoothAnim + "Mask";
+			const string ContentPath_SmoothAnim_Add						= ContentDir_SmoothAnim + "Add";
+			const string ContentPath_SmoothAnim_Alpha					= ContentDir_SmoothAnim + "Alpha";
+			const string ContentPath_SmoothAnim_PremultipliedAlpha		= ContentDir_SmoothAnim + "PremultipliedAlpha";
+			const string ContentPath_SmoothAnim_Multiply				= ContentDir_SmoothAnim + "Multiply";
+			const string ContentPath_SmoothAnim_Light					= ContentDir_SmoothAnim + "Light";
+			const string ContentPath_SmoothAnim_Invert					= ContentDir_SmoothAnim + "Invert";
 
-			ContentProvider.AddContent(ContentPath_Solid,		new DrawTechnique(BlendMode.Solid));
-			ContentProvider.AddContent(ContentPath_Mask,		new DrawTechnique(BlendMode.Mask));
-			ContentProvider.AddContent(ContentPath_Add,		new DrawTechnique(BlendMode.Add));
-			ContentProvider.AddContent(ContentPath_Alpha,		new DrawTechnique(BlendMode.Alpha));
-			ContentProvider.AddContent(ContentPath_Multiply,	new DrawTechnique(BlendMode.Multiply));
-			ContentProvider.AddContent(ContentPath_Light,		new DrawTechnique(BlendMode.Light));
-			ContentProvider.AddContent(ContentPath_Invert,		new DrawTechnique(BlendMode.Invert));
+			ContentProvider.AddContent(ContentPath_Solid,				new DrawTechnique(BlendMode.Solid));
+			ContentProvider.AddContent(ContentPath_Mask,				new DrawTechnique(BlendMode.Mask));
+			ContentProvider.AddContent(ContentPath_Add,					new DrawTechnique(BlendMode.Add));
+			ContentProvider.AddContent(ContentPath_Alpha,				new DrawTechnique(BlendMode.Alpha));
+			ContentProvider.AddContent(ContentPath_PremultipliedAlpha,	new DrawTechnique(BlendMode.PremultipliedAlpha));
+			ContentProvider.AddContent(ContentPath_Multiply,			new DrawTechnique(BlendMode.Multiply));
+			ContentProvider.AddContent(ContentPath_Light,				new DrawTechnique(BlendMode.Light));
+			ContentProvider.AddContent(ContentPath_Invert,				new DrawTechnique(BlendMode.Invert));
 
 			ContentProvider.AddContent(ContentPath_Picking,	new DrawTechnique(BlendMode.Mask, ShaderProgram.Picking));
 			ContentProvider.AddContent(ContentPath_SharpMask,	new DrawTechnique(BlendMode.Alpha, ShaderProgram.SharpAlpha));
 			
-			ContentProvider.AddContent(ContentPath_SmoothAnim_Solid,		new DrawTechnique(BlendMode.Solid,		ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
-			ContentProvider.AddContent(ContentPath_SmoothAnim_Mask,		new DrawTechnique(BlendMode.Mask,		ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
-			ContentProvider.AddContent(ContentPath_SmoothAnim_Add,			new DrawTechnique(BlendMode.Add,		ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
-			ContentProvider.AddContent(ContentPath_SmoothAnim_Alpha,		new DrawTechnique(BlendMode.Alpha,		ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
-			ContentProvider.AddContent(ContentPath_SmoothAnim_Multiply,	new DrawTechnique(BlendMode.Multiply,	ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
-			ContentProvider.AddContent(ContentPath_SmoothAnim_Light,		new DrawTechnique(BlendMode.Light,		ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
-			ContentProvider.AddContent(ContentPath_SmoothAnim_Invert,		new DrawTechnique(BlendMode.Invert,		ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
+			ContentProvider.AddContent(ContentPath_SmoothAnim_Solid,				new DrawTechnique(BlendMode.Solid,					ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
+			ContentProvider.AddContent(ContentPath_SmoothAnim_Mask,					new DrawTechnique(BlendMode.Mask,					ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
+			ContentProvider.AddContent(ContentPath_SmoothAnim_Add,					new DrawTechnique(BlendMode.Add,					ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
+			ContentProvider.AddContent(ContentPath_SmoothAnim_Alpha,				new DrawTechnique(BlendMode.Alpha,					ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
+			ContentProvider.AddContent(ContentPath_SmoothAnim_PremultipliedAlpha,	new DrawTechnique(BlendMode.PremultipliedAlpha,		ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
+			ContentProvider.AddContent(ContentPath_SmoothAnim_Multiply,				new DrawTechnique(BlendMode.Multiply,				ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
+			ContentProvider.AddContent(ContentPath_SmoothAnim_Light,				new DrawTechnique(BlendMode.Light,					ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
+			ContentProvider.AddContent(ContentPath_SmoothAnim_Invert,				new DrawTechnique(BlendMode.Invert,					ShaderProgram.SmoothAnim, VertexType_C1P3T4A1));
 
-			Solid		= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Solid);
-			Mask		= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Mask);
-			Add			= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Add);
-			Alpha		= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Alpha);
-			Multiply	= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Multiply);
-			Light		= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Light);
-			Invert		= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Invert);
-			Picking		= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Picking);
-			SharpAlpha	= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SharpMask);
+			Solid					= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Solid);
+			Mask					= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Mask);
+			Add						= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Add);
+			Alpha					= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Alpha);
+			PremultipliedAlpha		= ContentProvider.RequestContent<DrawTechnique>(ContentPath_PremultipliedAlpha);
+			Multiply				= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Multiply);
+			Light					= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Light);
+			Invert					= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Invert);
+			Picking					= ContentProvider.RequestContent<DrawTechnique>(ContentPath_Picking);
+			SharpAlpha				= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SharpMask);
 
-			SmoothAnim_Solid	= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Solid);
-			SmoothAnim_Mask		= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Mask);
-			SmoothAnim_Add		= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Add);
-			SmoothAnim_Alpha	= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Alpha);
-			SmoothAnim_Multiply	= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Multiply);
-			SmoothAnim_Light	= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Light);
-			SmoothAnim_Invert	= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Invert);
+			SmoothAnim_Solid				= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Solid);
+			SmoothAnim_Mask					= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Mask);
+			SmoothAnim_Add					= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Add);
+			SmoothAnim_Alpha				= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Alpha);
+			SmoothAnim_PremultipliedAlpha	= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_PremultipliedAlpha);
+			SmoothAnim_Multiply				= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Multiply);
+			SmoothAnim_Light				= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Light);
+			SmoothAnim_Invert				= ContentProvider.RequestContent<DrawTechnique>(ContentPath_SmoothAnim_Invert);
 		}
 		static DrawTechnique()
 		{
@@ -271,6 +289,7 @@ namespace Duality.Resources
 			{ 
 				return 
 					this.blendType == BlendMode.Alpha ||
+					this.blendType == BlendMode.PremultipliedAlpha ||
 					this.blendType == BlendMode.Add ||
 					this.blendType == BlendMode.Invert ||
 					this.blendType == BlendMode.Multiply ||
@@ -457,6 +476,13 @@ namespace Duality.Resources
 					GL.Disable(EnableCap.AlphaTest);
 					GL.Disable(EnableCap.SampleAlphaToCoverage);
 					GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
+					break;
+				case BlendMode.PremultipliedAlpha:
+					GL.DepthMask(false);
+					GL.Enable(EnableCap.Blend);
+					GL.Disable(EnableCap.AlphaTest);
+					GL.Disable(EnableCap.SampleAlphaToCoverage);
+					GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
 					break;
 				case BlendMode.Add:
 					GL.DepthMask(false);

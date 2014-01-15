@@ -84,6 +84,10 @@ namespace Duality
 		/// </summary>
 		Alpha,
 		/// <summary>
+		/// Incoming color is added to background color. Needs Z-Sorting.
+		/// </summary>
+		PremultipliedAlpha,
+		/// <summary>
 		/// Incoming color scales background color. Needs Z-Sorting.
 		/// </summary>
 		Multiply,

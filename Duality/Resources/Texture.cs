@@ -24,7 +24,9 @@ namespace Duality.Resources
 		/// A Texture resources file extension.
 		/// </summary>
 		public new const string FileExt = ".Texture" + Resource.FileExt;
-		
+
+		private const int ProcessedPixmapLayerIndex = 1;
+
 		/// <summary>
 		/// [GET] A Texture showing the Duality icon.
 		/// </summary>
@@ -245,26 +247,27 @@ namespace Duality.Resources
 		}
 
 		
-		private	ContentRef<Pixmap>		basePixmap	= ContentRef<Pixmap>.Null;
-		private	Vector2					size		= Vector2.Zero;
-		private	SizeMode				texSizeMode	= SizeMode.Default;
-		private	TextureMagFilter		filterMag	= TextureMagFilter.Linear;
-		private	TextureMinFilter		filterMin	= TextureMinFilter.LinearMipmapLinear;
-		private	TextureWrapMode			wrapX		= TextureWrapMode.ClampToEdge;
-		private	TextureWrapMode			wrapY		= TextureWrapMode.ClampToEdge;
-		private	PixelInternalFormat		pixelformat	= PixelInternalFormat.Rgba;
-		private	bool					anisoFilter		= false;
-		[NonSerialized]	private	int		pxWidth		= 0;
-		[NonSerialized]	private	int		pxHeight	= 0;
-		[NonSerialized]	private	int		glTexId		= 0;
-		[NonSerialized]	private	float	pxDiameter	= 0.0f;
-		[NonSerialized]	private	int		texWidth	= 0;
-		[NonSerialized]	private	int		texHeight	= 0;
-		[NonSerialized]	private	Vector2	uvRatio		= new Vector2(1.0f, 1.0f);
-		[NonSerialized] private	bool	needsReload	= true;
-		[NonSerialized] private	Rect[]	atlas		= null;
-		[NonSerialized] private	int		animCols	= 0;
-		[NonSerialized] private	int		animRows	= 0;
+		private	ContentRef<Pixmap>		basePixmap			= ContentRef<Pixmap>.Null;
+		private	Vector2					size				= Vector2.Zero;
+		private	SizeMode				texSizeMode			= SizeMode.Default;
+		private	TextureMagFilter		filterMag			= TextureMagFilter.Linear;
+		private	TextureMinFilter		filterMin			= TextureMinFilter.LinearMipmapLinear;
+		private	TextureWrapMode			wrapX				= TextureWrapMode.ClampToEdge;
+		private	TextureWrapMode			wrapY				= TextureWrapMode.ClampToEdge;
+		private	PixelInternalFormat		pixelformat			= PixelInternalFormat.Rgba;
+		private	bool					anisoFilter			= false;
+		private bool					premultiplyAlpha	= false;
+		[NonSerialized]	private	int		pxWidth				= 0;
+		[NonSerialized]	private	int		pxHeight			= 0;
+		[NonSerialized]	private	int		glTexId				= 0;
+		[NonSerialized]	private	float	pxDiameter			= 0.0f;
+		[NonSerialized]	private	int		texWidth			= 0;
+		[NonSerialized]	private	int		texHeight			= 0;
+		[NonSerialized]	private	Vector2	uvRatio				= new Vector2(1.0f, 1.0f);
+		[NonSerialized] private	bool	needsReload			= true;
+		[NonSerialized] private	Rect[]	atlas				= null;
+		[NonSerialized] private	int		animCols			= 0;
+		[NonSerialized] private	int		animRows			= 0;
 
 
 		/// <summary>
@@ -451,8 +454,20 @@ namespace Duality.Resources
 		public int AnimCols
 		{
 			get { return this.animCols; }
-		}		//	G
+		} //	G
 
+		/// <summary>
+		/// [GET / SET] Gets/sets a value indicating whether this texture should be premultiplied by it's alpha value.
+		/// </summary>
+		public bool PremultiplyAlpha
+		{
+			get { return this.premultiplyAlpha; }
+			set
+			{
+				this.premultiplyAlpha = value;
+				this.needsReload = true;
+			}
+		}
 
 		/// <summary>
 		/// Sets up a new, uninitialized Texture.
@@ -551,7 +566,16 @@ namespace Duality.Resources
 				Pixmap basePixmapRes = this.basePixmap.IsAvailable ? this.basePixmap.Res : null;
 				if (basePixmapRes != null)
 				{
-					pixelData = basePixmapRes.MainLayer;
+					if (this.premultiplyAlpha)
+					{
+						PremultiplyTextureAlpha();
+					}
+					else
+					{
+						ColorTransparentPixels();
+					}
+
+					pixelData = basePixmapRes.PixelData[ProcessedPixmapLayerIndex];
 					this.atlas = basePixmapRes.Atlas != null ? basePixmapRes.Atlas.ToArray() : null;
 					this.animCols = basePixmapRes.AnimCols;
 					this.animRows = basePixmapRes.AnimRows;
@@ -765,6 +789,42 @@ namespace Duality.Resources
 			c.wrapY = this.wrapY;
 			c.pixelformat = this.pixelformat;
 			c.LoadData(this.basePixmap, this.texSizeMode);
+		}
+
+		private void PremultiplyTextureAlpha()
+		{
+			ProcessPixmap(l => this.basePixmap.Res.MainLayer.DrawOnto(l, BlendMode.PremultipliedAlpha, 0, 0));
+		}
+
+		private void ColorTransparentPixels()
+		{
+			ProcessPixmap(l =>
+			{
+				this.basePixmap.Res.MainLayer.DrawOnto(l, BlendMode.Alpha, 0, 0);
+				l.ColorTransparentPixels();
+			});
+		}
+
+		private void ProcessPixmap(Action<Pixmap.Layer> process)
+		{
+			if (this.basePixmap == null)
+				return;
+
+			var mainLayer = this.basePixmap.Res.MainLayer;
+			Pixmap.Layer layer = new Pixmap.Layer(mainLayer.Width, mainLayer.Height);
+			if (this.basePixmap.Res.PixelData.Count == ProcessedPixmapLayerIndex)
+			{
+				this.basePixmap.Res.PixelData.Add(layer);
+			}
+			else
+			{
+				this.basePixmap.Res.PixelData[ProcessedPixmapLayerIndex] = layer;
+			}
+
+			process(layer);
+
+			if(!this.basePixmap.Res.IsDefaultContent && !this.basePixmap.Res.IsRuntimeResource)
+				this.basePixmap.Res.Save();
 		}
 	}
 }

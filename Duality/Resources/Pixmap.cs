@@ -332,7 +332,6 @@ namespace Duality.Resources
 				bm.UnlockBits(data);
 				
 				this.SetPixelDataArgb(argbValues, bm.Width, bm.Height);
-				this.ColorTransparentPixels();
 			}
 			/// <summary>
 			/// Sets the layers pixel data in the ColorRgba format. Note that the specified data will be copied and thus modifying it
@@ -757,7 +756,7 @@ namespace Duality.Resources
 						{
 							if (this.data[sourceN].A >= 0) target.data[targetN] = this.data[sourceN];
 						}
-						else if (blend == BlendMode.Add)
+						else if (blend == BlendMode.Add || blend == BlendMode.PremultipliedAlpha)
 						{
 							ColorRgba targetColor	= target.data[targetN];
 							float alphaTemp = (float)this.data[sourceN].A / 255.0f;
@@ -867,7 +866,7 @@ namespace Duality.Resources
 						{
 							if (clrSource.A >= 0) target.data[targetN] = this.data[sourceN];
 						}
-						else if (blend == BlendMode.Add)
+						else if (blend == BlendMode.Add || blend == BlendMode.PremultipliedAlpha)
 						{
 							clrTarget	= target.data[targetN];
 							float alphaTemp = (float)clrSource.A / 255.0f;
