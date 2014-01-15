@@ -465,6 +465,10 @@ namespace Duality.Resources
 			set
 			{
 				this.premultiplyAlpha = value;
+				
+				if(this.basePixmap.Res.PixelData.Count > 1)
+					this.basePixmap.Res.PixelData.RemoveAt(ProcessedPixmapLayerIndex);
+
 				this.needsReload = true;
 			}
 		}
@@ -566,13 +570,16 @@ namespace Duality.Resources
 				Pixmap basePixmapRes = this.basePixmap.IsAvailable ? this.basePixmap.Res : null;
 				if (basePixmapRes != null)
 				{
-					if (this.premultiplyAlpha)
+					if (NeedsPreprocessing())
 					{
-						PremultiplyTextureAlpha();
-					}
-					else
-					{
-						ColorTransparentPixels();
+						if (this.premultiplyAlpha)
+						{
+							PremultiplyTextureAlpha();
+						}
+						else
+						{
+							ColorTransparentPixels();
+						}
 					}
 
 					pixelData = basePixmapRes.PixelData[ProcessedPixmapLayerIndex];
@@ -789,6 +796,11 @@ namespace Duality.Resources
 			c.wrapY = this.wrapY;
 			c.pixelformat = this.pixelformat;
 			c.LoadData(this.basePixmap, this.texSizeMode);
+		}
+
+		private bool NeedsPreprocessing()
+		{
+			return this.basePixmap.Res.PixelData.Count == 1;
 		}
 
 		private void PremultiplyTextureAlpha()
