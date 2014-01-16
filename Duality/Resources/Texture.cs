@@ -112,7 +112,7 @@ namespace Duality.Resources
 			/// <summary>
 			/// The default behaviour. Equals <see cref="Enlarge"/>.
 			/// </summary>
-			Default = Enlarge
+			Default = NonPowerOfTwo
 		}
 
 
