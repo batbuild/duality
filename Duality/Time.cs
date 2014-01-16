@@ -20,6 +20,10 @@ namespace Duality
 		/// Seconds a frame takes at the desired refresh rate of 60 FPS
 		/// </summary>
 		public const	float	SPFMult		= 1.0f / 60.0f;
+		/// <summary>
+		/// Maximum time in milliseconds that one frame update can take
+		/// </summary>
+		public const	float	MaxFrameTime	= 500;
 
 		private	static	DateTime	startup		= DateTime.Now;
 		private	static	Stopwatch	watch		= new Stopwatch();
@@ -129,7 +133,7 @@ namespace Duality
 			frameCount++;
 
 			double mainTimer = Time.MainTimer.TotalMilliseconds;
-			lastDelta = forceFixedStep ? MsPFMult : MathF.Min((float)(mainTimer - frameBegin), MsPFMult * 2); // Don't skip more than 2 frames / fall below 30 fps
+			lastDelta = forceFixedStep ? MsPFMult : MathF.Min((float)(mainTimer - frameBegin), MaxFrameTime); // Don't skip more than 2 frames / fall below 30 fps
 			frameBegin = mainTimer;
 
 			if (timeFreeze == 0)
