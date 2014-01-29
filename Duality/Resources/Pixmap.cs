@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
-
+using System.Threading.Tasks;
 using Duality.ColorFormat;
 using Duality.EditorHints;
 using Duality.Serialization;
@@ -392,8 +392,10 @@ namespace Duality.Resources
 				if (this.data == null || this.data.Length != this.width * this.height) 
 					this.data = new ColorRgba[this.width * this.height];
 
-				for (int i = 0; i < this.data.Length; i++)
-					this.data[i].SetIntArgb(pixelData[i]);
+				unchecked
+				{
+					Parallel.For(0, this.data.Length, i => this.data[i].SetIntArgb(pixelData[i]));
+				}
 			}
 
 			/// <summary>
