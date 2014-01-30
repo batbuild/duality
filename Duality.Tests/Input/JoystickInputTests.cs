@@ -11,7 +11,7 @@ namespace Duality.Tests.Input
 		{
 			var joystickInput = new JoystickInput {Source = CreateJoystickInputSourceMock().Object};
 
-			Assert.DoesNotThrow(joystickInput.Update);
+			Assert.DoesNotThrow(((IUserInput)joystickInput).Update);
 		}
 
 		[Test]

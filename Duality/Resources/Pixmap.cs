@@ -1049,10 +1049,11 @@ namespace Duality.Resources
 		}
 
 
-		private	List<Layer>	layers		= new List<Layer>();
-		private	List<Rect>	atlas		= null;
-		private	int			animCols	= 0;
-		private	int			animRows	= 0;
+		private	List<Layer>	layers			= new List<Layer>();
+		private	List<Rect>	atlas			= null;
+		private	int			animCols		= 0;
+		private	int			animRows		= 0;
+		private	int			animFrameBorder	= 0;
 		
 		/// <summary>
 		/// [GET / SET] The main pixel data <see cref="Duality.Resources.Pixmap.Layer"/>.
@@ -1111,6 +1112,17 @@ namespace Duality.Resources
 			set { this.atlas = value; }
 		}					//	GS
 		/// <summary>
+		/// [GET / SET] Pixel size of the border around each individual animation frame.
+		/// within the image.
+		/// </summary>
+		[EditorHintFlags(MemberFlags.AffectsOthers)]
+		[EditorHintRange(0, 64)]
+		public int AnimFrameBorder
+		{
+			get { return this.animFrameBorder; }
+			set { this.GenerateAnimAtlas(this.animCols, this.animRows, value); }
+		}						//	GS
+		/// <summary>
 		/// [GET / SET] Information about different animation frames contained in this Pixmap.
 		/// Setting this will lead to an auto-generated atlas map according to the animation.
 		/// </summary>
@@ -1119,7 +1131,7 @@ namespace Duality.Resources
 		public int AnimCols
 		{
 			get { return this.animCols; }
-			set { this.GenerateAnimAtlas(value, value == 0 ? 0 : this.animRows); }
+			set { this.GenerateAnimAtlas(value, value == 0 ? 0 : this.animRows, this.animFrameBorder); }
 		}						//	GS
 		/// <summary>
 		/// [GET / SET] Information about different animation frames contained in this Pixmap.
@@ -1130,7 +1142,7 @@ namespace Duality.Resources
 		public int AnimRows
 		{
 			get { return this.animRows; }
-			set { this.GenerateAnimAtlas(value == 0 ? 0 : this.animCols, value); }
+			set { this.GenerateAnimAtlas(value == 0 ? 0 : this.animCols, value, this.animFrameBorder); }
 		}						//	GS
 		/// <summary>
 		/// [GET] Total number of animation frames in this Pixmap
@@ -1209,21 +1221,28 @@ namespace Duality.Resources
 		/// </summary>
 		/// <param name="cols">The number of columns in an animated sprite Pixmap</param>
 		/// <param name="rows">The number of rows in an animated sprite Pixmap</param>
-		public void GenerateAnimAtlas(int cols, int rows)
+		public void GenerateAnimAtlas(int cols, int rows, int frameBorder)
 		{
 			// Remove previously existing animation atlas data
 			int frames = this.animCols * this.animRows;
 			if (this.atlas != null) this.atlas.RemoveRange(0, Math.Min(frames, this.atlas.Count));
 
-			// Set up animation frame data
+			// Discard empty atlas
 			if (cols == 0 && rows == 0)
 			{
-				this.animCols = this.animRows = 0;
+				this.animCols = 0;
+				this.animRows = 0;
+				this.animFrameBorder = frameBorder;
 				if (this.atlas != null && this.atlas.Count == 0) this.atlas = null;
 				return;
 			}
+
 			this.animCols = Math.Max(cols, 1);
 			this.animRows = Math.Max(rows, 1);
+
+			Vector2 frameSize = new Vector2((float)this.Width / this.animCols, (float)this.Height / this.animRows);
+
+			this.animFrameBorder = MathF.Clamp(frameBorder, 0, (int)(MathF.Min(frameSize.X, frameSize.Y) * 0.5f));
 
 			// Set up new atlas data
 			frames = this.animCols * this.animRows;
@@ -1231,16 +1250,16 @@ namespace Duality.Resources
 			{
 				if (this.atlas == null) this.atlas = new List<Rect>(frames);
 				int i = 0;
-				Vector2 frameSize = new Vector2((float)this.Width / this.animCols, (float)this.Height / this.animRows);
 				for (int y = 0; y < this.animRows; y++)
 				{
 					for (int x = 0; x < this.animCols; x++)
 					{
-						this.atlas.Insert(i, new Rect(
-							x * frameSize.X,
-							y * frameSize.Y,
-							frameSize.X,
-							frameSize.Y));
+						Rect frameRect = new Rect(
+							x * frameSize.X + this.animFrameBorder,
+							y * frameSize.Y + this.animFrameBorder,
+							frameSize.X - this.animFrameBorder * 2,
+							frameSize.Y - this.animFrameBorder * 2);
+						this.atlas.Insert(i, frameRect);
 						i++;
 					}
 				}

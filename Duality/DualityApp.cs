@@ -71,27 +71,28 @@ namespace Duality
 		public const string DataDirectory = "Data";
 
 
-		private static Thread mainThread = null;
-		private static bool initialized = false;
-		private static bool isUpdating = false;
-		private static bool runFromEditor = false;
-		private static bool terminateScheduled = false;
-		private static string logfilePath = "logfile.txt";
-		private static StreamWriter logfile = null;
-		private static Vector2 targetResolution = Vector2.Zero;
-		private static GraphicsMode targetMode = null;
-		private static HashSet<GraphicsMode> availModes = new HashSet<GraphicsMode>(new GraphicsModeComparer());
-		private static GraphicsMode defaultMode = null;
-		private static MouseInput mouse = new MouseInput();
-		private static KeyboardInput keyboard = new KeyboardInput();
-		private static JoystickInputCollection joysticks = new JoystickInputCollection();
-		private static SoundDevice sound = null;
-		private static ExecutionEnvironment environment = ExecutionEnvironment.Unknown;
-		private static ExecutionContext execContext = ExecutionContext.Terminated;
-		private static DualityAppData appData = null;
-		private static DualityUserData userData = null;
-		private static DualityMetaData metaData = null;
-		private static List<object> disposeSchedule = new List<object>();
+		private	static	Thread						mainThread			= null;
+		private	static	bool						initialized			= false;
+		private	static	bool						isUpdating			= false;
+		private	static	bool						runFromEditor		= false;
+		private	static	bool						terminateScheduled	= false;
+		private	static	string						logfilePath			= "logfile.txt";
+		private	static	StreamWriter				logfile				= null;
+		private	static	Vector2						targetResolution	= Vector2.Zero;
+		private	static	GraphicsMode				targetMode			= null;
+		private	static	HashSet<GraphicsMode>		availModes			= new HashSet<GraphicsMode>(new GraphicsModeComparer());
+		private	static	GraphicsMode				defaultMode			= null;
+		private	static	MouseInput					mouse				= new MouseInput();
+		private	static	KeyboardInput				keyboard			= new KeyboardInput();
+		private	static	JoystickInputCollection		joysticks			= new JoystickInputCollection();
+		private	static	GamepadInputCollection		gamepads			= new GamepadInputCollection();
+		private	static	SoundDevice					sound				= null;
+		private	static	ExecutionEnvironment		environment			= ExecutionEnvironment.Unknown;
+		private	static	ExecutionContext			execContext			= ExecutionContext.Terminated;
+		private	static	DualityAppData				appData				= null;
+		private	static	DualityUserData				userData			= null;
+		private	static	DualityMetaData				metaData			= null;
+		private	static	List<object>				disposeSchedule		= new List<object>();
 
 		private static Dictionary<string, CorePlugin> plugins = new Dictionary<string, CorePlugin>();
 		private static List<Assembly> disposedPlugins = new List<Assembly>();
@@ -158,6 +159,13 @@ namespace Duality
 		public static JoystickInputCollection Joysticks
 		{
 			get { return joysticks; }
+		}
+		/// <summary>
+		/// [GET] Provides access to gamepad user input.
+		/// </summary>
+		public static GamepadInputCollection Gamepads
+		{
+			get { return gamepads; }
 		}
 		/// <summary>
 		/// [GET] Provides access to the main <see cref="SoundDevice"/>.
@@ -402,6 +410,8 @@ namespace Duality
 			OnUserDataChanged();
 
 			Formatter.InitDefaultMethod();
+			joysticks.AddGlobalDevices();
+			gamepads.AddGlobalDevices();
 
 			Log.Core.Write(
 				"DualityApp initialized" + Environment.NewLine +
@@ -503,6 +513,7 @@ namespace Duality
 			mouse.Update();
 			keyboard.Update();
 			joysticks.Update();
+			gamepads.Update();
 		}
 		/// <summary>
 		/// Performs a single render cycle.
@@ -623,7 +634,7 @@ namespace Duality
 					{
 						using (var formatter = Formatter.Create(str))
 						{
-							appData = formatter.ReadObject() as DualityAppData ?? new DualityAppData();
+							appData = formatter.ReadObject<DualityAppData>() ?? new DualityAppData();
 						}
 					}
 					Log.Core.PopIndent();
@@ -653,7 +664,7 @@ namespace Duality
 					{
 						using (var formatter = Formatter.Create(str))
 						{
-							UserData = formatter.ReadObject() as DualityUserData ?? new DualityUserData();
+							UserData = formatter.ReadObject<DualityUserData>() ?? new DualityUserData();
 						}
 					}
 					Log.Core.PopIndent();
@@ -682,7 +693,7 @@ namespace Duality
 					{
 						using (var formatter = Formatter.Create(str))
 						{
-							metaData = formatter.ReadObject() as DualityMetaData ?? new DualityMetaData();
+							metaData = formatter.ReadObject<DualityMetaData>() ?? new DualityMetaData();
 						}
 					}
 					Log.Core.PopIndent();
@@ -1135,6 +1146,10 @@ namespace Duality
 			{
 				if (ReflectionHelper.CleanEventBindings(joystick, invalidAssembly)) Log.Core.WriteWarning(warningText, Log.Type(typeof(DualityApp)) + ".Joysticks");
 			}
+			foreach (GamepadInput gamepad in gamepads)
+			{
+				if (ReflectionHelper.CleanEventBindings(gamepad,				invalidAssembly))	Log.Core.WriteWarning(warningText, Log.Type(typeof(DualityApp)) + ".Gamepads");
+			}
 		}
 		private static void CleanInputSources(Assembly invalidAssembly)
 		{
@@ -1162,6 +1177,14 @@ namespace Duality
 				{
 					joysticks.RemoveSource(joystick.Source);
 					Log.Core.WriteWarning(warningText, Log.Type(joystick.Source.GetType()));
+				}
+			}
+			foreach (GamepadInput gamepad in gamepads.ToArray())
+			{
+				if (gamepad.Source != null && gamepad.Source.GetType().Assembly == invalidAssembly)
+				{
+					gamepads.RemoveSource(gamepad.Source);
+					Log.Core.WriteWarning(warningText, Log.Type(gamepad.Source.GetType()));
 				}
 			}
 		}
