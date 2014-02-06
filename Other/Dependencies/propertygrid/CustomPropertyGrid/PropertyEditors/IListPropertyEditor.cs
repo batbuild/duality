@@ -46,7 +46,7 @@ namespace AdamsLair.PropertyGrid.PropertyEditors
 			this.sizeEditor.PropertyName = "Size";
 			this.sizeEditor.Getter = this.SizeValueGetter;
 			this.sizeEditor.Setter = this.SizeValueSetter;
-			this.offsetEditor.ValueMutable = true;
+			
 		}
 
 		public override void InitContent()
