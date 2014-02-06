@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>DualityDependencies</id>
+        <version>0.1.0.0</version>
+        <title>Duality</title>
+        <authors>@silverspoon</authors>
+        <projectUrl>https://github.com/andrea/duality</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Contains dependencies for duality game engine.</description>
+        <language>en-IE</language>
+    </metadata>
+    <files>
+        <file src="bin\Release\Aga.Controls.dll" target="lib\net40\Aga.Controls.dll" />
+        <file src="bin\Release\CustomPropertyGrid.dll" target="lib\net40\CustomPropertyGrid.dll" />
+        <file src="bin\Release\FarseerOpenTK.dll" target="lib\net40\FarseerOpenTK.dll" />
+        <file src="bin\Release\OpenTK.dll" target="lib\net40\OpenTK.dll" />
+        <file src="bin\Release\OpenTK.GLControl.dll" target="lib\net40\OpenTK.GLControl.dll" />
+        <file src="bin\Release\WeifenLuo.WinFormsUI.Docking.dll" target="lib\net40\WeifenLuo.WinFormsUI.Docking.dll" />
+    </files>
+</package>
