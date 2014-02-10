@@ -142,16 +142,15 @@ namespace EditorBase.CamViewLayers
 							center += polyVert[i];
 							Vector2.Multiply(ref polyVert[i], colliderScale, out polyVert[i]);
 							MathF.TransformCoord(ref polyVert[i].X, ref polyVert[i].Y, c.GameObj.Transform.Angle);
-							polyVert[i] += colliderPos.Xy;
 						}
 						center /= polyVert.Length;
 						Vector2.Multiply(ref center, colliderScale, out center);
 						MathF.TransformCoord(ref center.X, ref center.Y, c.GameObj.Transform.Angle);
 
 						canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Alpha, clr.WithAlpha((0.25f + densityRelative * 0.25f) * shapeAlpha)));
-						canvas.FillConvexPolygon(polyVert, colliderPos.Z);
+						canvas.FillPolygon(polyVert, colliderPos.X, colliderPos.Y, colliderPos.Z);
 						canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Alpha, clr.WithAlpha(shapeAlpha)));
-						canvas.DrawPolygon(polyVert, colliderPos.Z);
+						canvas.DrawPolygon(polyVert, colliderPos.X, colliderPos.Y, colliderPos.Z);
 					}
 					else if (loop != null)
 					{
@@ -161,14 +160,13 @@ namespace EditorBase.CamViewLayers
 							center += loopVert[i];
 							Vector2.Multiply(ref loopVert[i], colliderScale, out loopVert[i]);
 							MathF.TransformCoord(ref loopVert[i].X, ref loopVert[i].Y, c.GameObj.Transform.Angle);
-							loopVert[i] += colliderPos.Xy;
 						}
 						center /= loopVert.Length;
 						Vector2.Multiply(ref center, colliderScale, out center);
 						MathF.TransformCoord(ref center.X, ref center.Y, c.GameObj.Transform.Angle);
 
 						canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Alpha, clr.WithAlpha(shapeAlpha)));
-						canvas.DrawPolygon(loopVert, colliderPos.Z);
+						canvas.DrawPolygon(loopVert, colliderPos.X, colliderPos.Y, colliderPos.Z);
 					}
 					
 					// Draw shape index
@@ -191,13 +189,22 @@ namespace EditorBase.CamViewLayers
 				if (c.BodyType == BodyType.Dynamic)
 				{
 					Vector2 localMassCenter = c.LocalMassCenter;
-					MathF.TransformCoord(ref localMassCenter.X, ref localMassCenter.Y, c.GameObj.Transform.Angle);
+					MathF.TransformCoord(ref localMassCenter.X, ref localMassCenter.Y, c.GameObj.Transform.Angle, c.GameObj.Transform.Scale);
 					canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Alpha, this.MassCenterColor.WithAlpha(colliderAlpha)));
-					canvas.DrawCross(
-						colliderPos.X + localMassCenter.X, 
+					canvas.DrawLine(
+						colliderPos.X + localMassCenter.X - 5.0f, 
 						colliderPos.Y + localMassCenter.Y, 
-						colliderPos.Z, 
-						5.0f);
+						colliderPos.Z,
+						colliderPos.X + localMassCenter.X + 5.0f, 
+						colliderPos.Y + localMassCenter.Y, 
+						colliderPos.Z);
+					canvas.DrawLine(
+						colliderPos.X + localMassCenter.X, 
+						colliderPos.Y + localMassCenter.Y - 5.0f, 
+						colliderPos.Z,
+						colliderPos.X + localMassCenter.X, 
+						colliderPos.Y + localMassCenter.Y + 5.0f, 
+						colliderPos.Z);
 				}
 			}
 		}

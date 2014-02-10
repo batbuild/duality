@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
@@ -7,6 +8,8 @@ using OpenTK;
 using Duality.VertexFormat;
 using Duality.ColorFormat;
 using Duality.Resources;
+using Duality.Cloning;
+using ICloneable = Duality.Cloning.ICloneable;
 
 namespace Duality
 {
@@ -20,7 +23,7 @@ namespace Duality
 		/// <summary>
 		/// Describes the state of a <see cref="Canvas"/>.
 		/// </summary>
-		public class State
+		public class State : ICloneable
 		{
 			private	BatchInfo			batchInfo;
 			private	ColorRgba			color;
@@ -30,9 +33,11 @@ namespace Duality
 			private	float		transformAngle;
 			private	Vector2		transformScale;
 			private	Vector2		transformHandle;
+			private	Rect		uvGenRect;
 
 			private	Vector2		curTX;
 			private	Vector2		curTY;
+			private	Vector2		texBaseSize;
 
 
 			internal BatchInfo MaterialDirect
@@ -61,6 +66,21 @@ namespace Duality
 			{
 				get { return this.invariantTextScale; }
 				set { this.invariantTextScale = value; }
+			}
+			/// <summary>
+			/// [GET / SET] The texture coordinate rect which is used for UV generation when drawing shapes.
+			/// </summary>
+			public Rect TextureCoordinateRect
+			{
+				get { return this.uvGenRect; }
+				set { this.uvGenRect = value; }
+			}
+			/// <summary>
+			/// [GET] The currently bound main textures size.
+			/// </summary>
+			public Vector2 TextureBaseSize
+			{
+				get { return this.texBaseSize; }
 			}
 			/// <summary>
 			/// [GET / SET] The color tint to use for drawing.
@@ -123,17 +143,27 @@ namespace Duality
 			}
 			public State(State other)
 			{
-				this.batchInfo = other.batchInfo;
-				this.font = other.font;
-				this.color = other.color;
-				this.invariantTextScale = other.invariantTextScale;
-				this.zOffset = other.zOffset;
-				this.transformAngle = other.transformAngle;
-				this.transformHandle = other.transformHandle;
-				this.transformScale = other.transformScale;
-				this.UpdateTransform();
+				other.CopyTo(this);
 			}
-
+			
+			/// <summary>
+			/// Copies all state data to the specified target.
+			/// </summary>
+			/// <param name="target"></param>
+			public void CopyTo(State target)
+			{
+				target.batchInfo			= this.batchInfo;
+				target.uvGenRect			= this.uvGenRect;
+				target.texBaseSize			= this.texBaseSize;
+				target.font					= this.font;
+				target.color				= this.color;
+				target.invariantTextScale	= this.invariantTextScale;
+				target.zOffset				= this.zOffset;
+				target.transformAngle		= this.transformAngle;
+				target.transformHandle		= this.transformHandle;
+				target.transformScale		= this.transformScale;
+				target.UpdateTransform();
+			}
 			/// <summary>
 			/// Creates a clone of this State.
 			/// </summary>
@@ -148,6 +178,8 @@ namespace Duality
 			public void Reset()
 			{
 				this.batchInfo = new BatchInfo(DrawTechnique.Mask, ColorRgba.White);
+				this.uvGenRect = new Rect(1.0f, 1.0f);
+				this.texBaseSize = Vector2.Zero;
 				this.font = Font.GenericMonospace10;
 				this.color = ColorRgba.White;
 				this.invariantTextScale = false;
@@ -165,6 +197,16 @@ namespace Duality
 			public void SetMaterial(BatchInfo material)
 			{
 				this.batchInfo = material;
+				if (this.batchInfo.MainTexture.IsAvailable)
+				{
+					Texture tex = this.batchInfo.MainTexture.Res;
+					this.uvGenRect = new Rect(tex.UVRatio);
+					this.texBaseSize = tex.Size;
+				}
+				else
+				{
+					this.texBaseSize = Vector2.Zero;
+				}
 			}
 			/// <summary>
 			/// Sets the States drawing material.
@@ -173,6 +215,16 @@ namespace Duality
 			public void SetMaterial(ContentRef<Material> material)
 			{
 				this.batchInfo = material.Res.InfoDirect;
+				if (this.batchInfo.MainTexture.IsAvailable)
+				{
+					Texture tex = this.batchInfo.MainTexture.Res;
+					this.uvGenRect = new Rect(tex.UVRatio);
+					this.texBaseSize = tex.Size;
+				}
+				else
+				{
+					this.texBaseSize = Vector2.Zero;
+				}
 			}
 
 			private void UpdateTransform()
@@ -213,32 +265,6 @@ namespace Duality
 					}
 				}
 			}
-			internal void TransformVertices(VertexC1P3[] vertexData, Vector2 shapeHandle, float shapeHandleScale)
-			{
-				if (this.IsTransformIdentity)
-				{
-					for (int i = 0; i < vertexData.Length; i++)
-					{
-						vertexData[i].Pos.Z += this.zOffset;
-					}
-				}
-				else
-				{
-					Vector2 transformHandle = this.transformHandle;
-					Vector2 transformScale = this.transformScale;
-					for (int i = 0; i < vertexData.Length; i++)
-					{
-						vertexData[i].Pos.X -= transformHandle.X * shapeHandleScale + shapeHandle.X;
-						vertexData[i].Pos.Y -= transformHandle.Y * shapeHandleScale + shapeHandle.Y;
-						vertexData[i].Pos.X *= transformScale.X;
-						vertexData[i].Pos.Y *= transformScale.Y;
-						MathF.TransformDotVec(ref vertexData[i].Pos, ref this.curTX, ref this.curTY);
-						vertexData[i].Pos.X += shapeHandle.X;
-						vertexData[i].Pos.Y += shapeHandle.Y;
-						vertexData[i].Pos.Z += this.zOffset;
-					}
-				}
-			}
 			internal void TransformVertices(VertexC1P3T2[] vertexData, Vector2 shapeHandle, float shapeHandleScale)
 			{
 				if (this.IsTransformIdentity)
@@ -265,75 +291,20 @@ namespace Duality
 					}
 				}
 			}
+			
+			void ICloneable.CopyDataTo(object targetObj, CloneProvider provider)
+			{
+				this.CopyTo(targetObj as State);
+			}
 		}
 
-		/// <summary>
-		/// Describes a pattern for dashed lines.
-		/// </summary>
-		public enum DashPattern : uint
-		{
-			/// <summary>
-			/// There is no line at all.
-			/// </summary>
-			Empty		= 0x0U,
 
-			/// <summary>
-			/// A dotted line with a a lot of dots.
-			/// Pattern: #_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
-			/// </summary>
-			DotMore		= 0xAAAAAAAAU,
-			/// <summary>
-			/// A dotted line.
-			/// Pattern: #___#___#___#___#___#___#___#___
-			/// </summary>
-			Dot			= 0x88888888U,
-			/// <summary>
-			/// A dotted line with less dots.
-			/// Pattern: #_______#_______#_______#_______
-			/// </summary>
-			DotLess		= 0x80808080U,
+		private static Dictionary<uint,Texture>	dashTextures = new Dictionary<uint,Texture>();
 
-			/// <summary>
-			/// A dashed line with short dashes.
-			/// Pattern: ##__##__##__##__##__##__##__##__
-			/// </summary>
-			DashShort	= 0xCCCCCCCCU,
-			/// <summary>
-			/// A dashed line.
-			/// Pattern: ####____####____####____####____
-			/// </summary>
-			Dash		= 0xF0F0F0F0U,
-			/// <summary>
-			/// A dashed line with long dashes.
-			/// Pattern: ########________########________
-			/// </summary>
-			DashLong	= 0xFF00FF00U,
-
-			/// <summary>
-			/// A line with alternating dashes and dots.
-			/// Pattern: ###__#__###__#__###__#__###__#__
-			/// </summary>
-			DashDot		= 0xE4E4E4E4U,
-			/// <summary>
-			/// An alternating line with more dots than dashes.
-			/// Pattern: #####___#___#___#####___#___#___
-			/// </summary>
-			DashDotDot	= 0xF888F888U,
-			/// <summary>
-			/// An alternating line with more dashes than dots.
-			/// Pattern: ####____####____####____#___#___
-			/// </summary>
-			DashDashDot	= 0xF0F0F088U,
-
-			/// <summary>
-			/// The line isn't dashed.
-			/// </summary>
-			Full		= 0xFFFFFFFFU
-		}
-
-		private static Dictionary<uint,Texture>	dashTextures	= new Dictionary<uint,Texture>();
 		private	IDrawDevice		device		= null;
 		private	Stack<State>	stateStack	= new Stack<State>(new [] { new State() });
+		private	CanvasBuffer	buffer		= null;
+
 
 		/// <summary>
 		/// [GET] The underlying <see cref="IDrawDevice"/> that is used for drawing.
@@ -354,12 +325,37 @@ namespace Duality
 				this.stateStack.Push(value);
 			}
 		}
+		/// <summary>
+		/// [GET] The available width to draw on this Canvas.
+		/// </summary>
+		public int Width
+		{
+			get { return MathF.RoundToInt(this.device.TargetSize.X); }
+		}
+		/// <summary>
+		/// [GET] The available height to draw on this Canvas.
+		/// </summary>
+		public int Height
+		{
+			get { return MathF.RoundToInt(this.device.TargetSize.Y); }
+		}
 
-		public Canvas(IDrawDevice device)
+
+		/// <summary>
+		/// Creates a new Canvas that uses the specified <see cref="Duality.IDrawDevice"/>. You may optionally specify a
+		/// <see cref="Duality.CanvasBuffer"/> for improving rendering performance and memory footprint when rendering similar
+		/// shapes throughout multiple frames.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="buffer"></param>
+		public Canvas(IDrawDevice device, CanvasBuffer buffer = null)
 		{
 			this.device = device;
+			this.buffer = buffer ?? new CanvasBuffer(true);
+			this.buffer.Reset();
 		}
 		
+
 		/// <summary>
 		/// Adds a clone of the <see cref="Canvas.CurrentState">current state</see> on top of the internal
 		/// <see cref="State"/> stack.
@@ -398,27 +394,31 @@ namespace Duality
 		/// Draws a convex polygon. All vertices share the same Z value.
 		/// </summary>
 		/// <param name="points"></param>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
 		/// <param name="z"></param>
-		public void DrawPolygon(Vector2[] points, float z = 0.0f)
+		public void DrawPolygon(Vector2[] points, float x, float y, float z = 0.0f)
 		{
-			Vector3 pos = new Vector3(points[0].X, points[0].Y, z);
+			Vector3 pos = new Vector3(x, y, z);
 
 			float scale = 1.0f;
-			Vector3 posTemp = pos;
-			this.device.PreprocessCoords(ref posTemp, ref scale);
+			this.device.PreprocessCoords(ref pos, ref scale);
 
 			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3[] vertices = new VertexC1P3[points.Length];
+			Rect texCoordRect = this.CurrentState.TextureCoordinateRect;
+			VertexC1P3T2[] vertices = this.buffer.RequestVertexArray(points.Length);
 			for (int i = 0; i < points.Length; i++)
 			{
-				vertices[i].Pos.X = (points[i].X - pos.X) * scale + posTemp.X + 0.5f;
-				vertices[i].Pos.Y = (points[i].Y - pos.Y) * scale + posTemp.Y + 0.5f;
-				vertices[i].Pos.Z = (z - pos.Z) * scale + posTemp.Z;
+				vertices[i].Pos.X = points[i].X * scale + pos.X + 0.5f;
+				vertices[i].Pos.Y = points[i].Y * scale + pos.Y + 0.5f;
+				vertices[i].Pos.Z = pos.Z;
+				vertices[i].TexCoord.X = texCoordRect.X + texCoordRect.W * (float)i / (float)(points.Length - 1);
+				vertices[i].TexCoord.Y = texCoordRect.Y;
 				vertices[i].Color = shapeColor;
 			}
 
 			this.CurrentState.TransformVertices(vertices, pos.Xy, scale);
-			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices);
+			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices, points.Length);
 		}
 
 		/// <summary>
@@ -442,53 +442,60 @@ namespace Duality
 			Vector2 shapeHandle = pos.Xy;
 			float shapeHandleScale = scale;
 			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3[] vertices;
+			Rect texCoordRect = this.CurrentState.TextureCoordinateRect;
+			VertexC1P3T2[] vertices;
 			float angle;
 
 			// XY circle
-			vertices = new VertexC1P3[segmentNum];
+			vertices = this.buffer.RequestVertexArray(segmentNum);
 			angle = 0.0f;
-			for (int i = 0; i < vertices.Length; i++)
+			for (int i = 0; i < segmentNum; i++)
 			{
 				vertices[i].Pos.X = pos.X + (float)Math.Sin(angle) * r;
 				vertices[i].Pos.Y = pos.Y - (float)Math.Cos(angle) * r;
 				vertices[i].Pos.Z = pos.Z;
+				vertices[i].TexCoord.X = texCoordRect.X + texCoordRect.W * (float)i / (float)(segmentNum - 1);
+				vertices[i].TexCoord.Y = texCoordRect.Y;
 				vertices[i].Color = shapeColor;
 				this.device.PreprocessCoords(ref vertices[i].Pos, ref scale);
 				angle += (MathF.TwoPi / segmentNum);
 			}
 			this.CurrentState.TransformVertices(vertices, shapeHandle, shapeHandleScale);
-			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices);
+			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices, segmentNum);
 
 			// XZ circle
-			vertices = new VertexC1P3[segmentNum];
+			vertices = this.buffer.RequestVertexArray(segmentNum);
 			angle = 0.0f;
-			for (int i = 0; i < vertices.Length; i++)
+			for (int i = 0; i < segmentNum; i++)
 			{
 				vertices[i].Pos.X = pos.X + (float)Math.Sin(angle) * r;
 				vertices[i].Pos.Y = pos.Y;
 				vertices[i].Pos.Z = pos.Z - (float)Math.Cos(angle) * r;
+				vertices[i].TexCoord.X = texCoordRect.X + texCoordRect.W * (float)i / (float)(segmentNum - 1);
+				vertices[i].TexCoord.Y = texCoordRect.Y;
 				vertices[i].Color = shapeColor;
 				this.device.PreprocessCoords(ref vertices[i].Pos, ref scale);
 				angle += (MathF.TwoPi / segmentNum);
 			}
 			this.CurrentState.TransformVertices(vertices, shapeHandle, shapeHandleScale);
-			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices);
+			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices, segmentNum);
 
 			// YZ circle
-			vertices = new VertexC1P3[segmentNum];
+			vertices = this.buffer.RequestVertexArray(segmentNum);
 			angle = 0.0f;
-			for (int i = 0; i < vertices.Length; i++)
+			for (int i = 0; i < segmentNum; i++)
 			{
 				vertices[i].Pos.X = pos.X;
 				vertices[i].Pos.Y = pos.Y + (float)Math.Sin(angle) * r;
 				vertices[i].Pos.Z = pos.Z - (float)Math.Cos(angle) * r;
+				vertices[i].TexCoord.X = texCoordRect.X + texCoordRect.W * (float)i / (float)(segmentNum - 1);
+				vertices[i].TexCoord.Y = texCoordRect.Y;
 				vertices[i].Color = shapeColor;
 				this.device.PreprocessCoords(ref vertices[i].Pos, ref scale);
 				angle += (MathF.TwoPi / segmentNum);
 			}
 			this.CurrentState.TransformVertices(vertices, shapeHandle, shapeHandleScale);
-			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices);
+			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices, segmentNum);
 		}
 
 		/// <summary>
@@ -511,13 +518,20 @@ namespace Duality
 
 			Vector2 shapeHandle = pos.Xy;
 			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3[] vertices = new VertexC1P3[2];
+			Rect texCoordRect = this.CurrentState.TextureCoordinateRect;
+			VertexC1P3T2[] vertices = this.buffer.RequestVertexArray(2);
+
 			vertices[0].Pos = pos + new Vector3(0.5f, 0.5f, 0.0f);
 			vertices[1].Pos = target + new Vector3(0.5f, 0.5f, 0.0f);
+			
+			vertices[0].TexCoord = new Vector2(texCoordRect.X, 0.0f);
+			vertices[1].TexCoord = new Vector2(texCoordRect.X + texCoordRect.W, 0.0f);
+
 			vertices[0].Color = shapeColor;
 			vertices[1].Color = shapeColor;
+
 			this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.Lines, vertices);
+			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.Lines, vertices, 2);
 		}
 		/// <summary>
 		/// Draws a flat line.
@@ -561,7 +575,7 @@ namespace Duality
 
 			Vector2 shapeHandle = pos.Xy;
 			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3T2[] vertices = new VertexC1P3T2[2];
+			VertexC1P3T2[] vertices = this.buffer.RequestVertexArray(2);
 			vertices[0].Pos = pos + new Vector3(0.5f, 0.5f, 0.0f);
 			vertices[1].Pos = target + new Vector3(0.5f, 0.5f, 0.0f);
 			vertices[0].TexCoord = new Vector2(0.0f, 0.0f);
@@ -572,7 +586,7 @@ namespace Duality
 			BatchInfo customMat = new BatchInfo(this.CurrentState.MaterialDirect);
 			customMat.MainTexture = dashTextures[patternBits];
 			this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-			device.AddVertices(customMat, VertexMode.Lines, vertices);
+			device.AddVertices(customMat, VertexMode.Lines, vertices, 2);
 		}
 		/// <summary>
 		/// Draws a flat line.
@@ -612,17 +626,26 @@ namespace Duality
 
 			Vector2 shapeHandle = pos.Xy;
 			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3[] vertices = new VertexC1P3[4];
+			Rect texCoordRect = this.CurrentState.TextureCoordinateRect;
+			VertexC1P3T2[] vertices = this.buffer.RequestVertexArray(4);
+
 			vertices[0].Pos = pos + new Vector3(left);
 			vertices[1].Pos = target + new Vector3(left2);
 			vertices[2].Pos = target + new Vector3(right2);
 			vertices[3].Pos = pos + new Vector3(right);
+
+			vertices[0].TexCoord = new Vector2(texCoordRect.X, 0.0f);
+			vertices[1].TexCoord = new Vector2(texCoordRect.X + texCoordRect.W * 0.3333333f, 0.0f);
+			vertices[2].TexCoord = new Vector2(texCoordRect.X + texCoordRect.W * 0.6666666f, 0.0f);
+			vertices[3].TexCoord = new Vector2(texCoordRect.X + texCoordRect.W, 0.0f);
+
 			vertices[0].Color = shapeColor;
 			vertices[1].Color = shapeColor;
 			vertices[2].Color = shapeColor;
 			vertices[3].Color = shapeColor;
+
 			this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices);
+			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices, 4);
 		}
 		/// <summary>
 		/// Draws a thick, flat line.
@@ -634,51 +657,6 @@ namespace Duality
 		public void DrawThickLine(float x, float y, float x2, float y2, float width)
 		{
 			this.DrawThickLine(x, y, 0, x2, y2, 0, width);
-		}
-		
-		/// <summary>
-		/// Draws a cross at the specified position.
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="r"></param>
-		public void DrawCross(float x, float y, float z, float r)
-		{
-			Vector3 pos = new Vector3(x - r, y, z);
-			Vector3 pos2 = new Vector3(x, y - r, z);
-			Vector3 target = new Vector3(x + r, y, z);
-			Vector3 target2 = new Vector3(x, y + r, z);
-			float scale = 1.0f;
-			
-			device.PreprocessCoords(ref pos, ref scale);
-			device.PreprocessCoords(ref pos2, ref scale);
-			device.PreprocessCoords(ref target, ref scale);
-			device.PreprocessCoords(ref target2, ref scale);
-
-			Vector2 shapeHandle = new Vector2(x, y);
-			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3[] vertices = new VertexC1P3[4];
-			vertices[0].Pos = pos + new Vector3(0.5f, 0.5f, 0.0f);
-			vertices[1].Pos = target + new Vector3(0.5f, 0.5f, 0.0f);
-			vertices[2].Pos = pos2 + new Vector3(0.5f, 0.5f, 0.0f);
-			vertices[3].Pos = target2 + new Vector3(0.5f, 0.5f, 0.0f);
-			vertices[0].Color = shapeColor;
-			vertices[1].Color = shapeColor;
-			vertices[2].Color = shapeColor;
-			vertices[3].Color = shapeColor;
-			this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.Lines, vertices);
-		}
-		/// <summary>
-		/// Draws a cross at the specified position.
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="r"></param>
-		public void DrawCross(float x, float y, float r)
-		{
-			this.DrawCross(x, y, 0.0f, r);
 		}
 
 		/// <summary>
@@ -700,11 +678,18 @@ namespace Duality
 
 			Vector2 shapeHandle = pos.Xy;
 			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3[] vertices = new VertexC1P3[4];
+			Rect texCoordRect = this.CurrentState.TextureCoordinateRect;
+			VertexC1P3T2[] vertices = this.buffer.RequestVertexArray(4);
+
 			vertices[0].Pos = new Vector3(pos.X + 0.5f, pos.Y + 0.5f, pos.Z);
 			vertices[1].Pos = new Vector3(pos.X + w * scale - 0.5f, pos.Y + 0.5f, pos.Z);
 			vertices[2].Pos = new Vector3(pos.X + w * scale - 0.5f, pos.Y + h * scale - 0.5f, pos.Z);
 			vertices[3].Pos = new Vector3(pos.X + 0.5f, pos.Y + h * scale - 0.5f, pos.Z);
+
+			vertices[0].TexCoord = new Vector2(texCoordRect.X, 0.0f);
+			vertices[1].TexCoord = new Vector2(texCoordRect.X + texCoordRect.W * 0.3333333f, 0.0f);
+			vertices[2].TexCoord = new Vector2(texCoordRect.X + texCoordRect.W * 0.6666666f, 0.0f);
+			vertices[3].TexCoord = new Vector2(texCoordRect.X + texCoordRect.W, 0.0f);
 
 			vertices[0].Color = shapeColor;
 			vertices[1].Color = shapeColor;
@@ -712,7 +697,7 @@ namespace Duality
 			vertices[3].Color = shapeColor;
 
 			this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices);
+			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineLoop, vertices, 4);
 		}
 		/// <summary>
 		/// Draws a rectangle.
@@ -732,25 +717,26 @@ namespace Duality
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <param name="z"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		/// <param name="minAngle"></param>
-		/// <param name="maxAngle"></param>
-		public void DrawOvalSegment(float x, float y, float z, float w, float h, float minAngle, float maxAngle, bool outline = false)
+		/// <param name="width">The rendered ovals total width.</param>
+		/// <param name="height">The rendered ovals total height.</param>
+		/// <param name="minAngle">The oval segments minimum angle.</param>
+		/// <param name="maxAngle">The oval segments maximum angle.</param>
+		/// <param name="outline">If true, the oval sections complete outline is drawn instead of just the outer perimeter.</param>
+		public void DrawOvalSegment(float x, float y, float z, float width, float height, float minAngle, float maxAngle, bool outline = false)
 		{
 			if (minAngle == maxAngle) return;
-			if (w < 0.0f) { x += w; w = -w; }
-			if (h < 0.0f) { y += h; h = -h; }
-			w *= 0.5f; x += w;
-			h *= 0.5f; y += h;
+			if (width < 0.0f) { x += width; width = -width; }
+			if (height < 0.0f) { y += height; height = -height; }
+			width *= 0.5f; x += width;
+			height *= 0.5f; y += height;
 
 			Vector3 pos = new Vector3(x, y, z);
-			if (!this.device.IsCoordInView(pos, MathF.Max(w, h) + this.CurrentState.TransformHandle.Length)) return;
+			if (!this.device.IsCoordInView(pos, MathF.Max(width, height) + this.CurrentState.TransformHandle.Length)) return;
 
 			float scale = 1.0f;
 			this.device.PreprocessCoords(ref pos, ref scale);
-			w *= scale;
-			h *= scale;
+			width *= scale;
+			height *= scale;
 
 			if (maxAngle <= minAngle) maxAngle += MathF.Ceiling((minAngle - maxAngle) / MathF.RadAngle360) * MathF.RadAngle360;
 
@@ -760,11 +746,13 @@ namespace Duality
 			if (loop && outline) outline = false;
 			else if (outline) loop = true;
 
-			int segmentNum = MathF.Clamp(MathF.RoundToInt(MathF.Pow(MathF.Max(w, h), 0.65f) * 3.5f * angleRange / MathF.RadAngle360), 4, 128);
+			int segmentNum = MathF.Clamp(MathF.RoundToInt(MathF.Pow(MathF.Max(width, height), 0.65f) * 3.5f * angleRange / MathF.RadAngle360), 4, 128);
 			float angleStep = angleRange / segmentNum;
-			Vector2 shapeHandle = pos.Xy - new Vector2(w, h);
+			Vector2 shapeHandle = pos.Xy - new Vector2(width, height);
 			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3[] vertices = new VertexC1P3[segmentNum + (loop ? 0 : 1) + (outline ? 2 : 0)];
+			Rect texCoordRect = this.CurrentState.TextureCoordinateRect;
+			int vertexCount = segmentNum + (loop ? 0 : 1) + (outline ? 2 : 0);
+			VertexC1P3T2[] vertices = this.buffer.RequestVertexArray(vertexCount);
 			float angle = minAngle;
 			
 			if (outline)
@@ -772,33 +760,38 @@ namespace Duality
 				vertices[0].Pos.X = pos.X + 0.5f;
 				vertices[0].Pos.Y = pos.Y + 0.5f;
 				vertices[0].Pos.Z = pos.Z;
+				vertices[0].TexCoord.X = texCoordRect.X;
+				vertices[0].TexCoord.Y = texCoordRect.Y;
 				vertices[0].Color = shapeColor;
 			}
 
 			// XY circle
-			for (int i = outline ? 1 : 0; i < vertices.Length; i++)
+			for (int i = outline ? 1 : 0; i < vertexCount; i++)
 			{
-				vertices[i].Pos.X = pos.X + (float)Math.Sin(angle) * (w - 0.5f);
-				vertices[i].Pos.Y = pos.Y - (float)Math.Cos(angle) * (h - 0.5f);
+				vertices[i].Pos.X = pos.X + (float)Math.Sin(angle) * (width - 0.5f);
+				vertices[i].Pos.Y = pos.Y - (float)Math.Cos(angle) * (height - 0.5f);
 				vertices[i].Pos.Z = pos.Z;
+				vertices[i].TexCoord.X = texCoordRect.X + texCoordRect.W * (float)i / (float)(vertexCount - 1);
+				vertices[i].TexCoord.Y = texCoordRect.Y;
 				vertices[i].Color = shapeColor;
 				angle += angleStep;
 			}
 			this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-			this.device.AddVertices(this.CurrentState.MaterialDirect, loop ? VertexMode.LineLoop : VertexMode.LineStrip, vertices);
+			this.device.AddVertices(this.CurrentState.MaterialDirect, loop ? VertexMode.LineLoop : VertexMode.LineStrip, vertices, vertexCount);
 		}
 		/// <summary>
 		/// Draws the section of an oval.
 		/// </summary>
 		/// <param name="x"></param>
 		/// <param name="y"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		/// <param name="minAngle"></param>
-		/// <param name="maxAngle"></param>
-		public void DrawOvalSegment(float x, float y, float w, float h, float minAngle, float maxAngle, bool outline = false)
+		/// <param name="width">The rendered ovals total width.</param>
+		/// <param name="height">The rendered ovals total height.</param>
+		/// <param name="minAngle">The oval segments minimum angle.</param>
+		/// <param name="maxAngle">The oval segments maximum angle.</param>
+		/// <param name="outline">If true, the oval sections complete outline is drawn instead of just the outer perimeter.</param>
+		public void DrawOvalSegment(float x, float y, float width, float height, float minAngle, float maxAngle, bool outline = false)
 		{
-			this.DrawOvalSegment(x, y, 0, w, h, minAngle, maxAngle, outline);
+			this.DrawOvalSegment(x, y, 0, width, height, minAngle, maxAngle, outline);
 		}
 		/// <summary>
 		/// Draws the section of a circle.
@@ -806,28 +799,30 @@ namespace Duality
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <param name="z"></param>
-		/// <param name="r"></param>
-		/// <param name="minAngle"></param>
-		/// <param name="maxAngle"></param>
-		public void DrawCircleSegment(float x, float y, float z, float r, float minAngle, float maxAngle, bool outline = false)
+		/// <param name="radius">The rendered circles radius.</param>
+		/// <param name="minAngle">The circle segments minimum angle.</param>
+		/// <param name="maxAngle">The circle segments maximum angle.</param>
+		/// <param name="outline">If true, the circle sections complete outline is drawn instead of just the outer perimeter.</param>
+		public void DrawCircleSegment(float x, float y, float z, float radius, float minAngle, float maxAngle, bool outline = false)
 		{
-			this.CurrentState.TransformHandle += new Vector2(r, r);
-			this.DrawOvalSegment(x, y, z, r * 2, r * 2, minAngle, maxAngle, outline);
-			this.CurrentState.TransformHandle -= new Vector2(r, r);
+			this.CurrentState.TransformHandle += new Vector2(radius, radius);
+			this.DrawOvalSegment(x, y, z, radius * 2, radius * 2, minAngle, maxAngle, outline);
+			this.CurrentState.TransformHandle -= new Vector2(radius, radius);
 		}
 		/// <summary>
 		/// Draws the section of a circle
 		/// </summary>
 		/// <param name="x"></param>
 		/// <param name="y"></param>
-		/// <param name="r"></param>
-		/// <param name="minAngle"></param>
-		/// <param name="maxAngle"></param>
-		public void DrawCircleSegment(float x, float y, float r, float minAngle, float maxAngle, bool outline = false)
+		/// <param name="radius">The rendered circles radius.</param>
+		/// <param name="minAngle">The circle segments minimum angle.</param>
+		/// <param name="maxAngle">The circle segments maximum angle.</param>
+		/// <param name="outline">If true, the circle sections complete outline is drawn instead of just the outer perimeter.</param>
+		public void DrawCircleSegment(float x, float y, float radius, float minAngle, float maxAngle, bool outline = false)
 		{
-			this.CurrentState.TransformHandle += new Vector2(r, r);
-			this.DrawOvalSegment(x, y, 0, r * 2, r * 2, minAngle, maxAngle, outline);
-			this.CurrentState.TransformHandle -= new Vector2(r, r);
+			this.CurrentState.TransformHandle += new Vector2(radius, radius);
+			this.DrawOvalSegment(x, y, 0, radius * 2, radius * 2, minAngle, maxAngle, outline);
+			this.CurrentState.TransformHandle -= new Vector2(radius, radius);
 		}
 
 		/// <summary>
@@ -836,26 +831,26 @@ namespace Duality
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <param name="z"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
+		/// <param name="width"></param>
+		/// <param name="height"></param>
 		/// <param name="minAngle"></param>
 		/// <param name="maxAngle"></param>
-		public void DrawOval(float x, float y, float z, float w, float h)
+		public void DrawOval(float x, float y, float z, float width, float height)
 		{
-			this.DrawOvalSegment(x, y, z, w, h, 0.0f, MathF.RadAngle360);
+			this.DrawOvalSegment(x, y, z, width, height, 0.0f, MathF.RadAngle360);
 		}
 		/// <summary>
 		/// Draws the section of an oval.
 		/// </summary>
 		/// <param name="x"></param>
 		/// <param name="y"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
+		/// <param name="width"></param>
+		/// <param name="height"></param>
 		/// <param name="minAngle"></param>
 		/// <param name="maxAngle"></param>
-		public void DrawOval(float x, float y, float w, float h)
+		public void DrawOval(float x, float y, float width, float height)
 		{
-			this.DrawOvalSegment(x, y, 0, w, h, 0.0f, MathF.RadAngle360);
+			this.DrawOvalSegment(x, y, 0, width, height, 0.0f, MathF.RadAngle360);
 		}
 		/// <summary>
 		/// Draws the section of a circle.
@@ -863,55 +858,141 @@ namespace Duality
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <param name="z"></param>
-		/// <param name="r"></param>
+		/// <param name="radius"></param>
 		/// <param name="minAngle"></param>
 		/// <param name="maxAngle"></param>
-		public void DrawCircle(float x, float y, float z, float r)
+		public void DrawCircle(float x, float y, float z, float radius)
 		{
-			this.CurrentState.TransformHandle += new Vector2(r, r);
-			this.DrawOvalSegment(x, y, z, r * 2, r * 2, 0.0f, MathF.RadAngle360);
-			this.CurrentState.TransformHandle -= new Vector2(r, r);
+			this.CurrentState.TransformHandle += new Vector2(radius, radius);
+			this.DrawOvalSegment(x, y, z, radius * 2, radius * 2, 0.0f, MathF.RadAngle360);
+			this.CurrentState.TransformHandle -= new Vector2(radius, radius);
 		}
 		/// <summary>
 		/// Draws the section of a circle
 		/// </summary>
 		/// <param name="x"></param>
 		/// <param name="y"></param>
-		/// <param name="r"></param>
+		/// <param name="radius"></param>
 		/// <param name="minAngle"></param>
 		/// <param name="maxAngle"></param>
-		public void DrawCircle(float x, float y, float r)
+		public void DrawCircle(float x, float y, float radius)
 		{
-			this.CurrentState.TransformHandle += new Vector2(r, r);
-			this.DrawOvalSegment(x, y, 0, r * 2, r * 2, 0.0f, MathF.RadAngle360);
-			this.CurrentState.TransformHandle -= new Vector2(r, r);
+			this.CurrentState.TransformHandle += new Vector2(radius, radius);
+			this.DrawOvalSegment(x, y, 0, radius * 2, radius * 2, 0.0f, MathF.RadAngle360);
+			this.CurrentState.TransformHandle -= new Vector2(radius, radius);
 		}
 		
 		/// <summary>
-		/// Fills a convex polygon. All vertices share the same Z value.
+		/// Fills a polygon. All vertices share the same Z value, and the polygon needs to be convex.
 		/// </summary>
 		/// <param name="points"></param>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
 		/// <param name="z"></param>
-		public void FillConvexPolygon(Vector2[] points, float z = 0.0f)
+		public void FillPolygon(Vector2[] points, float x, float y, float z = 0.0f)
 		{
-			Vector3 pos = new Vector3(points[0].X, points[0].Y, z);
+			Vector3 pos = new Vector3(x, y, z);
 
 			float scale = 1.0f;
-			Vector3 posTemp = pos;
-			this.device.PreprocessCoords(ref posTemp, ref scale);
+			this.device.PreprocessCoords(ref pos, ref scale);
 
 			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3[] vertices = new VertexC1P3[points.Length];
+			Rect texCoordRect = this.CurrentState.TextureCoordinateRect;
+
+			// Determine bounding box
+			Rect pointBoundingRect = points.BoundingBox();
+
+			// Set up vertex array
+			VertexC1P3T2[] vertices = this.buffer.RequestVertexArray(points.Length);
 			for (int i = 0; i < points.Length; i++)
 			{
-				vertices[i].Pos.X = (points[i].X - pos.X) * scale + posTemp.X;
-				vertices[i].Pos.Y = (points[i].Y - pos.Y) * scale + posTemp.Y;
-				vertices[i].Pos.Z = (z - pos.Z) * scale + posTemp.Z;
+				vertices[i].Pos.X = points[i].X * scale + pos.X;
+				vertices[i].Pos.Y = points[i].Y * scale + pos.Y;
+				vertices[i].Pos.Z = pos.Z;
+				vertices[i].TexCoord.X = texCoordRect.X + ((points[i].X - pointBoundingRect.X) / pointBoundingRect.W) * texCoordRect.W;
+				vertices[i].TexCoord.Y = texCoordRect.Y + ((points[i].Y - pointBoundingRect.Y) / pointBoundingRect.H) * texCoordRect.H;
 				vertices[i].Color = shapeColor;
 			}
 
 			this.CurrentState.TransformVertices(vertices, pos.Xy, scale);
-			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.Polygon, vertices);
+			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.Polygon, vertices, points.Length);
+		}
+		/// <summary>
+		/// Fills a polygons outline. All vertices share the same Z value.
+		/// </summary>
+		/// <param name="points"></param>
+		/// <param name="width"></param>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
+		/// <param name="z"></param>
+		public void FillPolygonOutline(Vector2[] points, float width, float x, float y, float z = 0.0f)
+		{
+			width *= 0.5f;
+			Vector3 pos = new Vector3(x, y, z);
+
+			float scale = 1.0f;
+			this.device.PreprocessCoords(ref pos, ref scale);
+
+			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
+			Rect texCoordRect = this.CurrentState.TextureCoordinateRect;
+
+			// Determine bounding box
+			Rect pointBoundingRect = points.BoundingBox();
+			pointBoundingRect.X -= width * 0.5f;
+			pointBoundingRect.Y -= width * 0.5f;
+			pointBoundingRect.W += width;
+			pointBoundingRect.H += width;
+
+			// Set up vertex array
+			int vertexCount = points.Length * 2 + 2;
+			VertexC1P3T2[] vertices = this.buffer.RequestVertexArray(vertexCount);
+			for (int i = 0; i < points.Length; i++)
+			{
+				int vertexBase = i * 2;
+
+				int cur = i;
+				int prev = (i - 1 + points.Length) % points.Length;
+				int next = (i + 1) % points.Length;
+				
+				Vector2 tangent = (points[cur] - points[prev]).Normalized;
+				Vector2 tangent2 = (points[next] - points[cur]).Normalized;
+				Vector2 normal = tangent.PerpendicularLeft;
+				Vector2 normal2 = tangent2.PerpendicularLeft;
+				
+				float dot = Vector2.Dot(normal, tangent2);
+
+				Vector2 cross;
+				MathF.LinesCross(
+					points[prev].X - normal.X * width, points[prev].Y - normal.Y * width, 
+					points[cur].X  - normal.X * width, points[cur].Y  - normal.Y * width, 
+					points[cur].X  - normal2.X * width, points[cur].Y  - normal2.Y * width,
+					points[next].X - normal2.X * width, points[next].Y - normal2.Y * width,
+					out cross.X, out cross.Y,
+					true);
+
+				Vector2 leftOffset = Vector2.Zero;
+				Vector2 rightOffset = (tangent - tangent2).Normalized * (cross - points[cur]).Length * MathF.Sign(dot) * -2;
+
+				vertices[vertexBase + 0].Pos.X = (points[cur].X + leftOffset.X) * scale + pos.X;
+				vertices[vertexBase + 0].Pos.Y = (points[cur].Y + leftOffset.Y) * scale + pos.Y;
+				vertices[vertexBase + 0].Pos.Z = pos.Z;
+				vertices[vertexBase + 0].TexCoord.X = texCoordRect.X + ((points[i].X + leftOffset.X - pointBoundingRect.X) / pointBoundingRect.W) * texCoordRect.W;
+				vertices[vertexBase + 0].TexCoord.Y = texCoordRect.Y + ((points[i].Y + leftOffset.Y - pointBoundingRect.Y) / pointBoundingRect.H) * texCoordRect.H;
+				vertices[vertexBase + 0].Color = shapeColor;
+				
+				vertices[vertexBase + 1].Pos.X = (points[cur].X  + rightOffset.X) * scale + pos.X;
+				vertices[vertexBase + 1].Pos.Y = (points[cur].Y  + rightOffset.Y) * scale + pos.Y;
+				vertices[vertexBase + 1].Pos.Z = pos.Z;
+				vertices[vertexBase + 1].TexCoord.X = texCoordRect.X + ((points[i].X + rightOffset.X - pointBoundingRect.X) / pointBoundingRect.W) * texCoordRect.W;
+				vertices[vertexBase + 1].TexCoord.Y = texCoordRect.Y + ((points[i].Y + rightOffset.Y - pointBoundingRect.Y) / pointBoundingRect.H) * texCoordRect.H;
+				vertices[vertexBase + 1].Color = shapeColor;
+			}
+
+			vertices[vertexCount - 2] = vertices[0];
+			vertices[vertexCount - 1] = vertices[1];
+
+			this.CurrentState.TransformVertices(vertices, pos.Xy, scale);
+			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.TriangleStrip, vertices, vertexCount);
 		}
 
 		/// <summary>
@@ -941,17 +1022,26 @@ namespace Duality
 
 			Vector2 shapeHandle = pos.Xy;
 			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3[] vertices = new VertexC1P3[4];
+			Rect texCoordRect = this.CurrentState.TextureCoordinateRect;
+			VertexC1P3T2[] vertices = this.buffer.RequestVertexArray(4);
+
 			vertices[0].Pos = pos + new Vector3(left);
 			vertices[1].Pos = target + new Vector3(left2);
 			vertices[2].Pos = target + new Vector3(right2);
 			vertices[3].Pos = pos + new Vector3(right);
+
+			vertices[0].TexCoord = texCoordRect.TopLeft;
+			vertices[1].TexCoord = texCoordRect.TopRight;
+			vertices[2].TexCoord = texCoordRect.BottomRight;
+			vertices[3].TexCoord = texCoordRect.BottomLeft;
+
 			vertices[0].Color = shapeColor;
 			vertices[1].Color = shapeColor;
 			vertices[2].Color = shapeColor;
 			vertices[3].Color = shapeColor;
+
 			this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.Quads, vertices);
+			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.Quads, vertices, 4);
 		}
 		/// <summary>
 		/// Fills a thick, flat line.
@@ -971,61 +1061,106 @@ namespace Duality
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <param name="z"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		/// <param name="minAngle"></param>
-		/// <param name="maxAngle"></param>
-		public void FillOvalSegment(float x, float y, float z, float w, float h, float minAngle, float maxAngle)
+		/// <param name="width">The rendered ovals total width.</param>
+		/// <param name="height">The rendered ovals total height.</param>
+		/// <param name="minAngle">The oval segments minimum angle.</param>
+		/// <param name="maxAngle">The oval segments maximum angle.</param>
+		/// <param name="donutWidth">If bigger than zero, a donut with the specified width is rendered instead of a completely filled oval.</param>
+		public void FillOvalSegment(float x, float y, float z, float width, float height, float minAngle, float maxAngle, float donutWidth = 0.0f)
 		{
 			if (minAngle == maxAngle) return;
-			if (w < 0.0f) { x += w; w = -w; }
-			if (h < 0.0f) { y += h; h = -h; }
-			w *= 0.5f; x += w;
-			h *= 0.5f; y += h;
+			if (width < 0.0f) { x += width; width = -width; }
+			if (height < 0.0f) { y += height; height = -height; }
+			if (donutWidth > MathF.Min(width, height)) donutWidth = 0.0f;
+			width *= 0.5f; x += width;
+			height *= 0.5f; y += height;
 
 			Vector3 pos = new Vector3(x, y, z);
-			if (!this.device.IsCoordInView(pos, MathF.Max(w, h) + this.CurrentState.TransformHandle.Length)) return;
+			if (!this.device.IsCoordInView(pos, MathF.Max(width, height) + this.CurrentState.TransformHandle.Length)) return;
 
 			float scale = 1.0f;
 			this.device.PreprocessCoords(ref pos, ref scale);
-			w *= scale;
-			h *= scale;
+			width *= scale;
+			height *= scale;
+			donutWidth *= scale;
 
 			if (maxAngle <= minAngle) maxAngle += MathF.Ceiling((minAngle - maxAngle) / MathF.RadAngle360) * MathF.RadAngle360;
 
 			float angleRange = MathF.Min(maxAngle - minAngle, MathF.RadAngle360);
-			int segmentNum = MathF.Clamp(MathF.RoundToInt(MathF.Pow(MathF.Max(w, h), 0.65f) * 3.5f * angleRange / MathF.RadAngle360), 4, 128);
+			int segmentNum = MathF.Clamp(MathF.RoundToInt(MathF.Pow(MathF.Max(width, height), 0.65f) * 3.5f * angleRange / MathF.RadAngle360), 4, 128);
 			float angleStep = angleRange / segmentNum;
-			Vector2 shapeHandle = pos.Xy - new Vector2(w, h);
+			Vector2 shapeHandle = pos.Xy - new Vector2(width, height);
 			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3[] vertices = new VertexC1P3[segmentNum + 2];
-			float angle = minAngle;
+			Rect texCoordRect = this.CurrentState.TextureCoordinateRect;
+			int vertexCount;
+			VertexC1P3T2[] vertices;
 
-			vertices[0].Pos = pos;
-			vertices[0].Color = shapeColor;
-			for (int i = 1; i < vertices.Length; i++)
+			if (donutWidth <= 0.0f)
 			{
-				vertices[i].Pos.X = pos.X + (float)Math.Sin(angle) * w;
-				vertices[i].Pos.Y = pos.Y - (float)Math.Cos(angle) * h;
-				vertices[i].Pos.Z = pos.Z;
-				vertices[i].Color = shapeColor;
-				angle += angleStep;
+				vertexCount = segmentNum + 2;
+				vertices = this.buffer.RequestVertexArray(vertexCount);
+				vertices[0].Pos = pos;
+				vertices[0].Color = shapeColor;
+				vertices[0].TexCoord = texCoordRect.Center;
+				float angle = minAngle;
+				for (int i = 1; i < vertexCount; i++)
+				{
+					float sin = (float)Math.Sin(angle);
+					float cos = (float)Math.Cos(angle); 
+					vertices[i].Pos.X = pos.X + sin * width;
+					vertices[i].Pos.Y = pos.Y - cos * height;
+					vertices[i].Pos.Z = pos.Z;
+					vertices[i].Color = shapeColor;
+					vertices[i].TexCoord.X = texCoordRect.X + (0.5f + 0.5f * sin) * texCoordRect.W;
+					vertices[i].TexCoord.Y = texCoordRect.Y + (0.5f - 0.5f * cos) * texCoordRect.H;
+					angle += angleStep;
+				}
+				this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
+				this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.TriangleFan, vertices, vertexCount);
 			}
-			this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-			this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.TriangleFan, vertices);
+			else
+			{
+				vertexCount = (segmentNum + 1) * 2;
+				vertices = this.buffer.RequestVertexArray(vertexCount);
+				float angle = minAngle;
+				Vector2 donutWidthTexCoord = 0.5f * donutWidth * Vector2.One / new Vector2(width, height);
+				for (int i = 0; i < vertexCount; i += 2)
+				{
+					float sin = (float)Math.Sin(angle);
+					float cos = (float)Math.Cos(angle); 
+
+					vertices[i + 0].Pos.X = pos.X + sin * width;
+					vertices[i + 0].Pos.Y = pos.Y - cos * height;
+					vertices[i + 0].Pos.Z = pos.Z;
+					vertices[i + 0].Color = shapeColor;
+					vertices[i + 0].TexCoord.X = texCoordRect.X + (0.5f + 0.5f * sin) * texCoordRect.W;
+					vertices[i + 0].TexCoord.Y = texCoordRect.Y + (0.5f - 0.5f * cos) * texCoordRect.H;
+
+					vertices[i + 1].Pos.X = pos.X + sin * (width - donutWidth);
+					vertices[i + 1].Pos.Y = pos.Y - cos * (height - donutWidth);
+					vertices[i + 1].Pos.Z = pos.Z;
+					vertices[i + 1].Color = shapeColor;
+					vertices[i + 1].TexCoord.X = texCoordRect.X + (0.5f + (0.5f - donutWidthTexCoord.X) * sin) * texCoordRect.W;
+					vertices[i + 1].TexCoord.Y = texCoordRect.Y + (0.5f - (0.5f - donutWidthTexCoord.Y) * cos) * texCoordRect.H;
+
+					angle += angleStep;
+				}
+				this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
+				this.device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.TriangleStrip, vertices, vertexCount);
+			}
 		}
 		/// <summary>
 		/// Fills the section of an oval.
 		/// </summary>
 		/// <param name="x"></param>
 		/// <param name="y"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		/// <param name="minAngle"></param>
-		/// <param name="maxAngle"></param>
-		public void FillOvalSegment(float x, float y, float w, float h, float minAngle, float maxAngle)
+		/// <param name="width">The rendered ovals total width.</param>
+		/// <param name="height">The rendered ovals total height.</param>
+		/// <param name="minAngle">The oval segments minimum angle.</param>
+		/// <param name="maxAngle">The oval segments maximum angle.</param>
+		public void FillOvalSegment(float x, float y, float width, float height, float minAngle, float maxAngle)
 		{
-			this.FillOvalSegment(x, y, 0, w, h, minAngle, maxAngle);
+			this.FillOvalSegment(x, y, 0, width, height, minAngle, maxAngle, 0);
 		}
 		/// <summary>
 		/// Fills the section of a circle.
@@ -1033,14 +1168,15 @@ namespace Duality
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <param name="z"></param>
-		/// <param name="r"></param>
-		/// <param name="minAngle"></param>
-		/// <param name="maxAngle"></param>
-		public void FillCircleSegment(float x, float y, float z, float r, float minAngle, float maxAngle)
+		/// <param name="radius">The circles radius.</param>
+		/// <param name="minAngle">The circle segments minimum angle.</param>
+		/// <param name="maxAngle">The circle segments maximum angle.</param>
+		/// <param name="donutWidth">If bigger than zero, a donut with the specified width is rendered instead of a completely filled circle area.</param>
+		public void FillCircleSegment(float x, float y, float z, float radius, float minAngle, float maxAngle, float donutWidth = 0.0f)
 		{
-			this.CurrentState.TransformHandle += new Vector2(r, r);
-			this.FillOvalSegment(x, y, z, r * 2, r * 2, minAngle, maxAngle);
-			this.CurrentState.TransformHandle -= new Vector2(r, r);
+			this.CurrentState.TransformHandle += new Vector2(radius, radius);
+			this.FillOvalSegment(x, y, z, radius * 2, radius * 2, minAngle, maxAngle, donutWidth);
+			this.CurrentState.TransformHandle -= new Vector2(radius, radius);
 		}
 		/// <summary>
 		/// Fills the section of a circle
@@ -1053,7 +1189,7 @@ namespace Duality
 		public void FillCircleSegment(float x, float y, float r, float minAngle, float maxAngle)
 		{
 			this.CurrentState.TransformHandle += new Vector2(r, r);
-			this.FillOvalSegment(x, y, 0, r * 2, r * 2, minAngle, maxAngle);
+			this.FillOvalSegment(x, y, 0, r * 2, r * 2, minAngle, maxAngle, 0);
 			this.CurrentState.TransformHandle -= new Vector2(r, r);
 		}
 
@@ -1063,22 +1199,22 @@ namespace Duality
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <param name="z"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		public void FillOval(float x, float y, float z, float w, float h)
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		public void FillOval(float x, float y, float z, float width, float height)
 		{
-			this.FillOvalSegment(x, y, z, w, h, 0.0f, MathF.RadAngle360);
+			this.FillOvalSegment(x, y, z, width, height, 0.0f, MathF.RadAngle360, 0.0f);
 		}
 		/// <summary>
 		/// Fills an oval
 		/// </summary>
 		/// <param name="x"></param>
 		/// <param name="y"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		public void FillOval(float x, float y, float w, float h)
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		public void FillOval(float x, float y, float width, float height)
 		{
-			this.FillOvalSegment(x, y, 0, w, h, 0.0f, MathF.RadAngle360);
+			this.FillOvalSegment(x, y, 0, width, height, 0.0f, MathF.RadAngle360, 0.0f);
 		}
 		/// <summary>
 		/// Fills a circle.
@@ -1086,12 +1222,12 @@ namespace Duality
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <param name="z"></param>
-		/// <param name="r"></param>
-		public void FillCircle(float x, float y, float z, float r)
+		/// <param name="radius"></param>
+		public void FillCircle(float x, float y, float z, float radius)
 		{
-			this.CurrentState.TransformHandle += new Vector2(r, r);
-			this.FillOvalSegment(x, y, z, r * 2, r * 2, 0.0f, MathF.RadAngle360);
-			this.CurrentState.TransformHandle -= new Vector2(r, r);
+			this.CurrentState.TransformHandle += new Vector2(radius, radius);
+			this.FillOvalSegment(x, y, z, radius * 2, radius * 2, 0.0f, MathF.RadAngle360, 0.0f);
+			this.CurrentState.TransformHandle -= new Vector2(radius, radius);
 		}
 		/// <summary>
 		/// Fills a circle.
@@ -1102,7 +1238,7 @@ namespace Duality
 		public void FillCircle(float x, float y, float r)
 		{
 			this.CurrentState.TransformHandle += new Vector2(r, r);
-			this.FillOvalSegment(x, y, 0, r * 2, r * 2, 0.0f, MathF.RadAngle360);
+			this.FillOvalSegment(x, y, 0, r * 2, r * 2, 0.0f, MathF.RadAngle360, 0.0f);
 			this.CurrentState.TransformHandle -= new Vector2(r, r);
 		}
 
@@ -1112,12 +1248,12 @@ namespace Duality
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <param name="z"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		public void FillRect(float x, float y, float z, float w, float h)
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		public void FillRect(float x, float y, float z, float width, float height)
 		{
-			if (w < 0.0f) { x += w; w = -w; }
-			if (h < 0.0f) { y += h; h = -h; }
+			if (width < 0.0f) { x += width; width = -width; }
+			if (height < 0.0f) { y += height; height = -height; }
 
 			Vector3 pos = new Vector3(x, y, z);
 			float scale = 1.0f;
@@ -1125,11 +1261,18 @@ namespace Duality
 
 			Vector2 shapeHandle = pos.Xy;
 			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3[] vertices = new VertexC1P3[4];
+			Rect texCoordRect = this.CurrentState.TextureCoordinateRect;
+			VertexC1P3T2[] vertices = this.buffer.RequestVertexArray(4);
+
 			vertices[0].Pos = new Vector3(pos.X, pos.Y, pos.Z);
-			vertices[1].Pos = new Vector3(pos.X + w * scale, pos.Y, pos.Z);
-			vertices[2].Pos = new Vector3(pos.X + w * scale, pos.Y + h * scale, pos.Z);
-			vertices[3].Pos = new Vector3(pos.X, pos.Y + h * scale, pos.Z);
+			vertices[1].Pos = new Vector3(pos.X + width * scale, pos.Y, pos.Z);
+			vertices[2].Pos = new Vector3(pos.X + width * scale, pos.Y + height * scale, pos.Z);
+			vertices[3].Pos = new Vector3(pos.X, pos.Y + height * scale, pos.Z);
+
+			vertices[0].TexCoord = texCoordRect.TopLeft;
+			vertices[1].TexCoord = texCoordRect.TopRight;
+			vertices[2].TexCoord = texCoordRect.BottomRight;
+			vertices[3].TexCoord = texCoordRect.BottomLeft;
 
 			vertices[0].Color = shapeColor;
 			vertices[1].Color = shapeColor;
@@ -1137,245 +1280,18 @@ namespace Duality
 			vertices[3].Color = shapeColor;
 
 			this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.Quads, vertices);
+			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.Quads, vertices, 4);
 		}
 		/// <summary>
 		/// Fills a rectangle.
 		/// </summary>
 		/// <param name="x"></param>
 		/// <param name="y"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		public void FillRect(float x, float y, float w, float h)
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		public void FillRect(float x, float y, float width, float height)
 		{
-			this.FillRect(x, y, 0, w, h);
-		}
-
-		/// <summary>
-		/// Draws a textured rectangle.
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		/// <param name="uvX">UV x coordinate</param>
-		/// <param name="uvY">UV y coordinate</param>
-		/// <param name="uvW">UV coordinate width</param>
-		/// <param name="uvH">UV coordinate height</param>
-		public void DrawTexturedRect(float x, float y, float z, float w, float h, float uvX, float uvY, float uvW, float uvH)
-		{
-			if (w < 0.0f) { x += w; w = -w; }
-			if (h < 0.0f) { y += h; h = -h; }
-
-			Vector3 pos = new Vector3(x, y, z);
-			float scale = 1.0f;
-			device.PreprocessCoords(ref pos, ref scale);
-
-			Texture mainTex = this.CurrentState.MaterialDirect.MainTexture.Res;
-			Vector2 mainTexUVRatio = mainTex != null ? mainTex.UVRatio : Vector2.One;
-
-			Vector2 shapeHandle = pos.Xy;
-			ColorRgba shapeColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			VertexC1P3T2[] vertices = new VertexC1P3T2[4];
-
-			vertices[0].Pos = new Vector3(pos.X, pos.Y, pos.Z);
-			vertices[1].Pos = new Vector3(pos.X + w * scale, pos.Y, pos.Z);
-			vertices[2].Pos = new Vector3(pos.X + w * scale, pos.Y + h * scale, pos.Z);
-			vertices[3].Pos = new Vector3(pos.X, pos.Y + h * scale, pos.Z);
-
-			vertices[0].TexCoord = new Vector2(uvX * mainTexUVRatio.X, uvY * mainTexUVRatio.Y);
-			vertices[1].TexCoord = new Vector2((uvX + uvW) * mainTexUVRatio.X, uvY * mainTexUVRatio.Y);
-			vertices[2].TexCoord = new Vector2((uvX + uvW) * mainTexUVRatio.X, (uvY + uvH) * mainTexUVRatio.Y);
-			vertices[3].TexCoord = new Vector2(uvX * mainTexUVRatio.X, (uvY + uvH) * mainTexUVRatio.Y);
-
-			vertices[0].Color = shapeColor;
-			vertices[1].Color = shapeColor;
-			vertices[2].Color = shapeColor;
-			vertices[3].Color = shapeColor;
-
-			this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.Quads, vertices);
-		}
-		/// <summary>
-		/// Draws a textured rectangle.
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="uvX">UV x coordinate</param>
-		/// <param name="uvY">UV y coordinate</param>
-		/// <param name="uvW">UV coordinate width</param>
-		/// <param name="uvH">UV coordinate height</param>
-		public void DrawTexturedRect(float x, float y, float z, float uvX, float uvY, float uvW, float uvH)
-		{
-			Texture mainTex = this.CurrentState.MaterialDirect.MainTexture.Res;
-			Vector2 mainTexSize = mainTex != null ? mainTex.Size : Vector2.One * 10.0f;
-			this.DrawTexturedRect(x, y, z, mainTexSize.X, mainTexSize.Y, uvX, uvY, uvW, uvH);
-		}
-		/// <summary>
-		/// Draws a textured rectangle.
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		public void DrawTexturedRect(float x, float y, float z, float w, float h)
-		{
-			this.DrawTexturedRect(x, y, z, w, h, 0.0f, 0.0f, 1.0f, 1.0f);
-		}
-		/// <summary>
-		/// Draws a textured rectangle.
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		public void DrawTexturedRect(float x, float y, float z)
-		{
-			Texture mainTex = this.CurrentState.MaterialDirect.MainTexture.Res;
-			Vector2 mainTexSize = mainTex != null ? mainTex.Size : Vector2.One * 10.0f;
-			this.DrawTexturedRect(x, y, z, mainTexSize.X, mainTexSize.Y, 0.0f, 0.0f, 1.0f, 1.0f);
-		}
-		/// <summary>
-		/// Draws a textured rectangle.
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		/// <param name="uvX">UV x coordinate</param>
-		/// <param name="uvY">UV y coordinate</param>
-		/// <param name="uvW">UV coordinate width</param>
-		/// <param name="uvH">UV coordinate height</param>
-		public void DrawTexturedRect(float x, float y, float w, float h, float uvX, float uvY, float uvW, float uvH)
-		{
-			this.DrawTexturedRect(x, y, 0, w, h, uvX, uvY, uvW, uvH);
-		}
-		/// <summary>
-		/// Draws a textured rectangle.
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="uvX">UV x coordinate</param>
-		/// <param name="uvY">UV y coordinate</param>
-		/// <param name="uvW">UV coordinate width</param>
-		/// <param name="uvH">UV coordinate height</param>
-		public void DrawTexturedRect(float x, float y, float uvX, float uvY, float uvW, float uvH)
-		{
-			Texture mainTex = this.CurrentState.MaterialDirect.MainTexture.Res;
-			Vector2 mainTexSize = mainTex != null ? mainTex.Size : Vector2.One * 10.0f;
-			this.DrawTexturedRect(x, y, 0, mainTexSize.X, mainTexSize.Y, uvX, uvY, uvW, uvH);
-		}
-		/// <summary>
-		/// Draws a textured rectangle.
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		public void DrawTexturedRect(float x, float y, float w, float h)
-		{
-			this.DrawTexturedRect(x, y, 0, w, h, 0.0f, 0.0f, 1.0f, 1.0f);
-		}
-		/// <summary>
-		/// Draws a textured rectangle.
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		public void DrawTexturedRect(float x, float y)
-		{
-			Texture mainTex = this.CurrentState.MaterialDirect.MainTexture.Res;
-			Vector2 mainTexSize = mainTex != null ? mainTex.Size : Vector2.One * 10.0f;
-			this.DrawTexturedRect(x, y, 0, mainTexSize.X, mainTexSize.Y, 0.0f, 0.0f, 1.0f, 1.0f);
-		}
-
-		/// <summary>
-		/// Draws a horizontally aligned graph.
-		/// </summary>
-		/// <param name="values">An array of value samples that will be represented by the graph.</param>
-		/// <param name="colors">An array of color values corresponding to the supplied values. Specify null, if no coloring is required.</param>
-		/// <param name="vertices">Optional vertex cache to use for the graph. If set, the graphs vertices are cached and re-used for better Profile.</param>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		public void DrawHorizontalGraph(float[] values, ColorRgba[] colors, ref VertexC1P3[] vertices, float x, float y, float z, float w, float h)
-		{
-			if (values == null)
-				throw new ArgumentNullException("values");
-			if (colors != null && colors.Length != values.Length)
-				throw new ArgumentException("The number of color samples needs to be equal to the number of value samples.", "colors");
-
-			if (h > 0.0f) h--;
-			if (h < 0.0f) h++;
-			Vector3 pos = new Vector3(x, y, z);
-			float scale = 1.0f;
-			
-			device.PreprocessCoords(ref pos, ref scale);
-
-			Vector2 shapeHandle = pos.Xy;
-			ColorRgba baseColor = this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor;
-			float sampleXRatio = w / (float)(values.Length - 1);
-			
-			if (vertices == null)
-				vertices = new VertexC1P3[MathF.Max(values.Length, 16)];
-			else if (vertices.Length < values.Length)
-				vertices = new VertexC1P3[MathF.Max(vertices.Length * 2, values.Length, 16)];
-
-			for (int i = 0; i < values.Length; i++)
-			{
-				vertices[i].Pos.X = pos.X + 0.5f + i * sampleXRatio;
-				vertices[i].Pos.Y = pos.Y + 0.5f + (1.0f - values[i]) * h;
-				vertices[i].Pos.Z = pos.Z;
-				vertices[i].Color = (colors != null) ? (baseColor * colors[i]) : baseColor;
-			}
-			this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-			device.AddVertices(this.CurrentState.MaterialDirect, VertexMode.LineStrip, vertices, values.Length);
-		}
-		/// <summary>
-		/// Draws a horizontally aligned graph.
-		/// </summary>
-		/// <param name="values">An array of value samples that will be represented by the graph.</param>
-		/// <param name="colors">An array of color values corresponding to the supplied values. Specify null, if no coloring is required.</param>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		public void DrawHorizontalGraph(float[] values, ColorRgba[] colors, float x, float y, float z, float w, float h)
-		{
-			VertexC1P3[] vertices = null;
-			this.DrawHorizontalGraph(values, colors, ref vertices, x, y, z, w, h);
-		}
-		/// <summary>
-		/// Draws a horizontally aligned graph.
-		/// </summary>
-		/// <param name="values">An array of value samples that will be represented by the graph.</param>
-		/// <param name="colors">An array of color values corresponding to the supplied values. Specify null, if no coloring is required.</param>
-		/// <param name="vertices">Optional vertex cache to use for the graph. If set, the graphs vertices are cached and re-used for better Profile.</param>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		public void DrawHorizontalGraph(float[] values, ColorRgba[] colors, ref VertexC1P3[] vertices, float x, float y, float w, float h)
-		{
-			this.DrawHorizontalGraph(values, colors, ref vertices, x, y, 0.0f, w, h);
-		}
-		/// <summary>
-		/// Draws a horizontally aligned graph.
-		/// </summary>
-		/// <param name="values">An array of value samples that will be represented by the graph.</param>
-		/// <param name="colors">An array of color values corresponding to the supplied values. Specify null, if no coloring is required.</param>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		public void DrawHorizontalGraph(float[] values, ColorRgba[] colors, float x, float y, float w, float h)
-		{
-			VertexC1P3[] vertices = null;
-			this.DrawHorizontalGraph(values, colors, ref vertices, x, y, 0.0f, w, h);
+			this.FillRect(x, y, 0, width, height);
 		}
 
 		/// <summary>
@@ -1386,9 +1302,9 @@ namespace Duality
 		/// <param name="y"></param>
 		/// <param name="z"></param>
 		/// <param name="blockAlign">Specifies the alignment of the text block.</param>
-		public void DrawText(string text, float x, float y, float z = 0.0f, Alignment blockAlign = Alignment.TopLeft)
+		public void DrawText(string text, float x, float y, float z = 0.0f, Alignment blockAlign = Alignment.TopLeft, bool drawBackground = false)
 		{
-			this.DrawText(new string[] { text }, x, y, z, blockAlign);
+			this.DrawText(new string[] { text }, x, y, z, blockAlign, drawBackground);
 		}
 		/// <summary>
 		/// Draws the specified text.
@@ -1399,14 +1315,34 @@ namespace Duality
 		/// <param name="y"></param>
 		/// <param name="z"></param>
 		/// <param name="blockAlign">Specifies the alignment of the text block. To make use of individual line alignment, use the <see cref="FormattedText"/> overload.</param>
-		public void DrawText(string[] text, ref VertexC1P3T2[] vertices, float x, float y, float z = 0.0f, Alignment blockAlign = Alignment.TopLeft)
+		public void DrawText(string[] text, ref VertexC1P3T2[][] vertices, float x, float y, float z = 0.0f, Alignment blockAlign = Alignment.TopLeft, bool drawBackground = false)
 		{
 			if (text == null || text.Length == 0) return;
 
+			Vector2 textSize = Vector2.Zero;
 			if (blockAlign != Alignment.TopLeft)
 			{
-				Vector2 textSize = this.MeasureText(text);
+				if (textSize == Vector2.Zero) textSize = this.MeasureText(text);
 				blockAlign.ApplyTo(ref x, ref y, textSize.X, textSize.Y);
+			}
+
+			if (drawBackground)
+			{
+				if (textSize == Vector2.Zero) textSize = this.MeasureText(text);
+				Vector2 padding = new Vector2(this.CurrentState.TextFont.Res.Height, this.CurrentState.TextFont.Res.Height) * 0.35f;
+
+				ColorFormat.ColorRgba baseColor = this.CurrentState.MaterialDirect.MainColor * this.CurrentState.ColorTint;
+				const float backAlpha = 0.65f;
+				float baseAlpha = (float)baseColor.A / 255.0f;
+				float baseLuminance = baseColor.GetLuminance();
+
+				this.PushState();
+				this.CurrentState.SetMaterial(new Resources.BatchInfo(
+					Resources.DrawTechnique.Alpha, 
+					(baseLuminance > 0.5f ? ColorFormat.ColorRgba.Black : ColorFormat.ColorRgba.White).WithAlpha(baseAlpha * backAlpha)));
+				this.CurrentState.ColorTint = ColorFormat.ColorRgba.White;
+				this.FillRect(x - padding.X, y - padding.Y, textSize.X + padding.X * 2, textSize.Y + padding.Y * 2);
+				this.PopState();
 			}
 
 			Vector3 pos = new Vector3(x, y, z);
@@ -1420,16 +1356,23 @@ namespace Duality
 			BatchInfo customMat = new BatchInfo(this.CurrentState.MaterialDirect);
 			customMat.MainTexture = font.Material.MainTexture;
 
+			// Prepare for attempt to use Canvas buffering
+			if (vertices == null || vertices.Length < text.Length)
+				vertices = new VertexC1P3T2[text.Length][];
+
 			Vector2 size = Vector2.Zero;
 			for (int i = 0; i < text.Length; i++)
 			{
-				int vertexCount = font.EmitTextVertices(text[i], ref vertices, pos.X, pos.Y, pos.Z, this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor, 0.0f, scale);
+				// Attempt to use Canvas buffering
+				if (vertices[i] == null || vertices[i].Length < text[i].Length * 4)
+					vertices[i] = this.buffer.RequestVertexArray(text[i].Length * 4);
 
-				this.CurrentState.TransformVertices(vertices, shapeHandle, scale);
-				device.AddVertices(customMat, VertexMode.Quads, vertices, vertexCount);
+				int vertexCount = font.EmitTextVertices(text[i], ref vertices[i], pos.X, pos.Y, pos.Z, this.CurrentState.ColorTint * this.CurrentState.MaterialDirect.MainColor, 0.0f, scale);
+
+				this.CurrentState.TransformVertices(vertices[i], shapeHandle, scale);
+				device.AddVertices(customMat, VertexMode.Quads, vertices[i], vertexCount);
 
 				pos.Y += font.LineSpacing * scale;
-				vertices = null;
 			}
 		}
 		/// <summary>
@@ -1440,10 +1383,10 @@ namespace Duality
 		/// <param name="y"></param>
 		/// <param name="z"></param>
 		/// <param name="blockAlign">Specifies the alignment of the text block. To make use of individual line alignment, use the <see cref="FormattedText"/> overload.</param>
-		public void DrawText(string[] text, float x, float y, float z = 0.0f, Alignment blockAlign = Alignment.TopLeft)
+		public void DrawText(string[] text, float x, float y, float z = 0.0f, Alignment blockAlign = Alignment.TopLeft, bool drawBackground = false)
 		{
-			VertexC1P3T2[] vertices = null;
-			this.DrawText(text, ref vertices, x, y, z, blockAlign);
+			VertexC1P3T2[][] vertices = null;
+			this.DrawText(text, ref vertices, x, y, z, blockAlign, drawBackground);
 		}
 		/// <summary>
 		/// Draws the specified formatted text.
@@ -1456,12 +1399,30 @@ namespace Duality
 		/// <param name="z"></param>
 		/// <param name="iconMat"></param>
 		/// <param name="blockAlign">Specifies the alignment of the text block. To make use of individual line alignment, make use of <see cref="FormattedText"/> format tags.</param>
-		public void DrawText(FormattedText text, ref VertexC1P3T2[][] vertText, ref VertexC1P3T2[] vertIcon, float x, float y, float z = 0.0f, BatchInfo iconMat = null, Alignment blockAlign = Alignment.TopLeft)
+		public void DrawText(FormattedText text, ref VertexC1P3T2[][] vertText, ref VertexC1P3T2[] vertIcon, float x, float y, float z = 0.0f, BatchInfo iconMat = null, Alignment blockAlign = Alignment.TopLeft, bool drawBackground = false)
 		{
 			if (text == null || text.IsEmpty) return;
 
 			if (blockAlign != Alignment.TopLeft)
 				blockAlign.ApplyTo(ref x, ref y, text.Size.X, text.Size.Y);
+
+			if (drawBackground)
+			{
+				Vector2 padding = new Vector2(this.CurrentState.TextFont.Res.Height, this.CurrentState.TextFont.Res.Height) * 0.35f;
+
+				ColorFormat.ColorRgba baseColor = this.CurrentState.MaterialDirect.MainColor * this.CurrentState.ColorTint;
+				const float backAlpha = 0.65f;
+				float baseAlpha = (float)baseColor.A / 255.0f;
+				float baseLuminance = baseColor.GetLuminance();
+
+				this.PushState();
+				this.CurrentState.SetMaterial(new Resources.BatchInfo(
+					Resources.DrawTechnique.Alpha, 
+					(baseLuminance > 0.5f ? ColorFormat.ColorRgba.Black : ColorFormat.ColorRgba.White).WithAlpha(baseAlpha * backAlpha)));
+				this.CurrentState.ColorTint = ColorFormat.ColorRgba.White;
+				this.FillRect(x - padding.X, y - padding.Y, text.Size.X + padding.X * 2, text.Size.Y + padding.Y * 2);
+				this.PopState();
+			}
 
 			Vector3 pos = new Vector3(x, y, z);
 			float scale = 1.0f;
@@ -1498,82 +1459,11 @@ namespace Duality
 		/// <param name="z"></param>
 		/// <param name="iconMat"></param>
 		/// <param name="blockAlign">Specifies the alignment of the text block. To make use of individual line alignment, make use of <see cref="FormattedText"/> format tags.</param>
-		public void DrawText(FormattedText text, float x, float y, float z = 0.0f, BatchInfo iconMat = null, Alignment blockAlign = Alignment.TopLeft)
+		public void DrawText(FormattedText text, float x, float y, float z = 0.0f, BatchInfo iconMat = null, Alignment blockAlign = Alignment.TopLeft, bool drawBackground = false)
 		{
 			VertexC1P3T2[][] vertText = null;
 			VertexC1P3T2[] vertIcon = null;
-			this.DrawText(text, ref vertText, ref vertIcon, x, y, z, iconMat, blockAlign);
-		}
-
-		/// <summary>
-		/// Draws a simple background rectangle for the specified text. Its color is automatically determined
-		/// based on the current state in order to generate an optimal contrast to the text.
-		/// </summary>
-		/// <param name="text"></param>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="backAlpha"></param>
-		/// <param name="blockAlign">Specifies the alignment of the text block. To make use of individual line alignment, use the <see cref="FormattedText"/> overload.</param>
-		public void DrawTextBackground(string text, float x, float y, float z = 0.0f, float backAlpha = 0.65f, Alignment blockAlign = Alignment.TopLeft)
-		{
-			this.DrawTextBackground(this.MeasureText(text), x, y, z, backAlpha, blockAlign);
-		}
-		/// <summary>
-		/// Draws a simple background rectangle for the specified text. Its color is automatically determined
-		/// based on the current state in order to generate an optimal contrast to the text.
-		/// </summary>
-		/// <param name="text"></param>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="backAlpha"></param>
-		/// <param name="blockAlign">Specifies the alignment of the text block. To make use of individual line alignment, use the <see cref="FormattedText"/> overload.</param>
-		public void DrawTextBackground(string[] text, float x, float y, float z = 0.0f, float backAlpha = 0.65f, Alignment blockAlign = Alignment.TopLeft)
-		{
-			this.DrawTextBackground(this.MeasureText(text), x, y, z, backAlpha, blockAlign);
-		}
-		/// <summary>
-		/// Draws a simple background rectangle for the specified text. Its color is automatically determined
-		/// based on the current state in order to generate an optimal contrast to the text.
-		/// </summary>
-		/// <param name="text"></param>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="backAlpha"></param>
-		/// <param name="blockAlign">Specifies the alignment of the text block. To make use of individual line alignment, make use of <see cref="FormattedText"/> format tags.</param>
-		public void DrawTextBackground(FormattedText text, float x, float y, float z = 0.0f, float backAlpha = 0.65f, Alignment blockAlign = Alignment.TopLeft)
-		{
-			this.DrawTextBackground(text.Size, x, y, z, backAlpha, blockAlign);
-		}
-		/// <summary>
-		/// Draws a simple background rectangle for a text of the specified size. Its color is automatically determined
-		/// based on the current state in order to generate an optimal contrast to the text.
-		/// </summary>
-		/// <param name="textSize"></param>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="z"></param>
-		/// <param name="backAlpha"></param>
-		/// <param name="blockAlign">Specifies the alignment of the text block. To make use of individual line alignment, use the <see cref="FormattedText"/> overload.</param>
-		public void DrawTextBackground(Vector2 textSize, float x, float y, float z = 0.0f, float backAlpha = 0.65f, Alignment blockAlign = Alignment.TopLeft)
-		{
-			Vector2 padding = new Vector2(this.CurrentState.TextFont.Res.Height, this.CurrentState.TextFont.Res.Height) * 0.35f;
-			
-			blockAlign.ApplyTo(ref x, ref y, textSize.X, textSize.Y);
-
-			ColorFormat.ColorRgba clr = this.CurrentState.MaterialDirect.MainColor * this.CurrentState.ColorTint;
-			float alpha = (float)clr.A / 255.0f;
-			float lum = clr.GetLuminance();
-
-			this.PushState();
-			this.CurrentState.SetMaterial(new Resources.BatchInfo(
-				Resources.DrawTechnique.Alpha, 
-				(lum > 0.5f ? ColorFormat.ColorRgba.Black : ColorFormat.ColorRgba.White).WithAlpha(alpha * backAlpha)));
-			this.CurrentState.ColorTint = ColorFormat.ColorRgba.White;
-			this.FillRect(x - padding.X, y - padding.Y, textSize.X + padding.X * 2, textSize.Y + padding.Y * 2);
-			this.PopState();
+			this.DrawText(text, ref vertText, ref vertIcon, x, y, z, iconMat, blockAlign, drawBackground);
 		}
 
 		/// <summary>

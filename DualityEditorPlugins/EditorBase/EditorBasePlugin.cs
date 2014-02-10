@@ -8,6 +8,7 @@ using WeifenLuo.WinFormsUI.Docking;
 using Duality;
 using Duality.Components;
 using Duality.Components.Renderers;
+using Duality.Components.Diagnostics;
 using Duality.Components.Physics;
 using Duality.Resources;
 using TextRenderer = Duality.Components.Renderers.TextRenderer;
@@ -181,6 +182,7 @@ namespace EditorBase
 			CorePluginRegistry.RegisterTypeImage(typeof(SoundListener),			EditorBaseResCache.IconCmpSoundListener);
 			CorePluginRegistry.RegisterTypeImage(typeof(RigidBody),				EditorBaseResCache.IconCmpRectCollider);
 			CorePluginRegistry.RegisterTypeImage(typeof(ProfileRenderer),		EditorBaseResCache.IconCmpProfileRenderer);
+			CorePluginRegistry.RegisterTypeImage(typeof(RigidBodyRenderer),		EditorBaseResCache.IconCmpRigidBodyRenderer);
 
 			CorePluginRegistry.RegisterTypeCategory(typeof(Transform),			"");
 			CorePluginRegistry.RegisterTypeCategory(typeof(SpriteRenderer),		GeneralRes.Category_Graphics);
@@ -191,6 +193,7 @@ namespace EditorBase
 			CorePluginRegistry.RegisterTypeCategory(typeof(SoundListener),		GeneralRes.Category_Sound);
 			CorePluginRegistry.RegisterTypeCategory(typeof(RigidBody),			GeneralRes.Category_Physics);
 			CorePluginRegistry.RegisterTypeCategory(typeof(ProfileRenderer),	GeneralRes.Category_Diagnostics);
+			CorePluginRegistry.RegisterTypeCategory(typeof(RigidBodyRenderer),	GeneralRes.Category_Diagnostics);
 
 			CorePluginRegistry.RegisterTypeCategory(typeof(Scene),				"");
 			CorePluginRegistry.RegisterTypeCategory(typeof(Prefab),				"");

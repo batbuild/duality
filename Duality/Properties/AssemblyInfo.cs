@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -38,3 +39,4 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("DualityLauncher")]
 [assembly: InternalsVisibleTo("DualityDebugging")]
 [assembly: InternalsVisibleTo("Duality.Tests")]
+[assembly: NeutralResourcesLanguageAttribute("en-US", UltimateResourceFallbackLocation.MainAssembly)]
