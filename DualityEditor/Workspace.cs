@@ -18,7 +18,9 @@ namespace DualityEditor
 
 		public IEnumerable<string> GetLayoutNames()
 		{
-			return Directory.EnumerateFiles(Path.Combine(Path.Combine(Path.GetDirectoryName(DualityApp.UserDataPath), LayoutsFolder)))
+			CreateLayoutsFolderIfItDoesntExist();
+
+			return Directory.EnumerateFiles(Path.Combine(GetLayoutsFolder()))
 				.Select(Path.GetFileNameWithoutExtension)
 				.OrderBy(s => s);
 		}
@@ -109,6 +111,20 @@ namespace DualityEditor
 
 			// If none exists, create one
 			return deserializeDockContent ?? (dockContentType.CreateInstanceOf() as IDockContent);
+		}
+
+		private static void CreateLayoutsFolderIfItDoesntExist()
+		{
+			if (Directory.Exists(GetLayoutsFolder())) 
+				return;
+
+			Log.Core.Write("Creating layouts folder in {0}", GetLayoutsFolder());
+			Directory.CreateDirectory(GetLayoutsFolder());
+		}
+
+		private static string GetLayoutsFolder()
+		{
+			return Path.Combine(Path.GetDirectoryName(DualityApp.UserDataPath), LayoutsFolder);
 		}
 	}
 }
