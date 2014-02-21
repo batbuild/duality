@@ -135,5 +135,7 @@ namespace Duality
 		/// <param name="vertexBuffer">A vertex data buffer that stores the vertices to add.</param>
 		/// <param name="vertexCount">The number of vertices to add, from the beginning of the buffer.</param>
 		void AddVertices<T>(BatchInfo material, VertexMode vertexMode, T[] vertexBuffer, int vertexCount) where T : struct, IVertexData;
+
+		void AddBatch(IDrawBatch drawBatch);
 	}
 }
