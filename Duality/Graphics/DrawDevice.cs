@@ -126,7 +126,12 @@ namespace Duality
 			get { return this.viewportRect.Size; }
 		}
 
-		
+		public Matrix4 MatProjection
+		{
+			get { return matProjection; }
+		}
+
+
 		public DrawDevice()
 		{
 			this.UpdateZSortAccuracy();
@@ -484,7 +489,7 @@ namespace Duality
 			Vector2 refSize = this.TargetSize;
 			this.GenerateModelView(out this.matModelView);
 			this.GenerateProjection(new Rect(refSize), out this.matProjection);
-			this.matFinal = this.matModelView * this.matProjection;
+			this.matFinal = this.matModelView * this.MatProjection;
 		}
 		public void BeginRendering(ClearFlag clearFlags, ColorRgba clearColor, float clearDepth)
 		{

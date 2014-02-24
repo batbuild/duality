@@ -51,9 +51,10 @@ namespace Duality
 		/// [GET] The size of the surface this drawing device operates on.
 		/// </summary>
 		Vector2 TargetSize { get; }
-		
 
-		
+		Matrix4 MatProjection { get; }
+
+
 		/// <summary>
 		/// Returns the scale factor of objects that are located at the specified (world space) z-Coordinate.
 		/// </summary>
