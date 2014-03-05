@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AdamsLair.PropertyGrid
 {
-	public class ObjectItem
+	public class ObjectItem 
 	{
 		private object	value	= null;
 		private string	caption	= null;
