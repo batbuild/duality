@@ -51,9 +51,10 @@ namespace Duality
 		/// [GET] The size of the surface this drawing device operates on.
 		/// </summary>
 		Vector2 TargetSize { get; }
-		
 
-		
+		Matrix4 MatProjection { get; }
+
+
 		/// <summary>
 		/// Returns the scale factor of objects that are located at the specified (world space) z-Coordinate.
 		/// </summary>
@@ -135,5 +136,7 @@ namespace Duality
 		/// <param name="vertexBuffer">A vertex data buffer that stores the vertices to add.</param>
 		/// <param name="vertexCount">The number of vertices to add, from the beginning of the buffer.</param>
 		void AddVertices<T>(BatchInfo material, VertexMode vertexMode, T[] vertexBuffer, int vertexCount) where T : struct, IVertexData;
+
+		void AddBatch(IDrawBatch drawBatch);
 	}
 }
