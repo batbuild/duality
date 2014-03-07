@@ -131,6 +131,11 @@ namespace Duality
 			get { return matProjection; }
 		}
 
+		public bool IsRenderTargetActive
+		{
+			get { return this.renderTarget.IsAvailable; }
+		}
+
 
 		public DrawDevice()
 		{

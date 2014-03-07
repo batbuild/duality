@@ -53,6 +53,7 @@ namespace Duality
 		Vector2 TargetSize { get; }
 
 		Matrix4 MatProjection { get; }
+		bool IsRenderTargetActive { get; }
 
 
 		/// <summary>
