@@ -440,8 +440,7 @@ namespace Duality.Resources
 			{
 				this.premultiplyAlpha = value;
 				
-				if(this.basePixmap.Res.PixelData.Count > 1)
-					this.basePixmap.Res.PixelData.RemoveAt(ProcessedPixmapLayerIndex);
+				RemoveProcessedPixmap();
 
 				this.needsReload = true;
 			}
@@ -511,6 +510,7 @@ namespace Duality.Resources
 		/// </summary>
 		public void ReloadData()
 		{
+			RemoveProcessedPixmap();
 			this.LoadData(this.basePixmap, this.texSizeMode);
 		}
 		/// <summary>
@@ -807,6 +807,12 @@ namespace Duality.Resources
 
 			if(!this.basePixmap.Res.IsDefaultContent && !this.basePixmap.Res.IsRuntimeResource)
 				this.basePixmap.Res.Save();
+		}
+
+		private void RemoveProcessedPixmap()
+		{
+			if (this.basePixmap.Res.PixelData.Count > 1)
+				this.basePixmap.Res.PixelData.RemoveAt(ProcessedPixmapLayerIndex);
 		}
 	}
 }
