@@ -52,6 +52,9 @@ namespace Duality.Helpers
 					continue;
 
 				receiver.HandleMessage(sender, msg);
+
+				if (msg.Handled)
+					break;
 			}
 		}
 	}

@@ -2,5 +2,6 @@
 {
 	public abstract class GameMessage
 	{
+		public bool Handled;
 	}
 }
