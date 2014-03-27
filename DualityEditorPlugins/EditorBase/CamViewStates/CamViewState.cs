@@ -131,6 +131,78 @@ namespace EditorBase.CamViewStates
 			}
 		}
 
+		public class TransformGizmo
+		{
+			private const int ArrowLength = 70;
+			private const int ArrowHeadWidth = 10;
+			private const int ArrowHeadHeight = 20;
+			private const int GrabRectSize = 20;
+			private const int ArrowSelectionThreshold = 10;
+
+			public static void Draw(Canvas canvas, List<SelObj> transformObjSel, Vector3 position, float scale)
+			{
+				if (transformObjSel.Count != 1 || !(transformObjSel.First().ActualObject is GameObject))
+					return;
+
+				if ((transformObjSel.First().ActualObject as GameObject).Renderer != null)
+					return;
+
+				var screenArrowLength = ArrowLength / scale;
+				var screenArrowHeadWidth = ArrowHeadWidth / scale;
+				var screenArrowHeadHeight = ArrowHeadHeight / scale;
+				var screenGrabRectSize = GrabRectSize / scale;
+
+				canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, new ColorRgba(129, 191, 72)));
+				canvas.DrawLine(position.X, position.Y, position.Z,
+					position.X, position.Y - screenArrowLength,
+					position.Z);
+				canvas.FillPolygon(new[]
+				{
+					new Vector2((screenArrowHeadWidth / 2), 0),
+					new Vector2(-(screenArrowHeadWidth / 2), 0),
+					new Vector2(0, -screenArrowHeadHeight)
+				}, position.X, position.Y - screenArrowLength, position.Z);
+
+				canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, new ColorRgba(174, 65, 42)));
+				canvas.DrawLine(position.X, position.Y, position.Z,
+					position.X + screenArrowLength, position.Y,
+					position.Z);
+				canvas.FillPolygon(new[]
+				{
+					new Vector2(0, (screenArrowHeadWidth / 2)),
+					new Vector2(0, -(screenArrowHeadWidth / 2)),
+					new Vector2(screenArrowHeadHeight, 0)
+				}, position.X + screenArrowLength, position.Y, position.Z);
+
+				canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, new ColorRgba(175, 190, 253, 127)));
+				canvas.FillRect(position.X, position.Y - screenGrabRectSize, position.Z, screenGrabRectSize, screenGrabRectSize);
+
+				canvas.CurrentState.SetMaterial(new BatchInfo(DrawTechnique.Solid, new ColorRgba(33, 75, 253, 127)));
+				canvas.DrawRect(position.X, position.Y - screenGrabRectSize, position.Z, screenGrabRectSize, screenGrabRectSize);
+			}
+
+			public static bool IsGrabRectSelected(SelObj selObj, float scale, Vector3 mouseSpaceCoord)
+			{
+				var selObjPosition = selObj.Pos;
+				var selectionRect = new Rect(selObjPosition.X, selObjPosition.Y - (GrabRectSize / scale), GrabRectSize / scale, GrabRectSize / scale);
+				return selectionRect.Contains(mouseSpaceCoord.Xy);
+			}
+
+			public static bool IsVerticalAxisSelected(SelObj selObj, float scale, Vector3 mouseSpaceCoord)
+			{
+				var selObjPosition = selObj.Pos;
+				return MathF.PointLineDistance(mouseSpaceCoord.X, mouseSpaceCoord.Y, selObjPosition.X, selObjPosition.Y, selObjPosition.X + (ArrowLength / scale), selObjPosition.Y) 
+					< (ArrowSelectionThreshold / scale);
+			}
+
+			public static bool IsHorizontalAxisSelected(SelObj selObj, float scale, Vector3 mouseSpaceCoord)
+			{
+				var selObjPosition = selObj.Pos;
+				return MathF.PointLineDistance(mouseSpaceCoord.X, mouseSpaceCoord.Y, selObjPosition.X, selObjPosition.Y, selObjPosition.X, selObjPosition.Y - (ArrowLength/scale))
+					< (ArrowSelectionThreshold / scale);
+			}
+		}
+
 
 		private static readonly ContentRef<Duality.Resources.Font> OverlayFont = Duality.Resources.Font.GenericMonospace8;
 
@@ -470,8 +542,11 @@ namespace EditorBase.CamViewStates
 				this.DrawLockedAxes(canvas, this.selectionCenter.X, this.selectionCenter.Y, this.selectionCenter.Z, this.selectionRadius * 4);
 			}
 
+			TransformGizmo.Draw(canvas, transformObjSel, this.selectionCenter, this.GetScaleAtZ(this.selectionCenter.Z));
+
 			canvas.PopState();
 		}
+
 		protected virtual void OnCollectStateOverlayDrawcalls(Canvas canvas)
 		{
 			// Gather general data
@@ -968,8 +1043,6 @@ namespace EditorBase.CamViewStates
 				this.UpdateObjRotate(mouseLoc);
 			else if (this.action == ObjectAction.Scale)
 				this.UpdateObjScale(mouseLoc);
-			else
-				this.UpdateMouseover(mouseLoc);
 
 			if (this.action != ObjectAction.None)
 				this.InvalidateSelectionStats();
@@ -1011,10 +1084,31 @@ namespace EditorBase.CamViewStates
 				// Determine object at mouse position
 				this.mouseoverObject = this.PickSelObjAt(mouseLoc.X, mouseLoc.Y);
 
-				// Determine action variables
 				Vector3 mouseSpaceCoord = this.GetSpaceCoord(new Vector3(mouseLoc.X, mouseLoc.Y, this.selectionCenter.Z));
 				float scale = this.GetScaleAtZ(this.selectionCenter.Z);
 				const float boundaryThickness = 10.0f;
+
+				if (mouseoverObject == null && this.actionObjSel.Count == 1 && this.actionObjSel.First().ActualObject is GameObject && this.actionObjSel.First().HasTransform)
+				{
+					var selObjPosition = this.actionObjSel.First().Pos;
+
+					if (TransformGizmo.IsGrabRectSelected(this.actionObjSel.First(), scale, mouseSpaceCoord))
+					{
+						this.mouseoverObject = this.actionObjSel.First();
+					}
+					else if (TransformGizmo.IsVerticalAxisSelected(this.actionObjSel.First(), scale, mouseSpaceCoord))
+					{
+						this.mouseoverObject = this.actionObjSel.First();
+						this.actionLockedAxis = LockedAxis.X;
+					}
+					else if (TransformGizmo.IsHorizontalAxisSelected(this.actionObjSel.First(), scale, mouseSpaceCoord))
+					{
+						this.mouseoverObject = this.actionObjSel.First();
+						this.actionLockedAxis = LockedAxis.Y;
+					}
+				}
+
+				// Determine action variables
 				bool tooSmall = this.selectionRadius * scale <= boundaryThickness * 2.0f;
 				bool mouseOverBoundary = MathF.Abs((mouseSpaceCoord - this.selectionCenter).Length - this.selectionRadius) * scale < boundaryThickness;
 				bool mouseInsideBoundary = !mouseOverBoundary && (mouseSpaceCoord - this.selectionCenter).Length < this.selectionRadius;
@@ -1125,7 +1219,18 @@ namespace EditorBase.CamViewStates
 			mov.Z = zMovement;
 			target.Z = 0;
 
-			mov = this.ApplyAxisLock(mov, movLock, target + (Vector3.UnitZ * this.CameraObj.Transform.Pos.Z) - this.actionBeginLocSpace);
+			if (this.actionLockedAxis == LockedAxis.X)
+			{
+				mov = new Vector3(mov.X, 0, 0);
+			}
+			else if (this.actionLockedAxis == LockedAxis.Y)
+			{
+				mov = new Vector3(0, mov.Y, 0);
+			}
+			else
+			{
+				mov = this.ApplyAxisLock(mov, movLock, target + (Vector3.UnitZ * this.CameraObj.Transform.Pos.Z) - this.actionBeginLocSpace);
+			}
 
 			this.MoveSelectionBy(mov);
 
@@ -1285,6 +1390,7 @@ namespace EditorBase.CamViewStates
 		{
 			this.drawCamGizmoState = CameraAction.None;
 			this.drawSelGizmoState = ObjectAction.None;
+			this.actionLockedAxis = LockedAxis.None;
 
 			if (this.camBeginDragScene)
 			{
@@ -1339,6 +1445,9 @@ namespace EditorBase.CamViewStates
 			}
 			else
 			{
+				Point mouseLoc = this.PointToClient(Cursor.Position);
+				this.UpdateMouseover(mouseLoc);
+
 				if (this.action == ObjectAction.None)
 				{
 					if (e.Button == MouseButtons.Left)
