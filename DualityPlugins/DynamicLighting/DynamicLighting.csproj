@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -38,9 +40,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Duality\OpenTK.dll</HintPath>
+    <Reference Include="OpenTK">
+      <HintPath>..\..\packages\OpenTK.1.1.1550.5715\lib\net40\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -71,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="EmbeddedResources\iconCmpLightingSpriteRenderer.png" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="EmbeddedResources\iconResLightingTechnique.png" />
@@ -94,6 +96,7 @@ mkdir  "$(SolutionDir)DualityEditor\bin\$(ConfigurationName)\Plugins"
 copy "$(TargetPath)" "$(SolutionDir)DualityEditor\bin\$(ConfigurationName)\Plugins"
 copy "$(TargetDir)$(TargetName).xml" "$(SolutionDir)DualityEditor\bin\$(ConfigurationName)\Plugins"</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

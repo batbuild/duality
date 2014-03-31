@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -51,20 +53,21 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerDuality">
-      <HintPath>.\FarseerDuality.dll</HintPath>
-    </Reference>
-    <Reference Include="NVorbis, Version=0.7.3.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="FarseerDuality, Version=3.3.5203.28885, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\NVorbis.dll</HintPath>
+      <HintPath>..\packages\FarseerDuality.0.1.0.0\lib\net40\FarseerDuality.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+    <Reference Include="NVorbis, Version=0.7.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\OpenTK.dll</HintPath>
+      <HintPath>..\packages\NVorbis.0.7.4\lib\NVorbis.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTK.GLControl, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\OpenTK.GLControl.dll</HintPath>
+      <HintPath>..\packages\OpenTK.1.1.1550.5715\lib\net40\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\OpenTK.GLControl.1.1.1550.5715\lib\net40\OpenTK.GLControl.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -296,6 +299,7 @@
     <EmbeddedResource Include="EmbeddedResources\DualityIcon.png" />
     <EmbeddedResource Include="EmbeddedResources\DualityIconB.png" />
     <EmbeddedResource Include="EmbeddedResources\SharpAlpha.frag" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="EmbeddedResources\Beep.ogg" />
@@ -358,6 +362,7 @@
     <PostBuildEvent>mkdir  "$(SolutionDir)DualityEditor\bin\$(ConfigurationName)"
 copy "$(TargetDir)Duality.xml" "$(SolutionDir)DualityEditor\bin\$(ConfigurationName)"</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

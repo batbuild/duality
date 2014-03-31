@@ -22,6 +22,8 @@
     <AssemblyName>Steering.core</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -48,7 +50,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="OpenTK">
-      <HintPath>..\..\Duality\OpenTK.dll</HintPath>
+      <HintPath>..\..\packages\OpenTK.1.1.1550.5715\lib\net40\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -91,6 +93,9 @@
       <LastGenOutput>SteeringRes.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir  "$(SolutionDir)DualityLauncher\bin\$(ConfigurationName)\Plugins"
@@ -100,6 +105,7 @@ mkdir  "$(SolutionDir)DualityEditor\bin\$(ConfigurationName)\Plugins"
 copy "$(TargetPath)" "$(SolutionDir)DualityEditor\bin\$(ConfigurationName)\Plugins"
 copy "$(TargetDir)$(TargetName).xml" "$(SolutionDir)DualityEditor\bin\$(ConfigurationName)\Plugins"</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

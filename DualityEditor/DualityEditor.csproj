@@ -14,6 +14,8 @@
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>DualityIconC.ico</ApplicationIcon>
@@ -66,24 +68,25 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AdamsLair.WinForms">
-      <HintPath>.\AdamsLair.WinForms.dll</HintPath>
-    </Reference>
-    <Reference Include="Aga.Controls, Version=1.7.0.0, Culture=neutral, PublicKeyToken=fcc90fbf924463a3, processorArchitecture=MSIL">
+    <Reference Include="AdamsLair.WinForms, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Aga.Controls.dll</HintPath>
+      <HintPath>..\packages\AdamsLair.WinForms.0.1.0.0\lib\net40\AdamsLair.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Aga.Controls, Version=1.7.0.1, Culture=neutral, PublicKeyToken=fcc90fbf924463a3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Aga.Controls.0.1.0.0\lib\net40\Aga.Controls.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>.\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build" />
-    <Reference Include="OpenTK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Duality\OpenTK.dll</HintPath>
+      <HintPath>..\packages\OpenTK.1.1.1550.5715\lib\net40\OpenTK.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTK.GLControl, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+    <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Duality\OpenTK.GLControl.dll</HintPath>
+      <HintPath>..\packages\OpenTK.GLControl.1.1.1550.5715\lib\net40\OpenTK.GLControl.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -92,8 +95,9 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="WeifenLuo.WinFormsUI.Docking">
-      <HintPath>.\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5cded1a1a0a7b481, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\dockpanelsuite.0.1.0.0\lib\net40\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
     </Reference>
     <Reference Include="Windows7.DesktopIntegration">
       <HintPath>.\Windows7.DesktopIntegration.dll</HintPath>
@@ -246,7 +250,7 @@
     <Compile Include="Workspace.cs" />
     <EmbeddedResource Include="Forms\CreateObjectDialog.resx">
       <DependentUpon>CreateObjectDialog.cs</DependentUpon>
-    </EmbeddedResource>    
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\GeneralRes.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
@@ -287,6 +291,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -304,9 +309,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Aga.Controls.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="DualityIcon.ico" />
     <Content Include="DualityIconB.ico" />
     <Content Include="DualityIconC.ico" />
@@ -357,6 +359,7 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

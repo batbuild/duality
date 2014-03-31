@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -38,9 +40,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\NUnit\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Duality\OpenTK.dll</HintPath>
+      <HintPath>..\..\packages\OpenTK.1.1.1550.5715\lib\net40\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -89,6 +91,7 @@
     <None Include="EmbeddedResources\CanvasTestNothing.png" />
     <None Include="EmbeddedResources\FormatterTestOldBinaryData.dat" />
     <None Include="EmbeddedResources\FormatterTestOldXmlData.dat" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="EmbeddedResources\CanvasTestRedSquare.png" />
@@ -105,6 +108,7 @@
   <PropertyGroup>
     <PostBuildEvent>copy "$(SolutionDir)Duality\bin\$(ConfigurationName)\*.*" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

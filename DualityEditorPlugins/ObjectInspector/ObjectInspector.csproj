@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,16 +36,18 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AdamsLair.WinForms">
-      <HintPath>..\..\DualityEditor\AdamsLair.WinForms.dll</HintPath>
+    <Reference Include="AdamsLair.WinForms, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.0.0\lib\net40\AdamsLair.WinForms.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="WeifenLuo.WinFormsUI.Docking">
-      <HintPath>..\..\DualityEditor\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5cded1a1a0a7b481, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\dockpanelsuite.0.1.0.0\lib\net40\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -99,12 +103,14 @@
     <None Include="EmbeddedResources\bug.png" />
     <None Include="EmbeddedResources\page_copy.png" />
     <None Include="EmbeddedResources\lock.png" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir  "$(SolutionDir)DualityEditor\bin\$(ConfigurationName)\Plugins"
 copy "$(TargetPath)" "$(SolutionDir)DualityEditor\bin\$(ConfigurationName)\Plugins"</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

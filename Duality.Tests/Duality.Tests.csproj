@@ -38,8 +38,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerDuality">
-      <HintPath>..\Duality\FarseerDuality.dll</HintPath>
+    <Reference Include="FarseerDuality, Version=3.3.5203.28885, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FarseerDuality.0.1.0.0\lib\net40\FarseerDuality.dll</HintPath>
     </Reference>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
@@ -49,7 +50,7 @@
     </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Duality\OpenTK.dll</HintPath>
+      <HintPath>..\packages\OpenTK.1.1.1550.5715\lib\net40\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
