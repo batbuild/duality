@@ -123,8 +123,8 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerOpenTK">
-      <HintPath>..\Duality\bin\Release\FarseerOpenTK.dll</HintPath>
+    <Reference Include="FarseerDuality">
+      <HintPath>..\Duality\bin\Release\FarseerDuality.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK">
       <HintPath>..\Duality\bin\Release\OpenTK.dll</HintPath>

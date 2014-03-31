@@ -4,7 +4,7 @@
         <id>DualityEditor</id>
         <version>0.1.100.0</version>
         <title>Duality Editor</title>
-        <authors>@silverspoon</authors>
+        <authors>@BatCatGames</authors>
         <owners />
         <projectUrl>https://github.com/andrea/duality</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -13,14 +13,14 @@
     </metadata>    
     <files>
         <file src="DualityEditor\bin\Release\Aga.Controls.dll" target="lib\net40\Aga.Controls.dll" />        
-        <file src="DualityEditor\bin\Release\CustomPropertyGrid.dll" target="lib\net40\CustomPropertyGrid.dll" />        
+        <file src="DualityEditor\bin\Release\AdamsLair.WinForms.dll" target="lib\net40\AdamsLair.WinForms.dll" />
         <file src="DualityEditor\bin\Release\Duality.dll" target="lib\net40\Duality.dll" />
         <file src="DualityEditor\bin\Release\Duality.xml" target="lib\net40\Duality.xml" />
         <file src="DualityEditor\bin\Release\DualityEditor.exe" target="lib\net40\DualityEditor.exe" />
         <file src="DualityEditor\bin\Release\DualityEditor.xml" target="lib\net40\DualityEditor.xml" />        
-        <file src="DualityEditor\bin\Release\FarseerOpenTK.dll" target="lib\net40\FarseerOpenTK.dll" />
-        <file src="DualityEditor\bin\Release\FarseerOpenTK.xml" target="lib\net40\FarseerOpenTK.xml" />
-        <file src="DualityEditor\bin\Release\Ionic.Zip.dll" target="lib\net40\Ionic.Zip.dll" />        
+        <file src="DualityEditor\bin\Release\FarseerDuality.dll" target="lib\net40\FarseerDuality.dll" />
+        <file src="DualityEditor\bin\Release\FarseerDuality.xml" target="lib\net40\FarseerDuality.xml" />
+        <file src="DualityEditor\bin\Release\Ionic.Zip.dll" target="lib\net40\Ionic.Zip.dll" />
         <file src="DualityEditor\bin\Release\OpenTK.dll" target="lib\net40\OpenTK.dll" />
         <file src="DualityEditor\bin\Release\OpenTK.GLControl.dll" target="lib\net40\OpenTK.GLControl.dll" />
         <file src="DualityEditor\bin\Release\OpenTK.GLControl.xml" target="lib\net40\OpenTK.GLControl.xml" />
