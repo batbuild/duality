@@ -53,9 +53,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerDuality, Version=3.3.5203.28885, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="FarseerDuality, Version=3.3.5203.32612, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FarseerDuality.0.1.0.0\lib\net40\FarseerDuality.dll</HintPath>
+      <HintPath>..\packages\FarseerDuality.0.1.3\lib\net40\FarseerDuality.dll</HintPath>
     </Reference>
     <Reference Include="NVorbis, Version=0.7.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
