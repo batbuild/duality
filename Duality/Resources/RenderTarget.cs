@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Duality.EditorHints;
+using Duality.Editor;
+using Duality.Properties;
 
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -18,6 +19,8 @@ namespace Duality.Resources
 	/// <seealso cref="Duality.Resources.Texture"/>
 	[Serializable]
 	[ExplicitResourceReference(typeof(Texture))]
+	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
+	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageRenderTarget)]
 	public class RenderTarget : Resource
 	{
 		/// <summary>
@@ -295,7 +298,9 @@ namespace Duality.Resources
 		public void SetupOpenGLRes()
 		{
 			DualityApp.GuardSingleThreadState();
-			if (this.targetInfo == null || this.targetInfo.Count == 0) return;
+			if (this.targetInfo == null) return;
+			if (this.targetInfo.Count == 0) return;
+			if (this.targetInfo.All(i => !i.target.IsAvailable)) return;
 			
 			int highestAALevel = MathF.RoundToInt(MathF.Log(MathF.Max(MaxRenderTargetSamples, 1.0f), 2.0f));
 			int targetAALevel = highestAALevel;

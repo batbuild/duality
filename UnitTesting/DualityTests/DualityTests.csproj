@@ -48,25 +48,29 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Animation\AnimationTrackTest.cs" />
+    <Compile Include="Serialization\TestObjects.cs" />
+    <Compile Include="TestHelper.cs" />
+    <Compile Include="Utility\AnimationTrackTest.cs" />
     <Compile Include="Cloning\CloneProviderTest.cs" />
     <Compile Include="Components\ICmpInitializableTest.cs" />
     <Compile Include="Components\InitializableEventReceiver.cs" />
     <Compile Include="CorePlugin.cs" />
     <Compile Include="GlobalSetup.cs" />
-    <Compile Include="Graphics\CanvasTest.cs" />
-    <Compile Include="Helpers\RawListTest.cs" />
+    <Compile Include="Drawing\CanvasTest.cs" />
+    <Compile Include="Utility\GenericOperatorTest.cs" />
+    <Compile Include="Utility\GridTest.cs" />
+    <Compile Include="Utility\NonClosingStreamWrapperTest.cs" />
+    <Compile Include="Utility\SubStreamWrapperTest.cs" />
+    <Compile Include="Utility\RawListTest.cs" />
     <Compile Include="InitDualityAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources\SceneTest.cs" />
-    <Compile Include="Serialization\FormatterTest.cs" />
-    <Compile Include="Serialization\BinaryFormatterTest.cs" />
-    <Compile Include="Serialization\XmlFormatterTest.cs" />
-    <Compile Include="TestingResources\TestRes.Designer.cs">
+    <Compile Include="Properties\TestRes.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>TestRes.resx</DependentUpon>
     </Compile>
+    <Compile Include="Resources\SceneTest.cs" />
+    <Compile Include="Serialization\FormatterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Duality\Duality.csproj">
@@ -75,19 +79,27 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="TestingResources\TestRes.resx">
+    <EmbeddedResource Include="Properties\TestRes.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
       <LastGenOutput>TestRes.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestingResources\CanvasTestNothing.png" />
+    <None Include="EmbeddedResources\CanvasTestNothing.png" />
+    <None Include="EmbeddedResources\FormatterTestOldBinaryData.dat" />
+    <None Include="EmbeddedResources\FormatterTestOldXmlData.dat" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestingResources\CanvasTestRedSquare.png" />
+    <None Include="EmbeddedResources\CanvasTestRedSquare.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestingResources\CanvasTestDiagonalLine.png" />
+    <None Include="EmbeddedResources\CanvasTestDiagonalLine.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="EmbeddedResources\CanvasTestAllShapes.png" />
+    <Content Include="EmbeddedResources\CanvasTestAllShapesTransformed.png" />
+    <Content Include="EmbeddedResources\TexCoordUV.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

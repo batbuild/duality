@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Reflection;
+using System.Xml.Linq;
 
 using Duality;
-using DualityEditor.Forms;
+using Duality.Editor.Forms;
 
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace DualityEditor
+namespace Duality.Editor
 {
 	public abstract class EditorPlugin
 	{
@@ -44,12 +45,12 @@ namespace DualityEditor
 		/// Saves the plugins user data to the provided Xml Node.
 		/// </summary>
 		/// <param name="node"></param>
-		internal protected virtual void SaveUserData(System.Xml.XmlElement node) {}
+		internal protected virtual void SaveUserData(XElement node) {}
 		/// <summary>
 		/// Loads the plugins user data from the provided Xml Node.
 		/// </summary>
 		/// <param name="node"></param>
-		internal protected virtual void LoadUserData(System.Xml.XmlElement node) {}
+		internal protected virtual void LoadUserData(XElement node) {}
 		/// <summary>
 		/// Called when initializing the editors layout and trying to set up one of this plugins DockContent.
 		/// Returns an IDockContent instance of the specified dockContentType. May return already existing

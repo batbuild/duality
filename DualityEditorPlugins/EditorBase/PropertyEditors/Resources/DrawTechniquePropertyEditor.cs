@@ -4,11 +4,12 @@ using System.Reflection;
 using Duality;
 using Duality.Resources;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.PropertyEditors;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.PropertyEditors;
 
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(DrawTechnique), PropertyEditorAssignmentAttribute.PriorityGeneral + 1)]
 	public class DrawTechniquePropertyEditor : ResourcePropertyEditor
 	{
 		protected override PropertyEditor AutoCreateMemberEditor(MemberInfo info)

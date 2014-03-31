@@ -4,21 +4,19 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.PropertyEditors;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.PropertyEditors;
 
 using Duality;
 using Duality.Components.Physics;
-
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
-using DualityEditor.UndoRedoActions;
-
-using EditorBase.UndoRedoActions;
+using Duality.Editor;
+using Duality.Editor.UndoRedoActions;
+using Duality.Editor.Plugins.Base.UndoRedoActions;
 
 
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(RigidBodyPropertyEditor), "MatchToProperty")]
 	public class RigidBodyPropertyEditor : ComponentPropertyEditor
 	{
 		private RigidBodyJointAddNewPropertyEditor	addJointEditor	= null;
@@ -141,6 +139,15 @@ namespace EditorBase.PropertyEditors
 				return new object[] { this.addJointEditor.DisplayedValue };
 			};
 		}
+
+		private static int MatchToProperty(Type propertyType, ProviderContext context)
+		{
+			bool compRef = !(context.ParentEditor is GameObjectOverviewPropertyEditor);
+			if (typeof(RigidBody).IsAssignableFrom(propertyType) && !compRef)
+				return PropertyEditorAssignmentAttribute.PriorityGeneral + 1;
+			else
+				return PropertyEditorAssignmentAttribute.PriorityNone;
+		}
 	}
 
 	public class RigidBodyJointPropertyEditor : MemberwisePropertyEditor
@@ -157,7 +164,7 @@ namespace EditorBase.PropertyEditors
 		public RigidBodyJointPropertyEditor()
 		{
 			this.EditedType = typeof(JointInfo);
-			this.HeaderStyle = AdamsLair.PropertyGrid.Renderer.GroupHeaderStyle.SmoothSunken;
+			this.HeaderStyle = AdamsLair.WinForms.Renderer.GroupHeaderStyle.SmoothSunken;
 			this.HeaderHeight = 30;
 		}
 
@@ -178,8 +185,8 @@ namespace EditorBase.PropertyEditors
 					this.otherColEditor = this.ParentGrid.CreateEditor(typeof(RigidBody), this);
 					this.otherColEditor.Getter = this.CreateOtherColValueGetter();
 					this.otherColEditor.Setter = this.CreateOtherColValueSetter();
-					this.otherColEditor.PropertyName = PluginRes.EditorBaseRes.PropertyName_OtherCollider;
-					this.otherColEditor.PropertyDesc = PluginRes.EditorBaseRes.PropertyDesc_OtherCollider;
+					this.otherColEditor.PropertyName = Properties.EditorBaseRes.PropertyName_OtherCollider;
+					this.otherColEditor.PropertyDesc = Properties.EditorBaseRes.PropertyDesc_OtherCollider;
 					this.ParentGrid.ConfigureEditor(this.otherColEditor);
 					this.AddPropertyEditor(this.otherColEditor);
 				}
@@ -258,14 +265,14 @@ namespace EditorBase.PropertyEditors
 		public RigidBodyJointAddNewPropertyEditor()
 		{
 			this.EditedType = typeof(Type);
-			this.ButtonIcon = AdamsLair.PropertyGrid.EmbeddedResources.Resources.ImageAdd;
+			this.ButtonIcon = AdamsLair.WinForms.Properties.ResourcesCache.ImageAdd;
 			this.Hints = HintFlags.Default | HintFlags.HasButton | HintFlags.ButtonEnabled;
-			this.PropertyName = PluginRes.EditorBaseRes.PropertyName_AddJoint;
-			this.PropertyDesc = PluginRes.EditorBaseRes.PropertyDesc_AddJoint;
+			this.PropertyName = Properties.EditorBaseRes.PropertyName_AddJoint;
+			this.PropertyDesc = Properties.EditorBaseRes.PropertyDesc_AddJoint;
 
 			this.Items = 
 				from t in DualityApp.GetAvailDualityTypes(typeof(JointInfo))
-				where !t.IsAbstract
+				where !t.IsAbstract && !t.GetCustomAttributes<EditorHintFlagsAttribute>().Any(f => f.Flags.HasFlag(MemberFlags.Invisible))
 				select new ObjectItem(t, t.Name.Replace("JointInfo", "Joint"));
 		}
 		protected override void OnReadOnlyChanged()

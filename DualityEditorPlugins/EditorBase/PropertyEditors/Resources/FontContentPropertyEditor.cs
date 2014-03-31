@@ -1,14 +1,14 @@
 ﻿using System.Linq;
 using System.Reflection;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.PropertyEditors;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.PropertyEditors;
 
 using Duality;
 using Duality.Resources;
-using DualityEditor;
+using Duality.Editor;
 
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
 	public class FontContentPropertyEditor : ResourcePropertyEditor
 	{

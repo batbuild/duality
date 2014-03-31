@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.Xml;
+using System.Xml.Linq;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Drawing;
@@ -14,9 +14,8 @@ using Ionic.Zip;
 
 using Duality;
 using Duality.Serialization;
-using Duality.Serialization.MetaFormat;
 
-namespace DualityEditor
+namespace Duality.Editor
 {
 	public static class EditorHelper
 	{
@@ -31,6 +30,7 @@ namespace DualityEditor
 		public const string SourceCodeProjectCorePluginFile		= SourceCodeProjectCorePluginDir + @"\CorePlugin.csproj";
 		public const string SourceCodeProjectEditorPluginFile	= SourceCodeProjectEditorPluginDir + @"\EditorPlugin.csproj";
 		public const string SourceCodeGameResFile				= SourceCodeProjectCorePluginDir + @"\Properties\GameRes.cs";
+		public const string SourceCodeErrorHandlerFile			= SourceCodeProjectCorePluginDir + @"\Properties\ErrorHandlers.cs";
 		public const string SourceCodeCorePluginFile			= SourceCodeProjectCorePluginDir + @"\CorePlugin.cs";
 		public const string SourceCodeComponentExampleFile		= SourceCodeProjectCorePluginDir + @"\YourCustomComponentType.cs";
 		public const string SourceCodeEditorPluginFile			= SourceCodeProjectEditorPluginDir + @"\EditorPlugin.cs";
@@ -71,40 +71,6 @@ namespace DualityEditor
 			string[] visualStudioSubKeys = visualStudio != null ? visualStudio.GetSubKeyNames() : null;
 
 			vsEdition = VisualStudioEdition.Express;
-			// Doesn't work:
-			//if (visualStudioSubKeys != null)
-			//{
-			//    if (visualStudioSubKeys.Contains("8.0"))	vsEdition = VisualStudioEdition.Standard;
-			//    if (visualStudioSubKeys.Contains("9.0"))	vsEdition = VisualStudioEdition.Standard;
-			//    if (visualStudioSubKeys.Contains("10.0"))	vsEdition = VisualStudioEdition.Standard;
-			//    if (visualStudioSubKeys.Contains("11.0"))	vsEdition = VisualStudioEdition.Standard;
-			//    if (visualStudioSubKeys.Contains("12.0"))	vsEdition = VisualStudioEdition.Standard;
-			//}
-
-			// Doesn't work either:
-			//RegistryKey visualStudio = localMachine.OpenSubKey(@"SOFTWARE\Microsoft\VisualStudio");
-			//if (visualStudio != null)
-			//{
-			//    // Determine highest installed visual studio version
-			//    RegistryKey visualStudioVersion = null;
-			//    if (visualStudioVersion == null) visualStudioVersion = visualStudio.OpenSubKey("11.0");
-			//    if (visualStudioVersion == null) visualStudioVersion = visualStudio.OpenSubKey("10.0");
-			//    if (visualStudioVersion == null) visualStudioVersion = visualStudio.OpenSubKey("9.0");
-			//    if (visualStudioVersion == null) visualStudioVersion = visualStudio.OpenSubKey("8.0");
-
-			//    // Determine edition
-			//    if (visualStudioVersion != null)
-			//    {
-			//        RegistryKey visualStudioSetup = visualStudioVersion.OpenSubKey("Setup");
-			//        string[] subKeys = (visualStudioSetup != null) ? visualStudioSetup.GetSubKeyNames() : null;
-			//        if (subKeys != null)
-			//        {
-			//            // This won't work
-			//            if (subKeys.Any(k => k.Contains("Visual Studio Ultimate"))) vsEdition = VisualStudioEdition.Standard;
-			//            if (subKeys.Any(k => k.Contains("Visual Studio Professional"))) vsEdition = VisualStudioEdition.Standard;
-			//        }
-			//    }
-			//}
 		}
 
 		public static string GenerateClassNameFromPath(string path)
@@ -129,9 +95,16 @@ namespace DualityEditor
 
 			return path;
 		}
+		public static string GenerateErrorHandlersSrcFile(string oldRootNamespace, string rootNamespace)
+		{
+			string source = Properties.GeneralRes.ErrorHandlersTemplate;
+			source = source.Replace("OLDROOTNAMESPACE", oldRootNamespace);
+			source = source.Replace("ROOTNAMESPACE", rootNamespace);
+			return source;
+		}
 		public static string GenerateGameResSrcFile()
 		{
-			string gameRes = EditorRes.GeneralRes.GameResTemplate;
+			string gameRes = Properties.GeneralRes.GameResTemplate;
 			string mainClassName;
 			StringBuilder builder = new StringBuilder();
 			GenerateGameResSrcFile_ScanDir(builder, DualityApp.DataDirectory, 1, out mainClassName);
@@ -258,8 +231,16 @@ namespace DualityEditor
 				// Update plugin directory
 				foreach (string dstFile in Directory.GetFiles(Path.Combine(projFolder, DualityApp.PluginDirectory), "*", SearchOption.AllDirectories))
 				{
-					string srcFile = Path.Combine(DualityApp.PluginDirectory, Path.GetFileName(dstFile));
-					if (File.Exists(srcFile)) File.Copy(srcFile, dstFile, true);
+					string srcFileWorking = Path.Combine(DualityApp.PluginDirectory, Path.GetFileName(dstFile));
+					string srcFileExec = Path.Combine(PathHelper.ExecutingAssemblyDir, DualityApp.PluginDirectory, Path.GetFileName(dstFile));
+					if (File.Exists(srcFileWorking))
+					{
+						File.Copy(srcFileWorking, dstFile, true);
+					}
+					else if (File.Exists(srcFileExec))
+					{
+						File.Copy(srcFileExec, dstFile, true);
+					}
 				}
 			}
 			else if (template.SpecialTag == ProjectTemplateInfo.SpecialInfo.Current)
@@ -304,52 +285,46 @@ namespace DualityEditor
 			string oldPath = Environment.CurrentDirectory;
 			Environment.CurrentDirectory = projFolder;
 
-			// Initialize content
-			if (Directory.Exists(DualityApp.DataDirectory))
-			{
-				// Read content source code data (needed to rename classes / namespaces)
-				string oldRootNamespaceNameCore;
-				string newRootNamespaceNameCore;
-				DualityEditorApp.ReadPluginSourceCodeContentData(out oldRootNamespaceNameCore, out newRootNamespaceNameCore);
-
-				// Rename classes / namespaces
-				List<string> resFiles = Resource.GetResourceFiles();
-				foreach (string resFile in resFiles)
-				{
-					MetaFormatHelper.FilePerformAction(resFile, d => d.ReplaceTypeStrings(oldRootNamespaceNameCore, newRootNamespaceNameCore));
-				}
-			}
-
 			// Initialize AppData
 			DualityAppData data;
-			if (File.Exists(DualityApp.AppDataPath))
-			{
-				try
-				{
-					using (FileStream str = File.OpenRead(DualityApp.AppDataPath))
-					using (var formatter = Formatter.Create(str))
-					{
-						data = formatter.ReadObject<DualityAppData>() ?? new DualityAppData();
-					}
-				}
-				catch (Exception) { data = new DualityAppData(); }
-			}
-			else
-			{
-				data = new DualityAppData();
-			}
+			data = Formatter.TryReadObject<DualityAppData>(DualityApp.AppDataPath) ?? new DualityAppData();
 			data.AppName = projName;
 			data.AuthorName = Environment.UserName;
 			data.Version = 0;
-			using (FileStream str = File.Open(DualityApp.AppDataPath, FileMode.Create))
-			using (var formatter = Formatter.Create(str, FormattingMethod.Binary))
-			{
-				formatter.WriteObject(data);
-			}
+			Formatter.WriteObject(data, DualityApp.AppDataPath, FormattingMethod.Xml);
+			
+			// Read content source code data (needed to rename classes / namespaces)
+			string oldRootNamespaceNameCore;
+			string newRootNamespaceNameCore;
+			DualityEditorApp.ReadPluginSourceCodeContentData(out oldRootNamespaceNameCore, out newRootNamespaceNameCore);
 
 			// Initialize source code
 			DualityEditorApp.InitPluginSourceCode(); // Force re-init to update namespaces, etc.
 			DualityEditorApp.UpdatePluginSourceCode();
+
+			// Add SerializeErrorHandler class to handle renamed Types
+			if (Directory.Exists(DualityApp.DataDirectory))
+			{
+				// Add error handler source file to project
+				XDocument coreProject = XDocument.Load(SourceCodeProjectCorePluginFile);
+				string relErrorHandlerPath = PathHelper.MakeFilePathRelative(
+					SourceCodeErrorHandlerFile, 
+					Path.GetDirectoryName(SourceCodeProjectCorePluginFile));
+				if (!coreProject.Descendants("Compile", true).Any(c => string.Equals(c.GetAttributeValue("Include"), relErrorHandlerPath)))
+				{
+					XElement compileElement = coreProject.Descendants("Compile", true).FirstOrDefault();
+					XElement newCompileElement = new XElement(
+						XName.Get("Compile", compileElement.Name.NamespaceName), 
+						new XAttribute("Include", relErrorHandlerPath));
+					compileElement.AddAfterSelf(newCompileElement);
+				}
+				coreProject.Save(SourceCodeProjectCorePluginFile);
+
+				// Generate and save error handler source code
+				File.WriteAllText(
+					EditorHelper.SourceCodeErrorHandlerFile, 
+					EditorHelper.GenerateErrorHandlersSrcFile(oldRootNamespaceNameCore, newRootNamespaceNameCore));
+			}
 
 			// Compile plugins
 			var buildProperties = new Dictionary<string, string>();
@@ -543,14 +518,13 @@ namespace DualityEditor
 						}
 					}
 
-					XmlDocument xmlDoc = new XmlDocument();
-					xmlDoc.LoadXml(xmlSource);
+					XDocument xmlDoc = XDocument.Parse(xmlSource);
 
-					XmlElement elemName = xmlDoc.DocumentElement["name"];
-					if (elemName != null) this.name = elemName.InnerText;
+					XElement elemName = xmlDoc.Element("name");
+					if (elemName != null) this.name = elemName.Value;
 
-					XmlElement elemDesc = xmlDoc.DocumentElement["description"];
-					if (elemDesc != null) this.desc = elemDesc.InnerText;
+					XElement elemDesc = xmlDoc.Element("description");
+					if (elemDesc != null) this.desc = elemDesc.Value;
 				}
 			}
 

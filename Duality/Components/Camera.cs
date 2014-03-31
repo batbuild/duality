@@ -6,11 +6,10 @@ using System.IO;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
 
-using Duality.EditorHints;
-using Duality.VertexFormat;
-using Duality.ColorFormat;
+using Duality.Editor;
+using Duality.Drawing;
 using Duality.Resources;
-using Duality.Profiling;
+using Duality.Properties;
 
 namespace Duality.Components
 {
@@ -19,6 +18,8 @@ namespace Duality.Components
 	/// </summary>
 	[Serializable]
 	[RequiredComponent(typeof(Transform))]
+	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
+	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageCamera)]
 	public sealed class Camera : Component, ICmpInitializable
 	{
 		/// <summary>
@@ -150,12 +151,12 @@ namespace Duality.Components
 		}
 
 
-		private	float	nearZ				= 0.0f;
-		private	float	farZ				= 10000.0f;
-		private	float	focusDist			= Duality.DrawDevice.DefaultFocusDist;
-		private	PerspectiveMode	perspective	= PerspectiveMode.Parallax;
+		private	float	nearZ					= 0.0f;
+		private	float	farZ					= 10000.0f;
+		private	float	focusDist				= DrawDevice.DefaultFocusDist;
+		private	PerspectiveMode	perspective		= PerspectiveMode.Parallax;
 		private	VisibilityFlag	visibilityMask	= VisibilityFlag.All;
-		private	List<Pass>	passes			= new List<Pass>();
+		private	List<Pass>	passes				= new List<Pass>();
 
 		[NonSerialized]	private	DrawDevice			drawDevice		= null;
 		[NonSerialized]	private	List<ICmpRenderer>	pickingMap		= null;
@@ -431,8 +432,8 @@ namespace Duality.Components
 				for (int i = 0; i < w; ++i)
 				{
 					int rendererId =	(this.pickingBuffer[offset]		<< 16) |
-						                (this.pickingBuffer[offset + 1] << 8) |
-						                (this.pickingBuffer[offset + 2] << 0);
+										(this.pickingBuffer[offset + 1] << 8) |
+										(this.pickingBuffer[offset + 2] << 0);
 					if (rendererId != rendererIdLast)
 					{
 						if (rendererId - 1 > this.pickingMap.Count)
@@ -605,7 +606,7 @@ namespace Duality.Components
 			foreach (Predicate<ICmpRenderer> p in this.editorRenderFilter) rendererQuery = rendererQuery.Where(r => p(r));
 
 			// Collect drawcalls
-			if (this.drawDevice.PickingIndex != 0)
+			if (this.drawDevice.IsPicking)
 			{
 				this.pickingMap = new List<ICmpRenderer>(rendererQuery);
 				foreach (ICmpRenderer r in this.pickingMap)

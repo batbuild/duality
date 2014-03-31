@@ -2,11 +2,9 @@
 
 using Duality;
 using Duality.Resources;
+using Duality.Editor;
 
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
-
-namespace EditorBase
+namespace Duality.Editor.Plugins.Base
 {
 	public class ShaderFileImporter : IFileImporter
 	{

@@ -2,7 +2,8 @@
 
 using OpenTK;
 
-using Duality.EditorHints;
+using Duality.Editor;
+using Duality.Properties;
 
 namespace Duality.Components
 {
@@ -10,7 +11,9 @@ namespace Duality.Components
 	/// Represents a <see cref="GameObject">GameObjects</see> physical location in the world, relative to its <see cref="GameObject.Parent"/>.
 	/// </summary>
 	[Serializable]
-	public sealed class Transform : Component, ICmpUpdatable, ICmpEditorUpdatable, ICmpGameObjectListener, ICmpInitializable
+	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryNone)]
+	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageTransform)]
+	public sealed class Transform : Component, ICmpUpdatable, ICmpEditorUpdatable, ICmpInitializable
 	{
 		/// <summary>
 		/// Flags that are used to specify, whether certain Properties have been changed.
@@ -78,7 +81,6 @@ namespace Duality.Components
 		/// <summary>
 		/// [GET / SET] The objects velocity relative to its parent object.
 		/// </summary>
-		[EditorHintFlags(MemberFlags.Invisible)]
 		public Vector3 RelativeVel
 		{
 			get { return this.vel; }
@@ -100,7 +102,6 @@ namespace Duality.Components
 		/// <summary>
 		/// [GET / SET] The objects angle / rotation velocity relative to its parent object, in radians.
 		/// </summary>
-		[EditorHintFlags(MemberFlags.Invisible)]
 		public float RelativeAngleVel
 		{
 			get { return this.angleVel; }
@@ -137,7 +138,6 @@ namespace Duality.Components
 		/// [GET / SET] If false, this objects rotation values aren't relative to its parent.
 		/// However, its position, velocity, etc. still depend on parent rotation.
 		/// </summary>
-		[EditorHintFlags(MemberFlags.AffectsOthers)]
 		public bool DeriveAngle
 		{
 			get { return this.deriveAngle; }
@@ -206,7 +206,6 @@ namespace Duality.Components
 		/// <summary>
 		/// [GET] The objects velocity.
 		/// </summary>
-		[EditorHintFlags(MemberFlags.Invisible)]
 		public Vector3 Vel
 		{
 			get { return this.velAbs; }
@@ -234,7 +233,6 @@ namespace Duality.Components
 		/// <summary>
 		/// [GET] The objects angle / rotation velocity, in radians.
 		/// </summary>
-		[EditorHintFlags(MemberFlags.Invisible)]
 		public float AngleVel
 		{
 			get { return this.angleVelAbs; }
@@ -665,34 +663,12 @@ namespace Duality.Components
 
 			this.CheckValidTransform();
 		}
-		void ICmpGameObjectListener.OnGameObjectParentChanged(GameObject oldParent, GameObject newParent)
-		{
-			if (oldParent != null)
-			{
-				if (this.parentTransform == null)
-					oldParent.EventComponentAdded -= this.Parent_EventComponentAdded;
-				else
-					oldParent.EventComponentRemoving -= this.Parent_EventComponentRemoving;
-			}
-
-			if (newParent != null)
-			{
-				this.parentTransform = newParent.Transform;
-				if (this.parentTransform == null)
-					newParent.EventComponentAdded += this.Parent_EventComponentAdded;
-				else
-					newParent.EventComponentRemoving += this.Parent_EventComponentRemoving;
-			}
-			else
-				this.parentTransform = null;
-
-			this.UpdateRel();
-		}
 		void ICmpInitializable.OnInit(InitContext context)
 		{
 			if (context == InitContext.AddToGameObject ||
 				context == InitContext.Loaded)
 			{
+				this.gameobj.EventParentChanged += this.gameobj_EventParentChanged;
 				if (this.gameobj.Parent != null)
 				{
 					this.parentTransform = this.gameobj.Parent.Transform;
@@ -710,6 +686,7 @@ namespace Duality.Components
 		{
 			if (context == ShutdownContext.RemovingFromGameObject)
 			{
+				this.gameobj.EventParentChanged -= this.gameobj_EventParentChanged;
 				if (this.gameobj.Parent != null)
 				{
 					if (this.parentTransform == null)
@@ -721,6 +698,29 @@ namespace Duality.Components
 				this.parentTransform = null;
 				this.UpdateRel();
 			}
+		}
+		private void gameobj_EventParentChanged(object sender, GameObjectParentChangedEventArgs e)
+		{
+			if (e.OldParent != null)
+			{
+				if (this.parentTransform == null)
+					e.OldParent.EventComponentAdded -= this.Parent_EventComponentAdded;
+				else
+					e.OldParent.EventComponentRemoving -= this.Parent_EventComponentRemoving;
+			}
+
+			if (e.NewParent != null)
+			{
+				this.parentTransform = e.NewParent.Transform;
+				if (this.parentTransform == null)
+					e.NewParent.EventComponentAdded += this.Parent_EventComponentAdded;
+				else
+					e.NewParent.EventComponentRemoving += this.Parent_EventComponentRemoving;
+			}
+			else
+				this.parentTransform = null;
+
+			this.UpdateRel();
 		}
 		private void Parent_EventComponentAdded(object sender, ComponentEventArgs e)
 		{

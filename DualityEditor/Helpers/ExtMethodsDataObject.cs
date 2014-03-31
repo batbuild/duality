@@ -5,12 +5,10 @@ using System.Windows.Forms;
 using System.IO;
 
 using Duality;
-using Duality.ColorFormat;
+using Duality.Drawing;
 using Duality.Resources;
 
-using DualityEditor.CorePluginInterface;
-
-namespace DualityEditor
+namespace Duality.Editor
 {
 	public static class ExtMethodsDataObject
 	{

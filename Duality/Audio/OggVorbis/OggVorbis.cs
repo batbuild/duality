@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using NVorbis;
 using NVorbis.Ogg;
 
-namespace Duality.OggVorbis
+namespace Duality.Resources
 {
 	public struct PcmData
 	{
@@ -63,7 +63,7 @@ namespace Duality.OggVorbis
 		}
 	}
 
-	public static class OV
+	public static class OggVorbis
 	{
 		private const int DefaultBufferSize = 1024 * 16;
 		private static object readMutex = new object();
@@ -206,15 +206,15 @@ namespace Duality.OggVorbis
 				return false;
 			}
 		}
-        private static void CastBuffer(float[] source, short[] target, int targetOffset, int length)
-        {
-            for (int i = 0; i < length; i++)
-            {
-                var temp = (int)(32767f * source[i]);
-                if (temp > short.MaxValue) temp = short.MaxValue;
-                else if (temp < short.MinValue) temp = short.MinValue;
-                target[targetOffset + i] = (short)temp;
-            }
-        }
+		private static void CastBuffer(float[] source, short[] target, int targetOffset, int length)
+		{
+			for (int i = 0; i < length; i++)
+			{
+				var temp = (int)(32767f * source[i]);
+				if (temp > short.MaxValue) temp = short.MaxValue;
+				else if (temp < short.MinValue) temp = short.MinValue;
+				target[targetOffset + i] = (short)temp;
+			}
+		}
 	}
 }

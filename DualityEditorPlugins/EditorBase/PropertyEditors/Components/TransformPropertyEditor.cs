@@ -3,16 +3,16 @@ using System.Linq;
 using System.Reflection;
 using System;
 
-using AdamsLair.PropertyGrid;
+using AdamsLair.WinForms;
 using OpenTK;
 
 using Duality;
-using Duality.EditorHints;
+using Duality.Editor;
 using Duality.Components;
-using DualityEditor;
 
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(TransformPropertyEditor), "MatchToProperty")]
 	public class TransformPropertyEditor : ComponentPropertyEditor, IHelpProvider
 	{
 		private bool			showRelative	= false;
@@ -87,8 +87,10 @@ namespace EditorBase.PropertyEditors
 				this.editorAngle.Getter = this.AngleGetter;
 				this.editorAngle.Setter = this.AngleSetter;
 				this.editorAngle.PropertyName = "Angle";
-				this.ParentGrid.ConfigureEditor(this.editorAngle, new EditorHintAttribute[] 
-				{ new EditorHintDecimalPlacesAttribute(1), new EditorHintIncrementAttribute(1) });
+				this.ParentGrid.ConfigureEditor(this.editorAngle, new EditorHintAttribute[] { 
+					new EditorHintDecimalPlacesAttribute(1), 
+					new EditorHintIncrementAttribute(1),
+					new EditorHintRangeAttribute(float.MinValue, float.MaxValue, 0.0f, 359.999f) });
 				this.AddPropertyEditor(this.editorAngle);
 				this.editorAngle.EndUpdate();
 			}
@@ -103,8 +105,8 @@ namespace EditorBase.PropertyEditors
 				this.editorAngleVel.EndUpdate();
 			}
 
-			this.AddEditorForProperty(ReflectionInfo.Property_Transform_DeriveAngle);
-			this.AddEditorForProperty(ReflectionInfo.Property_Transform_IgnoreParent);
+			this.AddEditorForMember(ReflectionInfo.Property_Transform_DeriveAngle);
+			this.AddEditorForMember(ReflectionInfo.Property_Transform_IgnoreParent);
 
 			this.editorShowRelative = this.ParentGrid.CreateEditor(typeof(bool), this);
 			if (editorShowRelative != null)
@@ -350,6 +352,15 @@ namespace EditorBase.PropertyEditors
 				return HelpInfo.FromMember(pickedEditor.EditedType);
 
 			return null;
+		}
+
+		private static int MatchToProperty(Type propertyType, ProviderContext context)
+		{
+			bool compRef = !(context.ParentEditor is GameObjectOverviewPropertyEditor);
+			if (typeof(Transform).IsAssignableFrom(propertyType) && !compRef)
+				return PropertyEditorAssignmentAttribute.PrioritySpecialized;
+			else
+				return PropertyEditorAssignmentAttribute.PriorityNone;
 		}
 	}
 }

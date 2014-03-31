@@ -5,21 +5,20 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.Renderer;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.Renderer;
 using Aga.Controls.Tree;
-using EditorBase.Modules;
-using ButtonState = AdamsLair.PropertyGrid.Renderer.ButtonState;
-using BorderStyle = AdamsLair.PropertyGrid.Renderer.BorderStyle;
+using Duality.Editor.Plugins.Base.Modules;
+using ButtonState = AdamsLair.WinForms.Renderer.ButtonState;
+using BorderStyle = AdamsLair.WinForms.Renderer.BorderStyle;
 
 using Duality;
 using Duality.Resources;
+using Duality.Editor;
 
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
-
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(IContentRef))]
 	public class IContentRefPropertyEditor : ObjectRefPropertyEditor
 	{
 		protected	Type		editedResType		= null;
@@ -29,7 +28,7 @@ namespace EditorBase.PropertyEditors
 		{
 			get 
 			{ 
-				IContentRef ctRef = ReflectionHelper.CreateInstanceOf(this.EditedType) as IContentRef;
+				IContentRef ctRef = (this.EditedType.CreateInstanceOf() ?? typeof(ContentRef<Resource>).CreateInstanceOf()) as IContentRef;
 				ctRef.Path = this.contentPath;
 				ctRef.MakeAvailable();
 				return ctRef;
@@ -74,9 +73,8 @@ namespace EditorBase.PropertyEditors
 		public override void ShowReferencedContent()
 		{
 			if (string.IsNullOrEmpty(this.contentPath)) return;
-			ProjectFolderView view = EditorBasePlugin.Instance.RequestProjectView();
-			view.FlashNode(view.NodeFromPath(this.contentPath));
-			System.Media.SystemSounds.Beep.Play();
+			IContentRef resRef = ContentProvider.RequestContent(this.contentPath);
+			DualityEditorApp.Highlight(this, new ObjectSelection(resRef.Res));
 		}
 
 		public override void ResetReference()
@@ -87,10 +85,9 @@ namespace EditorBase.PropertyEditors
 			this.PerformGetValue();
 			this.OnEditingFinished(FinishReason.LeapValue);
 		}
-
-		public override void PerformGetValue()
+		protected override void OnGetValue()
 		{
-			base.PerformGetValue();
+			base.OnGetValue();
 			IContentRef[] values = this.GetValue().Cast<IContentRef>().ToArray();
 
 			this.BeginUpdate();

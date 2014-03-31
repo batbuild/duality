@@ -8,12 +8,12 @@ using Duality;
 using Duality.Cloning;
 using Duality.Resources;
 
-using DualityEditor.Controls;
-using DualityEditor.EditorRes;
+using Duality.Editor.Controls;
+using Duality.Editor.Properties;
 
-using AdamsLair.PropertyGrid;
+using AdamsLair.WinForms;
 
-namespace DualityEditor.UndoRedoActions
+namespace Duality.Editor.UndoRedoActions
 {
 	public class EditPropertyAction : UndoRedoAction
 	{
@@ -69,7 +69,7 @@ namespace DualityEditor.UndoRedoActions
 		}
 		public override void Do()
 		{
-			if (this.targetValue != null)
+			if (this.targetValue != null && this.targetValue.Length > 0)
 			{
 				if (this.backupValue == null)
 				{

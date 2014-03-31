@@ -4,18 +4,16 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.Renderer;
-using BorderStyle = AdamsLair.PropertyGrid.Renderer.BorderStyle;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.Renderer;
+using BorderStyle = AdamsLair.WinForms.Renderer.BorderStyle;
 
 using Duality;
 using Duality.Resources;
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
+using Duality.Editor;
+using Duality.Editor.Plugins.Base.Properties;
 
-using EditorBase.PluginRes;
-
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
 	public partial class AudioDataPreviewPropertyEditor : PropertyEditor
 	{
@@ -92,9 +90,9 @@ namespace EditorBase.PropertyEditors
 			this.Invalidate();
 		}
 
-		public override void PerformGetValue()
+		protected override void OnGetValue()
 		{
-			base.PerformGetValue();
+			base.OnGetValue();
 			AudioData lastValue = this.value;
 			AudioData[] values = this.GetValue().Cast<AudioData>().ToArray();
 			this.value = values.NotNull().FirstOrDefault() as AudioData;
@@ -119,13 +117,13 @@ namespace EditorBase.PropertyEditors
 
 			if (this.prevSoundInst != null)
 			{
-				e.Graphics.DrawImage(this.prevImageLum > 0.5f ? EditorBaseResCache.IconSpeakerWhite : EditorBaseResCache.IconSpeakerBlack, 
+				e.Graphics.DrawImage(this.prevImageLum > 0.5f ? EditorBaseRes.IconSpeakerWhite : EditorBaseRes.IconSpeakerBlack, 
 					this.rectPrevSound.X, 
 					this.rectPrevSound.Y);
 			}
 			else
 			{
-				e.Graphics.DrawImageAlpha(this.prevImageLum > 0.5f ? EditorBaseResCache.IconSpeakerWhite : EditorBaseResCache.IconSpeakerBlack, 
+				e.Graphics.DrawImageAlpha(this.prevImageLum > 0.5f ? EditorBaseRes.IconSpeakerWhite : EditorBaseRes.IconSpeakerBlack, 
 					0.5f,
 					this.rectPrevSound.X, 
 					this.rectPrevSound.Y);

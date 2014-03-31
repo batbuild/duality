@@ -13,13 +13,15 @@ using OpenTK.Graphics.OpenGL;
 using NUnit.Framework;
 
 
-namespace DualityTests
+namespace Duality.Tests
 {
 	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
 	public class InitDualityAttribute : Attribute, ITestAction
 	{
-		private	string		oldEnvDir	= null;
-		private	GameWindow	dummyWindow	= null;
+		private	string				oldEnvDir			= null;
+		private	CorePlugin			unitTestPlugin		= null;
+		private	GameWindow			dummyWindow			= null;
+		private	ConsoleLogOutput	consoleLogOutput	= null;
 
 		public ActionTargets Targets
 		{
@@ -41,16 +43,17 @@ namespace DualityTests
 			// Add some Console logs manually for NUnit
 			if (!Log.Game.Outputs.OfType<ConsoleLogOutput>().Any())
 			{
-				Log.Game.AddOutput(new ConsoleLogOutput(ConsoleColor.DarkGray));
-				Log.Core.AddOutput(new ConsoleLogOutput(ConsoleColor.DarkBlue));
-				Log.Editor.AddOutput(new ConsoleLogOutput(ConsoleColor.DarkMagenta));
+				if (this.consoleLogOutput == null) this.consoleLogOutput = new ConsoleLogOutput();
+				Log.Game.AddOutput(this.consoleLogOutput);
+				Log.Core.AddOutput(this.consoleLogOutput);
+				Log.Editor.AddOutput(this.consoleLogOutput);
 			}
 
 			// Initialize Duality
 			DualityApp.Init(DualityApp.ExecutionEnvironment.Launcher, DualityApp.ExecutionContext.Game);
 
 			// Manually register pseudo-plugin for the Unit Testing Assembly
-			DualityApp.AddPlugin(typeof(DualityTestsPlugin).Assembly, codeBasePath);
+			this.unitTestPlugin = DualityApp.LoadPlugin(typeof(DualityTestsPlugin).Assembly, codeBasePath);
 
 			// Create a dummy window, to get access to all the device contexts
 			if (this.dummyWindow == null)
@@ -71,9 +74,17 @@ namespace DualityTests
 		public void AfterTest(TestDetails details)
 		{
 			Console.WriteLine("----- Beginning Duality environment teardown -----");
+			
+			// Remove NUnit Console logs
+			Log.Game.RemoveOutput(this.consoleLogOutput);
+			Log.Core.RemoveOutput(this.consoleLogOutput);
+			Log.Editor.RemoveOutput(this.consoleLogOutput);
+			this.consoleLogOutput = null;
 
 			if (this.dummyWindow != null)
 			{
+				ContentProvider.ClearContent();
+				ContentProvider.DisposeDefaultContent();
 			    this.dummyWindow.Dispose();
 			    this.dummyWindow = null;
 			}

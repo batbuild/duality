@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 
 using OpenTK;
 using OpenTK.Audio.OpenAL;
 
 using Duality.Resources;
-using Duality.OggVorbis;
 
 namespace Duality
 {
@@ -95,10 +96,9 @@ namespace Duality
 		private	float			fadeWaitEnd		= 0.0f;
 
 		// Streaming
-		private	bool				strStreamed		= false;
+		private	bool				isStreamed		= false;
 		private	VorbisStreamHandle	strOvStr		= null;
 		private	int[]				strAlBuffers	= null;
-		private	Thread				strWorker		= null;
 		private	StopRequest			strStopReq		= StopRequest.None;
 		private	object				strLock			= new object();
 		
@@ -244,14 +244,14 @@ namespace Duality
 		{
 			if (manually)
 			{
-				if (this.strWorker != null && this.strWorker.IsAlive)
+				if (this.isStreamed)
 				{
 					lock (this.strLock)
 					{
-						OV.EndStream(ref this.strOvStr);
+						OggVorbis.EndStream(ref this.strOvStr);
 					}
+					this.strStopReq = StopRequest.Immediately;
 				}
-				this.strWorker = null;
 
 				this.attachedTo = null;
 				this.curPriority = -1;
@@ -268,7 +268,7 @@ namespace Duality
 					{
 						for (int i = 0; i < this.strAlBuffers.Length; i++)
 						{
-							if (!AL.IsBuffer(this.strAlBuffers[i])) continue;
+							if (!AL.IsBuffer(this.strAlBuffers[i])) return;
 							AL.DeleteBuffer(this.strAlBuffers[i]);
 						}
 						this.strAlBuffers = null;
@@ -359,8 +359,8 @@ namespace Duality
 			if (this.alSource <= AlSource_NotAvailable) return;
 			lock (this.strLock)
 			{
-				// Do not reuse before-streamed sources OpenAL doesn't seem to like that.
-				if (this.strStreamed)
+				// Do not reuse before-streamed sources, since OpenAL doesn't seem to like that.
+				if (this.isStreamed)
 				{
 					AL.DeleteSource(this.alSource);
 					this.alSource = AL.GenSource();
@@ -368,22 +368,8 @@ namespace Duality
 				// Reuse other OpenAL sources
 				else
 				{
-					//int num = 0;
 					AL.SourceStop(this.alSource);
 					AL.Source(this.alSource, ALSourcei.Buffer, 0);
-					/*Al.alGetSourcei(this.alSource, Al.AL_BUFFERS_PROCESSED, out num);
-					if (num > 0)
-					{
-						unsafe
-						{
-							int[] buffers = new int[num];
-							fixed (int* result = &buffers[0])
-							{
-								Al.alSourceUnqueueBuffers(this.alSource, num, result);
-							}
-						}
-					}*/
-
 					AL.SourceRewind(this.alSource);
 				}
 
@@ -439,6 +425,7 @@ namespace Duality
 						if (!searchSimilar)
 							break;
 					}
+
 				}
 			}
 
@@ -512,6 +499,7 @@ namespace Duality
 		public void Update()
 		{
 			if (!DualityApp.Sound.IsAvailable) return;
+
 			lock (this.strLock)
 			{
 				// Check existence of attachTo object
@@ -587,16 +575,14 @@ namespace Duality
 
 				// Determine source state, if available
 				ALSourceState stateTemp = ALSourceState.Stopped;
-				if (this.alSource > AlSource_NotAvailable) stateTemp = AL.GetSourceState(this.alSource);
+				bool sourceAvailable = this.alSource > AlSource_NotAvailable;
+				if (sourceAvailable) stateTemp = AL.GetSourceState(this.alSource);
 
 				// If the source is stopped / finished, dispose and return
-				if (stateTemp == ALSourceState.Stopped)
+				if (stateTemp == ALSourceState.Stopped && (!audioDataRes.IsStreamed || this.strStopReq != StopRequest.None))
 				{
-					if (!audioDataRes.IsStreamed || this.strStopReq != StopRequest.None)
-					{
-						this.Dispose();
-						return;
-					}
+					this.Dispose();
+					return;
 				}
 				else if (stateTemp == ALSourceState.Initial && this.strStopReq == StopRequest.Immediately)
 				{
@@ -653,44 +639,47 @@ namespace Duality
 				// Hack: Volume always dirty - just to be sure
 				this.dirtyState |= DirtyFlag.Vol;
 
-				if (this.is3D)
+				if (sourceAvailable)
 				{
-					// Hack: Relative always dirty to support switching listeners without establishing a notifier-event
-					this.dirtyState |= DirtyFlag.Relative;
-					if (this.attachedTo != null) this.dirtyState |= DirtyFlag.AttachedTo;
+					if (this.is3D)
+					{
+						// Hack: Relative always dirty to support switching listeners without establishing a notifier-event
+						this.dirtyState |= DirtyFlag.Relative;
+						if (this.attachedTo != null) this.dirtyState |= DirtyFlag.AttachedTo;
 
-					if ((this.dirtyState & DirtyFlag.Relative) != DirtyFlag.None)
-						AL.Source(this.alSource, ALSourceb.SourceRelative, this.attachedTo == DualityApp.Sound.Listener);
-					if ((this.dirtyState & DirtyFlag.Pos) != DirtyFlag.None)
-						AL.Source(this.alSource, ALSource3f.Position, posAbs.X, -posAbs.Y, -posAbs.Z * 0.5f);
-					if ((this.dirtyState & DirtyFlag.Vel) != DirtyFlag.None)
-						AL.Source(this.alSource, ALSource3f.Velocity, velAbs.X, -velAbs.Y, -velAbs.Z);
-				}
-				else
-				{
-					if ((this.dirtyState & DirtyFlag.Relative) != DirtyFlag.None)
-						AL.Source(this.alSource, ALSourceb.SourceRelative, true);
-					if ((this.dirtyState & DirtyFlag.Pos) != DirtyFlag.None)
-						AL.Source(this.alSource, ALSource3f.Position, 0.0f, 0.0f, 0.0f);
-					if ((this.dirtyState & DirtyFlag.Vel) != DirtyFlag.None)
-						AL.Source(this.alSource, ALSource3f.Velocity, 0.0f, 0.0f, 0.0f);
-				}
-				if ((this.dirtyState & DirtyFlag.MaxDist) != DirtyFlag.None)
-					AL.Source(this.alSource, ALSourcef.MaxDistance, maxDistTemp);
-				if ((this.dirtyState & DirtyFlag.RefDist) != DirtyFlag.None)
-					AL.Source(this.alSource, ALSourcef.ReferenceDistance, minDistTemp);
-				if ((this.dirtyState & DirtyFlag.Loop) != DirtyFlag.None)
-					AL.Source(this.alSource, ALSourceb.Looping, (this.looped && !audioDataRes.IsStreamed));
-				if ((this.dirtyState & DirtyFlag.Vol) != DirtyFlag.None)
-					AL.Source(this.alSource, ALSourcef.Gain, volTemp);
-				if ((this.dirtyState & DirtyFlag.Pitch) != DirtyFlag.None)
-					AL.Source(this.alSource, ALSourcef.Pitch, pitchTemp);
-				if ((this.dirtyState & DirtyFlag.Paused) != DirtyFlag.None)
-				{
-					if (this.paused && this.pauseFade == 0.0f && stateTemp == ALSourceState.Playing)
-						AL.SourcePause(this.alSource);
-					else if ((!this.paused || this.pauseFade > 0.0f) && stateTemp == ALSourceState.Paused)
-						AL.SourcePlay(this.alSource);
+						if ((this.dirtyState & DirtyFlag.Relative) != DirtyFlag.None)
+							AL.Source(this.alSource, ALSourceb.SourceRelative, this.attachedTo == DualityApp.Sound.Listener);
+						if ((this.dirtyState & DirtyFlag.Pos) != DirtyFlag.None)
+							AL.Source(this.alSource, ALSource3f.Position, posAbs.X, -posAbs.Y, -posAbs.Z * 0.5f);
+						if ((this.dirtyState & DirtyFlag.Vel) != DirtyFlag.None)
+							AL.Source(this.alSource, ALSource3f.Velocity, velAbs.X, -velAbs.Y, -velAbs.Z);
+					}
+					else
+					{
+						if ((this.dirtyState & DirtyFlag.Relative) != DirtyFlag.None)
+							AL.Source(this.alSource, ALSourceb.SourceRelative, true);
+						if ((this.dirtyState & DirtyFlag.Pos) != DirtyFlag.None)
+							AL.Source(this.alSource, ALSource3f.Position, 0.0f, 0.0f, 0.0f);
+						if ((this.dirtyState & DirtyFlag.Vel) != DirtyFlag.None)
+							AL.Source(this.alSource, ALSource3f.Velocity, 0.0f, 0.0f, 0.0f);
+					}
+					if ((this.dirtyState & DirtyFlag.MaxDist) != DirtyFlag.None)
+						AL.Source(this.alSource, ALSourcef.MaxDistance, maxDistTemp);
+					if ((this.dirtyState & DirtyFlag.RefDist) != DirtyFlag.None)
+						AL.Source(this.alSource, ALSourcef.ReferenceDistance, minDistTemp);
+					if ((this.dirtyState & DirtyFlag.Loop) != DirtyFlag.None)
+						AL.Source(this.alSource, ALSourceb.Looping, (this.looped && !audioDataRes.IsStreamed));
+					if ((this.dirtyState & DirtyFlag.Vol) != DirtyFlag.None)
+						AL.Source(this.alSource, ALSourcef.Gain, volTemp);
+					if ((this.dirtyState & DirtyFlag.Pitch) != DirtyFlag.None)
+						AL.Source(this.alSource, ALSourcef.Pitch, pitchTemp);
+					if ((this.dirtyState & DirtyFlag.Paused) != DirtyFlag.None)
+					{
+						if (this.paused && this.pauseFade == 0.0f && stateTemp == ALSourceState.Playing)
+							AL.SourcePause(this.alSource);
+						else if ((!this.paused || this.pauseFade > 0.0f) && stateTemp == ALSourceState.Paused)
+							AL.SourcePlay(this.alSource);
+					}
 				}
 				this.dirtyState = DirtyFlag.None;
 
@@ -710,10 +699,8 @@ namespace Duality
 				{
 					if (audioDataRes.IsStreamed)
 					{
-						this.strStreamed = true;
-						this.strWorker = new Thread(ThreadStreamFunc);
-						this.strWorker.IsBackground = true;
-						this.strWorker.Start(this);
+						this.isStreamed = true;
+						DualityApp.Sound.EnqueueForStreaming(this);
 					}
 					else
 					{
@@ -737,132 +724,145 @@ namespace Duality
 					this.fadeWaitEnd = 0.0f;
 
 			}
+
 		}
 
 
-		private static void ThreadStreamFunc(object param)
+		internal bool PerformStreaming()
 		{
-			SoundInstance sndInst = (SoundInstance)param;
-			while (true)
+			lock (this.strLock)
 			{
-				lock (sndInst.strLock)
+				if (this.Disposed) return false;
+				if (!DualityApp.Sound.IsAvailable) return false;
+
+				ALSourceState stateTemp = ALSourceState.Stopped;
+				bool sourceAvailable = this.alSource > AlSource_NotAvailable;
+				if (sourceAvailable) stateTemp = AL.GetSourceState(this.alSource);
+
+				if (stateTemp == ALSourceState.Stopped && this.strStopReq != StopRequest.None)
 				{
-					if (sndInst.Disposed) return;
-					if (!DualityApp.Sound.IsAvailable) return;
+					// Stopped due to regular EOF. If strStopReq is NOT set,
+					// the source stopped playing because it reached the end of the buffer
+					// but in fact only because we were too slow inserting new data.
+					return false;
+				}
+				else if (this.strStopReq == StopRequest.Immediately)
+				{
+					// Stopped intentionally due to Stop()
+					if (this.alSource > AlSource_NotAvailable) AL.SourceStop(this.alSource);
+					return false;
+				}
 
-					ALSourceState stateTemp = ALSourceState.Stopped;
-					if (sndInst.alSource > AlSource_NotAvailable) stateTemp = AL.GetSourceState(sndInst.alSource);
+				AudioData audioDataRes = this.audioData.Res;
+				if (!this.sound.IsAvailable || audioDataRes == null)
+				{
+					this.Dispose();
+					return false;
+				}
 
-					if (stateTemp == ALSourceState.Stopped && sndInst.strStopReq != StopRequest.None)
-					{
-						// Stopped due to regular EOF. If strStopReq is NOT set,
-						// the source stopped playing because it reached the end of the buffer
-						// but in fact only because we were too slow inserting new data.
-						return;
-					}
-					else if (sndInst.strStopReq == StopRequest.Immediately)
-					{
-						// Stopped intentionally due to Stop()
-						if (sndInst.alSource > AlSource_NotAvailable) AL.SourceStop(sndInst.alSource);
-						return;
-					}
-
-					Sound soundRes = sndInst.sound.Res;
-					AudioData audioDataRes = sndInst.audioData.Res;
-					if (soundRes == null || audioDataRes == null)
-					{
-						sndInst.Dispose();
-						return;
-					}
+				if (sourceAvailable)
+				{
 					if (stateTemp == ALSourceState.Initial)
 					{
-						// Generate streaming buffers
-						sndInst.strAlBuffers = new int[3];
-						for (int i = 0; i < sndInst.strAlBuffers.Length; ++i)
-						{
-							AL.GenBuffers(1, out sndInst.strAlBuffers[i]);
-						}
-
-						// Begin streaming
-						OV.BeginStreamFromMemory(audioDataRes.OggVorbisData, out sndInst.strOvStr);
-
-						// Initially, completely fill all buffers
-						for (int i = 0; i < sndInst.strAlBuffers.Length; ++i)
-						{
-							PcmData pcm;
-							bool eof = !OV.StreamChunk(sndInst.strOvStr, out pcm);
-							if (pcm.dataLength > 0)
-							{
-								AL.BufferData(
-									sndInst.strAlBuffers[i], 
-									pcm.channelCount == 1 ? ALFormat.Mono16 : ALFormat.Stereo16,
-									pcm.data, 
-									pcm.dataLength * PcmData.SizeOfDataElement, 
-									pcm.sampleRate);
-								AL.SourceQueueBuffer(sndInst.alSource, sndInst.strAlBuffers[i]);
-								if (eof) break;
-							}
-							else break;
-						}
+						// Initialize streaming
+						PerformStreamingBegin(audioDataRes);
 
 						// Initially play source
-						AL.SourcePlay(sndInst.alSource);
-						stateTemp = AL.GetSourceState(sndInst.alSource);
+						AL.SourcePlay(this.alSource);
+						stateTemp = AL.GetSourceState(this.alSource);
 					}
 					else
 					{
-						int num;
-						AL.GetSource(sndInst.alSource, ALGetSourcei.BuffersProcessed, out num);
-						while (num > 0)
+						// Stream new data
+						PerformStreamingUpdate(audioDataRes);
+
+						// If the source stopped unintentionally, restart it. (See above)
+						if (stateTemp == ALSourceState.Stopped && this.strStopReq == StopRequest.None)
 						{
-							num--;
-
-							int unqueued;
-							unqueued = AL.SourceUnqueueBuffer(sndInst.alSource);
-
-							if (OV.IsStreamValid(sndInst.strOvStr))
-							{
-								PcmData pcm;
-								bool eof = !OV.StreamChunk(sndInst.strOvStr, out pcm);
-								if (eof)
-								{
-									OV.EndStream(ref sndInst.strOvStr);
-									if (sndInst.looped)
-									{
-										OV.BeginStreamFromMemory(audioDataRes.OggVorbisData, out sndInst.strOvStr);
-										if (pcm.dataLength == 0)
-										{
-											eof = !OV.StreamChunk(sndInst.strOvStr, out pcm);
-										}
-									}
-								}
-								if (pcm.dataLength > 0)
-								{
-									AL.BufferData(
-										unqueued, 
-										pcm.channelCount == 1 ? ALFormat.Mono16 : ALFormat.Stereo16,
-										pcm.data, 
-										pcm.dataLength * PcmData.SizeOfDataElement, 
-										pcm.sampleRate);
-									AL.SourceQueueBuffer(sndInst.alSource, unqueued);
-								}
-								if (pcm.dataLength == 0 || eof)
-								{
-									sndInst.strStopReq = StopRequest.EndOfStream;
-									break;
-								}
-							}
+							AL.SourcePlay(this.alSource);
 						}
 					}
-
-					if (stateTemp == ALSourceState.Stopped && sndInst.strStopReq == StopRequest.None)
-					{
-						// If the source stopped unintentionally, restart it. (See above)
-						AL.SourcePlay(sndInst.alSource);
-					}
 				}
-				Thread.Sleep(16);
+			}
+
+			return true;
+		}
+		private void PerformStreamingBegin(AudioData audioDataRes)
+		{
+			// Generate streaming buffers
+			this.strAlBuffers = new int[3];
+			for (int i = 0; i < this.strAlBuffers.Length; ++i)
+			{
+				AL.GenBuffers(1, out this.strAlBuffers[i]);
+			}
+
+			// Begin streaming
+			OggVorbis.BeginStreamFromMemory(audioDataRes.OggVorbisData, out this.strOvStr);
+
+			// Initially, completely fill all buffers
+			for (int i = 0; i < this.strAlBuffers.Length; ++i)
+			{
+				PcmData pcm;
+				bool eof = !OggVorbis.StreamChunk(this.strOvStr, out pcm);
+				if (pcm.dataLength > 0)
+				{
+					AL.BufferData(
+						this.strAlBuffers[i], 
+						pcm.channelCount == 1 ? ALFormat.Mono16 : ALFormat.Stereo16,
+						pcm.data, 
+						pcm.dataLength * PcmData.SizeOfDataElement, 
+						pcm.sampleRate);
+					AL.SourceQueueBuffer(this.alSource, this.strAlBuffers[i]);
+					if (eof) break;
+				}
+				else break;
 			}
 		}
+		private void PerformStreamingUpdate(AudioData audioDataRes)
+		{
+			int num;
+			AL.GetSource(this.alSource, ALGetSourcei.BuffersProcessed, out num);
+			while (num > 0)
+			{
+				num--;
+
+				int unqueued;
+				unqueued = AL.SourceUnqueueBuffer(this.alSource);
+
+				if (OggVorbis.IsStreamValid(this.strOvStr))
+				{
+					PcmData pcm;
+					bool eof = !OggVorbis.StreamChunk(this.strOvStr, out pcm);
+					if (eof)
+					{
+						OggVorbis.EndStream(ref this.strOvStr);
+						if (this.looped)
+						{
+							OggVorbis.BeginStreamFromMemory(audioDataRes.OggVorbisData, out this.strOvStr);
+							if (pcm.dataLength == 0)
+								eof = !OggVorbis.StreamChunk(this.strOvStr, out pcm);
+							else
+								eof = false;
+						}
+					}
+					if (pcm.dataLength > 0)
+					{
+						AL.BufferData(
+							unqueued, 
+							pcm.channelCount == 1 ? ALFormat.Mono16 : ALFormat.Stereo16,
+							pcm.data, 
+							pcm.dataLength * PcmData.SizeOfDataElement, 
+							pcm.sampleRate);
+						AL.SourceQueueBuffer(this.alSource, unqueued);
+					}
+					if (pcm.dataLength == 0 || eof)
+					{
+						this.strStopReq = StopRequest.EndOfStream;
+						break;
+					}
+				}
+			}
+		}
+
 	}
 }

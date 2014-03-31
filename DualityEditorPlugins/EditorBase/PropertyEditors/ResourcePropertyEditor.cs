@@ -2,17 +2,16 @@
 using System.Reflection;
 using System.Linq;
 
-using AdamsLair.PropertyGrid;
+using AdamsLair.WinForms;
 
 using Duality;
-using Duality.ColorFormat;
+using Duality.Drawing;
+using Duality.Editor;
+using Duality.Editor.UndoRedoActions;
 
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
-using DualityEditor.UndoRedoActions;
-
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(Resource))]
 	public class ResourcePropertyEditor : MemberwisePropertyEditor
 	{
 		private	bool	isInvokingDirectChild	= false;
@@ -32,7 +31,7 @@ namespace EditorBase.PropertyEditors
 		{
 			this.PropertyName = "Resource";
 			this.HeaderHeight = 20;
-			this.HeaderStyle = AdamsLair.PropertyGrid.Renderer.GroupHeaderStyle.Emboss;
+			this.HeaderStyle = AdamsLair.WinForms.Renderer.GroupHeaderStyle.Emboss;
 		}
 
 		protected override void OnUpdateFromObjects(object[] values)
@@ -46,10 +45,10 @@ namespace EditorBase.PropertyEditors
 		{
 			base.OnEditedTypeChanged();
 
-			System.Drawing.Bitmap iconBitmap = CorePluginRegistry.GetTypeImage(this.EditedType) as System.Drawing.Bitmap;
+			System.Drawing.Bitmap iconBitmap = this.EditedType.GetEditorImage() as System.Drawing.Bitmap;
 			ColorHsva avgClr = iconBitmap != null ? 
 				iconBitmap.GetAverageColor().ToHsva() : 
-				Duality.ColorFormat.ColorHsva.TransparentWhite;
+				Duality.Drawing.ColorHsva.TransparentWhite;
 			if (avgClr.S <= 0.05f)
 			{
 				avgClr = new ColorHsva(

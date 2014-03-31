@@ -6,13 +6,12 @@ using OpenTK;
 
 using Duality;
 using Duality.Resources;
+using Duality.Drawing;
+using Duality.Editor;
 using Font = Duality.Resources.Font;
 
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
 
-
-namespace EditorBase.PreviewGenerators
+namespace Duality.Editor.Plugins.Base.PreviewGenerators
 {
 	public class PixmapPreviewGenerator : PreviewGenerator<Pixmap>
 	{
@@ -59,7 +58,7 @@ namespace EditorBase.PreviewGenerators
 			int desiredHeight = query.DesiredHeight;
 			int oggHash = audio.OggVorbisData.GetCombinedHashCode();
 			int oggLen = audio.OggVorbisData.Length;
-			Duality.OggVorbis.PcmData pcm = Duality.OggVorbis.OV.LoadChunkFromMemory(audio.OggVorbisData, 500000);
+			PcmData pcm = OggVorbis.LoadChunkFromMemory(audio.OggVorbisData, 500000);
 			short[] sdata = pcm.data;
 			short maxVal = 1;
 			for (int i = 0; i < pcm.dataLength; i++)

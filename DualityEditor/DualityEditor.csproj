@@ -8,7 +8,7 @@
     <ProjectGuid>{9FB9F397-FD39-460C-A9AD-B4780D19945F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DualityEditor</RootNamespace>
+    <RootNamespace>Duality.Editor</RootNamespace>
     <AssemblyName>DualityEditor</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
@@ -66,12 +66,12 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AdamsLair.WinForms">
+      <HintPath>.\AdamsLair.WinForms.dll</HintPath>
+    </Reference>
     <Reference Include="Aga.Controls, Version=1.7.0.0, Culture=neutral, PublicKeyToken=fcc90fbf924463a3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\Aga.Controls.dll</HintPath>
-    </Reference>
-    <Reference Include="CustomPropertyGrid">
-      <HintPath>.\CustomPropertyGrid.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>.\Ionic.Zip.dll</HintPath>
@@ -100,22 +100,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controls\ColorPanel.cs">
-      <SubType>UserControl</SubType>
+    <Compile Include="Controls\TreeModels\TypeHierarchy\ModelItems.cs" />
+    <Compile Include="Controls\TreeModels\TypeHierarchy\TypeBrowserTreeModel.cs" />
+    <Compile Include="Forms\CreateObjectDialog.cs">
+      <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Controls\ColorShowBox.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\ColorSlider.cs">
-      <SubType>UserControl</SubType>
+    <Compile Include="Forms\CreateObjectDialog.Designer.cs">
+      <DependentUpon>CreateObjectDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\CueTextbox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\EnumFlagCheckedListBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\EnumComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\DualitorPropertyGrid.cs">
@@ -124,6 +117,7 @@
     <Compile Include="Controls\ExplorerListView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\PropertyEditors\PropertyEditorAssignmentAttribute.cs" />
     <Compile Include="Controls\PropertyEditors\RangePropertyEditor.cs" />
     <Compile Include="Controls\ToolStrip\DualitorToolStripRenderer.cs" />
     <Compile Include="Controls\ToolStrip\ToolStripCheckBox.cs">
@@ -141,13 +135,12 @@
     <Compile Include="Controls\PropertyEditors\VectorPropertyEditor.cs" />
     <Compile Include="Controls\PropertyEditors\Provider.cs" />
     <Compile Include="Controls\PropertyEditors\Vector2PropertyEditor.cs" />
-    <Compile Include="CorePluginInterface\CorePluginRegistry.cs" />
     <Compile Include="CorePluginInterface\DataConversion.cs" />
     <Compile Include="CorePluginInterface\EditorAction.cs" />
     <Compile Include="CorePluginInterface\DesignTimeObjectData.cs" />
     <Compile Include="CorePluginInterface\PreviewProvider.cs" />
     <Compile Include="DualityEditorApp.cs" />
-    <Compile Include="EditorRes\GeneralResCache.cs" />
+    <Compile Include="Properties\GeneralResCache.cs" />
     <Compile Include="EditorUserData.cs" />
     <Compile Include="Forms\SaveLayoutDialog.cs">
       <SubType>Form</SubType>
@@ -159,7 +152,7 @@
     <Compile Include="Helpers\EditorHelper.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EditorRes\GeneralRes.Designer.cs">
+    <Compile Include="Properties\GeneralRes.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>GeneralRes.resx</DependentUpon>
@@ -174,12 +167,6 @@
     </Compile>
     <Compile Include="Forms\AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ColorPickerDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ColorPickerDialog.Designer.cs">
-      <DependentUpon>ColorPickerDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\AppRunningDialog.cs">
       <SubType>Form</SubType>
@@ -257,16 +244,16 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Workspace.cs" />
-    <EmbeddedResource Include="EditorRes\GeneralRes.resx">
+    <EmbeddedResource Include="Forms\CreateObjectDialog.resx">
+      <DependentUpon>CreateObjectDialog.cs</DependentUpon>
+    </EmbeddedResource>    
+    <EmbeddedResource Include="Properties\GeneralRes.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>GeneralRes.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>GeneralRes.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ColorPickerDialog.resx">
-      <DependentUpon>ColorPickerDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\AppRunningDialog.resx">
       <DependentUpon>AppRunningDialog.cs</DependentUpon>
@@ -323,44 +310,46 @@
     <Content Include="DualityIcon.ico" />
     <Content Include="DualityIconB.ico" />
     <Content Include="DualityIconC.ico" />
-    <None Include="EditorRes\clock.png" />
-    <None Include="EditorRes\editoruserdata.xml" />
-    <None Include="EditorRes\application_stopwatch.png" />
-    <Content Include="EditorRes\WorkingFolderIcon.ico" />
-    <None Include="EditorRes\arrow_undo.png" />
-    <None Include="EditorRes\arrow_redo.png" />
-    <None Include="EditorRes\CursorHandGrabbing.png" />
-    <None Include="EditorRes\CursorHandGrab.png" />
-    <None Include="EditorRes\control_step_blue.png" />
-    <None Include="EditorRes\drive_disk.png" />
-    <None Include="EditorRes\working_bigtask.png" />
-    <None Include="EditorRes\template_empty.png" />
-    <None Include="EditorRes\template_current.png" />
-    <None Include="EditorRes\DualityIcon48.png" />
-    <None Include="EditorRes\DualityIcon256.png" />
-    <None Include="EditorRes\application_create.png" />
-    <None Include="EditorRes\page_gear.png" />
-    <None Include="EditorRes\page_code.png" />
-    <None Include="EditorRes\control_stop_blue.png" />
-    <None Include="EditorRes\control_play_blue.png" />
-    <None Include="EditorRes\control_pause_blue.png" />
-    <None Include="EditorRes\DualitorLogoHalfSize.png" />
-    <EmbeddedResource Include="EditorRes\GameResTemplate.txt" />
-    <None Include="EditorRes\page_white_csharp.png" />
-    <None Include="EditorRes\disk_multiple.png" />
-    <None Include="EditorRes\application_bug.png" />
-    <None Include="EditorRes\application_go.png" />
-    <None Include="EditorRes\arrow_refresh.png" />
-    <EmbeddedResource Include="EditorRes\GamePluginTemplate.zip" />
-    <None Include="EditorRes\icon_color.png" />
-    <None Include="EditorRes\add.png" />
-    <None Include="EditorRes\cross.png" />
-    <None Include="EditorRes\CursorArrowActionScale.png" />
-    <None Include="EditorRes\CursorArrowActionRotate.png" />
-    <None Include="EditorRes\CursorArrowActionMove.png" />
-    <None Include="EditorRes\CursorArrowAction.png" />
-    <None Include="EditorRes\CursorArrow.png" />
-    <None Include="EditorRes\cog.ico" />
+    <None Include="EmbeddedResources\clock.png" />
+    <None Include="EmbeddedResources\editoruserdata.xml" />
+    <None Include="EmbeddedResources\application_stopwatch.png" />
+    <EmbeddedResource Include="EmbeddedResources\ErrorHandlersTemplate.txt" />
+    <Content Include="EmbeddedResources\namespace.png" />
+    <Content Include="EmbeddedResources\WorkingFolderIcon.ico" />
+    <None Include="EmbeddedResources\arrow_undo.png" />
+    <None Include="EmbeddedResources\arrow_redo.png" />
+    <None Include="EmbeddedResources\CursorHandGrabbing.png" />
+    <None Include="EmbeddedResources\CursorHandGrab.png" />
+    <None Include="EmbeddedResources\control_step_blue.png" />
+    <None Include="EmbeddedResources\drive_disk.png" />
+    <None Include="EmbeddedResources\working_bigtask.png" />
+    <None Include="EmbeddedResources\template_empty.png" />
+    <None Include="EmbeddedResources\template_current.png" />
+    <None Include="EmbeddedResources\DualityIcon48.png" />
+    <None Include="EmbeddedResources\DualityIcon256.png" />
+    <None Include="EmbeddedResources\application_create.png" />
+    <None Include="EmbeddedResources\page_gear.png" />
+    <None Include="EmbeddedResources\page_code.png" />
+    <None Include="EmbeddedResources\control_stop_blue.png" />
+    <None Include="EmbeddedResources\control_play_blue.png" />
+    <None Include="EmbeddedResources\control_pause_blue.png" />
+    <None Include="EmbeddedResources\DualitorLogoHalfSize.png" />
+    <EmbeddedResource Include="EmbeddedResources\GameResTemplate.txt" />
+    <None Include="EmbeddedResources\page_white_csharp.png" />
+    <None Include="EmbeddedResources\disk_multiple.png" />
+    <None Include="EmbeddedResources\application_bug.png" />
+    <None Include="EmbeddedResources\application_go.png" />
+    <None Include="EmbeddedResources\arrow_refresh.png" />
+    <EmbeddedResource Include="EmbeddedResources\GamePluginTemplate.zip" />
+    <None Include="EmbeddedResources\icon_color.png" />
+    <None Include="EmbeddedResources\add.png" />
+    <None Include="EmbeddedResources\cross.png" />
+    <None Include="EmbeddedResources\CursorArrowActionScale.png" />
+    <None Include="EmbeddedResources\CursorArrowActionRotate.png" />
+    <None Include="EmbeddedResources\CursorArrowActionMove.png" />
+    <None Include="EmbeddedResources\CursorArrowAction.png" />
+    <None Include="EmbeddedResources\CursorArrow.png" />
+    <None Include="EmbeddedResources\cog.ico" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

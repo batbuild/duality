@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Drawing.Imaging;
+using Duality.Drawing;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;

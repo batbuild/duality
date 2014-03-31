@@ -4,13 +4,13 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Drawing;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.EditorTemplates;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.EditorTemplates;
 
 using Duality;
-using Duality.EditorHints;
+using Duality.Editor;
 
-namespace DualityEditor.Controls.PropertyEditors
+namespace Duality.Editor.Controls.PropertyEditors
 {
 	public abstract class VectorPropertyEditor : PropertyEditor
 	{
@@ -301,18 +301,23 @@ namespace DualityEditor.Controls.PropertyEditors
 				this.ApplyDefaultSubEditorConfig(t);
 			}
 
-			var places = this.EditedMember.GetEditorHint<EditorHintDecimalPlacesAttribute>(hintOverride);
-			var increment = this.EditedMember.GetEditorHint<EditorHintIncrementAttribute>(hintOverride);
-			var range = this.EditedMember.GetEditorHint<EditorHintRangeAttribute>(hintOverride);
-				
-			foreach (NumericEditorTemplate t in this.editor)
+			if (this.EditedMember != null)
 			{
-				if (places != null) t.DecimalPlaces = places.Places;
-				if (increment != null) t.Increment = increment.Increment;
-				if (range != null)
+				var range = EditorHintAttribute.Get<EditorHintRangeAttribute>(this.EditedMember, hintOverride);
+				var increment = EditorHintAttribute.Get<EditorHintIncrementAttribute>(this.EditedMember, hintOverride);
+				var places = EditorHintAttribute.Get<EditorHintDecimalPlacesAttribute>(this.EditedMember, hintOverride);
+				
+				foreach (NumericEditorTemplate t in this.editor)
 				{
-					t.Minimum = range.Min;
-					t.Maximum = range.Max;
+					if (places != null) t.DecimalPlaces = places.Places;
+					if (increment != null) t.Increment = increment.Increment;
+					if (range != null)
+					{
+						t.ValueBarMaximum = range.ReasonableMaximum;
+						t.ValueBarMinimum = range.ReasonableMinimum;
+						t.Minimum = range.LimitMinimum;
+						t.Maximum = range.LimitMaximum;
+					}
 				}
 			}
 		}

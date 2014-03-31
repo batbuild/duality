@@ -6,17 +6,16 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Drawing;
-using System.Xml;
+using System.Xml.Linq;
 using System.Text.RegularExpressions;
 
 using Duality;
+using Duality.Components;
 using Duality.Serialization;
 using Duality.Resources;
-using Duality.Profiling;
-
-using DualityEditor.Forms;
-using DualityEditor.CorePluginInterface;
-using DualityEditor.UndoRedoActions;
+using Duality.Drawing;
+using Duality.Editor.Forms;
+using Duality.Editor.UndoRedoActions;
 
 using OpenTK;
 using OpenTK.Platform;
@@ -25,13 +24,30 @@ using OpenTK.Platform.Windows;
 using Ionic.Zip;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace DualityEditor
+namespace Duality.Editor
 {
 	public enum SelectMode
 	{
 		Set,
 		Append,
 		Toggle
+	}
+
+	[Flags]
+	public enum HighlightMode
+	{
+		None		= 0x0,
+
+		/// <summary>
+		/// Highlights an objects conceptual representation, e.g. flashing its entry in an object overview.
+		/// </summary>
+		Conceptual	= 0x1,
+		/// <summary>
+		/// Highlights an objects spatial location, e.g. focusing it spatially in a scene view.
+		/// </summary>
+		Spatial		= 0x2,
+
+		All			= Conceptual | Spatial
 	}
 
 	public enum AutosaveFrequency
@@ -44,12 +60,16 @@ namespace DualityEditor
 
 	public static class DualityEditorApp
 	{
-		private	const	string	DesignTimeDataFile		= "designtimedata.dat";
+		public	const	string	DesignTimeDataFile		= "designtimedata.dat";
+		
+		public	const	string	ActionContextMenu		= "ContextMenu";
+		public	const	string	ActionContextOpenRes	= "OpenRes";
 		
 		private	static MainForm						mainForm			= null;
 		private	static GLControl					mainContextControl	= null;
 		private	static List<EditorPlugin>			plugins				= new List<EditorPlugin>();
 		private	static Dictionary<Type,List<Type>>	availTypeDict		= new Dictionary<Type,List<Type>>();
+		private	static List<IEditorAction>			editorActions		= new List<IEditorAction>();
 		private	static ReloadCorePluginDialog		corePluginReloader	= null;
 		private	static bool							needsRecovery		= false;
 		private	static GameObjectManager			editorObjects		= new GameObjectManager();
@@ -71,9 +91,11 @@ namespace DualityEditor
 
 
 		public	static	event	EventHandler	Terminating			= null;
-		public	static	event	EventHandler	Idling				= null;
+		public	static	event	EventHandler	EventLoopIdling		= null;
+		public	static	event	EventHandler	EditorIdling		= null;
 		public	static	event	EventHandler	UpdatingEngine		= null;
 		public	static	event	EventHandler	SaveAllTriggered	= null;
+		public	static	event	EventHandler<HighlightObjectEventArgs>			HighlightObject			= null;
 		public	static	event	EventHandler<SelectionChangedEventArgs>			SelectionChanged		= null;
 		public	static	event	EventHandler<ObjectPropertyChangedEventArgs>	ObjectPropertyChanged	= null;
 		
@@ -167,7 +189,7 @@ namespace DualityEditor
 				Directory.CreateDirectory(DualityApp.DataDirectory);
 				using (FileStream s = File.OpenWrite(Path.Combine(DualityApp.DataDirectory, "WorkingFolderIcon.ico")))
 				{
-					EditorRes.GeneralResCache.IconWorkingFolder.Save(s);
+					Properties.GeneralResCache.IconWorkingFolder.Save(s);
 				}
 				using (StreamWriter w = new StreamWriter(Path.Combine(DualityApp.DataDirectory, "desktop.ini")))
 				{
@@ -205,7 +227,6 @@ namespace DualityEditor
 			LoadUserData();
 			LoadDockPanelLayout();
 			LoadEditorUserData();
-			LoadDesignTimeObjectData();
 			InitPlugins();
 
 			// Set up core plugin reloader
@@ -227,14 +248,34 @@ namespace DualityEditor
 			editorObjects.ComponentRemoving += editorObjects_ComponentRemoved;
 
 			// Initialize secondary editor components
-			CorePluginRegistry.Init();
+			DesignTimeObjectData.Init();
+			FileImportProvider.Init();
+			ConvertOperation.Init();
+			PreviewProvider.Init();
 			Sandbox.Init();
 			HelpSystem.Init();
 			FileEventManager.Init();
 			UndoRedoManager.Init();
 
-			// Enter an empty Scene and allow the engine to run
-			Scene.Current = new Scene();
+			// Initialize editor actions
+			foreach (Type actionType in GetAvailDualityEditorTypes(typeof(IEditorAction)))
+			{
+				if (actionType.IsAbstract) continue;
+				IEditorAction action = actionType.CreateInstanceOf() as IEditorAction;
+				if (action != null) editorActions.Add(action);
+			}
+
+			// If there are no Scenes in the current project, init the first one with some default objects.
+			if (!Directory.EnumerateFiles(DualityApp.DataDirectory, "*" + Scene.FileExt, SearchOption.AllDirectories).Any())
+			{
+				GameObject mainCam = new GameObject("MainCamera");
+				mainCam.AddComponent<Transform>().Pos = new Vector3(0, 0, -DrawDevice.DefaultFocusDist);
+				mainCam.AddComponent<Camera>();
+				mainCam.AddComponent<SoundListener>();
+				Scene.Current.AddObject(mainCam);
+			}
+
+			// Allow the engine to run
 			dualityAppSuspended = false;
 		}
 		public static bool Terminate(bool byUser)
@@ -249,10 +290,10 @@ namespace DualityEditor
 				{
 					string unsavedResText = unsavedResTemp.Take(5).ToString(r => r.GetType().GetTypeCSCodeName(true) + ":\t" + r.FullName, "\n");
 					if (unsavedResTemp.Count() > 5) 
-						unsavedResText += "\n" + string.Format(EditorRes.GeneralRes.Msg_ConfirmQuitUnsaved_Desc_More, unsavedResTemp.Count() - 5);
+						unsavedResText += "\n" + string.Format(Properties.GeneralRes.Msg_ConfirmQuitUnsaved_Desc_More, unsavedResTemp.Count() - 5);
 					DialogResult result = MessageBox.Show(
-						string.Format(EditorRes.GeneralRes.Msg_ConfirmQuitUnsaved_Desc, "\n\n" + unsavedResText + "\n\n"), 
-						EditorRes.GeneralRes.Msg_ConfirmQuitUnsaved_Caption, 
+						string.Format(Properties.GeneralRes.Msg_ConfirmQuitUnsaved_Desc, "\n\n" + unsavedResText + "\n\n"), 
+						Properties.GeneralRes.Msg_ConfirmQuitUnsaved_Caption, 
 						MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation);
 					if (result == DialogResult.Yes)
 					{
@@ -265,8 +306,8 @@ namespace DualityEditor
 				else
 				{
 					DialogResult result = MessageBox.Show(
-						EditorRes.GeneralRes.Msg_ConfirmQuit_Desc, 
-						EditorRes.GeneralRes.Msg_ConfirmQuit_Caption, 
+						Properties.GeneralRes.Msg_ConfirmQuit_Desc, 
+						Properties.GeneralRes.Msg_ConfirmQuit_Caption, 
 						MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 					if (result == DialogResult.No)
 						cancel = true;
@@ -289,16 +330,21 @@ namespace DualityEditor
 				Resource.ResourceSaving -= Resource_ResourceSaving;
 				FileEventManager.PluginChanged -= FileEventManager_PluginChanged;
 
-				// Initialize secondary editor components
+				// Terminate editor actions
+				editorActions.Clear();
+
+				// Terminate secondary editor components
 				UndoRedoManager.Terminate();
 				FileEventManager.Terminate();
 				HelpSystem.Terminate();
 				Sandbox.Terminate();
-				CorePluginRegistry.Terminate();
+				PreviewProvider.Terminate();
+				ConvertOperation.Terminate();
+				FileImportProvider.Terminate();
+				DesignTimeObjectData.Terminate();
 
 				// Terminate Duality
 				DualityEditorApp.SaveUserData();
-				DualityEditorApp.SaveDesignTimeObjectData();
 				DualityApp.SaveAppData();
 				DualityApp.Terminate();
 			}
@@ -308,38 +354,33 @@ namespace DualityEditor
 
 		private static void LoadPlugins()
 		{
-			CorePluginRegistry.RegisterPropertyEditorProvider(new Controls.PropertyEditors.DualityPropertyEditorProvider());
-
 			Log.Editor.Write("Scanning for editor plugins...");
 			Log.Editor.PushIndent();
 
-			if (Directory.Exists("Plugins"))
+			foreach (string dllPath in DualityApp.GetPluginLibPaths("*.editor.dll"))
 			{
-				string[] pluginDllPaths = Directory.GetFiles("Plugins", "*.editor.dll", SearchOption.AllDirectories);
-				foreach (string dllPath in pluginDllPaths)
+				Log.Editor.Write("Loading '{0}'...", dllPath);
+				Log.Editor.PushIndent();
+				try
 				{
-					Log.Editor.Write("Loading '{0}'...", dllPath);
-					Log.Editor.PushIndent();
-					try
+					Assembly pluginAssembly = Assembly.Load(File.ReadAllBytes(dllPath));
+					Type pluginType = pluginAssembly.GetExportedTypes().FirstOrDefault(t => typeof(EditorPlugin).IsAssignableFrom(t));
+					if (pluginType == null)
 					{
-						Assembly pluginAssembly = Assembly.Load(File.ReadAllBytes(dllPath));
-						Type pluginType = pluginAssembly.GetExportedTypes().FirstOrDefault(t => typeof(EditorPlugin).IsAssignableFrom(t));
-						if (pluginType == null)
-						{
-							Log.Editor.WriteWarning("Can't find EditorPlugin class. Discarding plugin...");
-							continue;
-						}
-						EditorPlugin plugin = (EditorPlugin)pluginType.CreateInstanceOf();
-						plugin.LoadPlugin();
-						plugins.Add(plugin);
+						Log.Editor.WriteWarning("Can't find EditorPlugin class. Discarding plugin...");
+						continue;
 					}
-					catch (Exception e)
-					{
-						Log.Editor.WriteError("Error loading plugin: {0}", Log.Exception(e));
-					}
-					Log.Editor.PopIndent();
+					EditorPlugin plugin = (EditorPlugin)pluginType.CreateInstanceOf();
+					plugin.LoadPlugin();
+					plugins.Add(plugin);
 				}
+				catch (Exception e)
+				{
+					Log.Editor.WriteError("Error loading plugin: {0}", Log.Exception(e));
+				}
+				Log.Editor.PopIndent();
 			}
+
 			Log.Editor.PopIndent();
 		}
 		private static void InitPlugins()
@@ -394,6 +435,13 @@ namespace DualityEditor
 
 			return availTypes;
 		}
+		public static IEnumerable<IEditorAction> GetEditorActions(Type subjectType, IEnumerable<object> objects, string context = ActionContextMenu)
+		{
+			return editorActions.Where(a => 
+				a.SubjectType.IsAssignableFrom(subjectType) && 
+				a.MatchesContext(context) && 
+				a.CanPerformOn(objects));
+		}
 
 		internal static void SaveUserData()
 		{
@@ -409,11 +457,7 @@ namespace DualityEditor
 
 			Log.Editor.PopIndent();
 		}
-		private static void SaveDesignTimeObjectData()
-		{
-			CorePluginRegistry.SaveDesignTimeData(DesignTimeDataFile);
-		}
-
+		
 		internal static void LoadUserData()
 		{
 			Log.Editor.Write("Loading user data...");
@@ -439,24 +483,23 @@ namespace DualityEditor
 			Log.Editor.Write("Loading editor user data...");
 			Log.Editor.PushIndent();
 
-			XmlDocument xmlDoc = new XmlDocument();
 			try
 			{
-				xmlDoc.LoadXml(editorUserData.EditorData);
-				System.Xml.XmlNodeList editorAppElemQuery = xmlDoc.DocumentElement.GetElementsByTagName("EditorApp");
-				if (editorAppElemQuery.Count > 0)
+				XDocument xmlDoc = XDocument.Parse(editorUserData.EditorData);
+				IEnumerable<XElement> editorAppElemQuery = xmlDoc.Descendants("EditorApp");
+				if (editorAppElemQuery.Any())
 				{
-					XmlElement editorAppElement = editorAppElemQuery[0] as System.Xml.XmlElement;
-					bool.TryParse(editorAppElement.GetAttribute("backups"), out backupsEnabled);
-					Enum.TryParse<AutosaveFrequency>(editorAppElement.GetAttribute("autosaves"), out autosaveFrequency);
-					launcherApp = editorAppElement.GetAttribute("launcher");
+					XElement editorAppElement = editorAppElemQuery.First();
+					bool.TryParse(editorAppElement.GetAttributeValue("backups"), out backupsEnabled);
+					Enum.TryParse<AutosaveFrequency>(editorAppElement.GetAttributeValue("autosaves"), out autosaveFrequency);
+					launcherApp = editorAppElement.GetAttributeValue("launcher");
 				}
 
-				foreach (XmlElement child in xmlDoc.DocumentElement)
+				foreach (XElement child in xmlDoc.Descendants())
 				{
-					if (child.Name.StartsWith("Plugin_"))
+					if (child.Name.LocalName.StartsWith("Plugin_"))
 					{
-						string pluginName = child.Name.Substring(7, child.Name.Length - 7);
+						string pluginName = child.Name.LocalName.Substring(7, child.Name.LocalName.Length - 7);
 						foreach (EditorPlugin plugin in plugins)
 						{
 							if (plugin.Id == pluginName)
@@ -468,7 +511,7 @@ namespace DualityEditor
 					}
 				}
 			}
-			catch (XmlException e)
+			catch (Exception e)
 			{
 				Log.Editor.WriteError("Cannot load plugin user data due to malformed or non-existent Xml: {0}", Log.Exception(e));
 			}
@@ -476,10 +519,6 @@ namespace DualityEditor
 			Log.Editor.PopIndent();
 		}
 
-		private static void LoadDesignTimeObjectData()
-		{
-			CorePluginRegistry.LoadDesignTimeData(DesignTimeDataFile);
-		}
 
 		public static void InitMainGLContext()
 		{
@@ -535,6 +574,17 @@ namespace DualityEditor
 			updateObjects.Add(obj);
 		}
 
+		/// <summary>
+		/// Triggers a highlight event in the editor, to which the appropriate modules will
+		/// be able to react. This usually means flashing a certain tree view entry or similar.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="obj"></param>
+		/// <param name="mode"></param>
+		public static void Highlight(object sender, ObjectSelection obj, HighlightMode mode = HighlightMode.Conceptual)
+		{
+			OnHightlightObject(sender, obj, mode);
+		}
 		public static void Select(object sender, ObjectSelection sel, SelectMode mode = SelectMode.Set)
 		{
 			selectionPrevious = selectionCurrent;
@@ -581,6 +631,13 @@ namespace DualityEditor
 				string path = PathHelper.GetFreePath(basePath, Scene.FileExt);
 				Scene.Current.Save(path);
 				DualityApp.AppData.Version++;
+				
+				// If there is no start scene defined, use this one.
+				if (DualityApp.AppData.StartScene == null)
+				{
+					DualityApp.AppData.StartScene = Scene.Current;
+					DualityApp.SaveAppData();
+				}
 			}
 			return Scene.Current.Path;
 		}
@@ -671,7 +728,7 @@ namespace DualityEditor
 			
 			// Replace exec path in user files, since VS doesn't support relative paths there..
 			{
-				XmlDocument userDoc;
+				XDocument userDoc;
 				const string userFileCore = EditorHelper.SourceCodeProjectCorePluginFile + ".user";
 				const string userFileEditor = EditorHelper.SourceCodeProjectEditorPluginFile + ".user";
 				ZipFile gamePluginZip = null;
@@ -679,7 +736,7 @@ namespace DualityEditor
 				if (!File.Exists(userFileCore))
 				{
 					if (gamePluginZip == null)
-						gamePluginZip = ZipFile.Read(EditorRes.GeneralRes.GamePluginTemplate);
+						gamePluginZip = ZipFile.Read(Properties.GeneralRes.GamePluginTemplate);
 					foreach (var e in gamePluginZip.Entries)
 					{
 						if (string.Equals(Path.GetFileName(e.FileName), Path.GetFileName(userFileCore), StringComparison.InvariantCultureIgnoreCase))
@@ -691,17 +748,16 @@ namespace DualityEditor
 				}
 				if (File.Exists(userFileCore))
 				{
-					userDoc = new XmlDocument();
 					try
 					{
-						userDoc.Load(userFileCore);
-						foreach (XmlElement element in userDoc.GetElementsByTagName("StartProgram").OfType<XmlElement>())
-							element.InnerText = Path.GetFullPath(DualityEditorApp.LauncherAppPath);
-						foreach (XmlElement element in userDoc.GetElementsByTagName("StartWorkingDirectory").OfType<XmlElement>())
-							element.InnerText = Path.GetFullPath(".");
+						userDoc = XDocument.Load(userFileCore);
+						foreach (XElement element in userDoc.Descendants("StartProgram", true))
+							element.Value = Path.GetFullPath(DualityEditorApp.LauncherAppPath);
+						foreach (XElement element in userDoc.Descendants("StartWorkingDirectory", true))
+							element.Value = Path.GetFullPath(".");
 						userDoc.Save(userFileCore);
 					}
-					catch (XmlException e)
+					catch (Exception e)
 					{
 						Log.Editor.WriteError("An error occured while updating the core plugin file {0}: {1}", userFileCore, e.Message);
 					}
@@ -710,7 +766,7 @@ namespace DualityEditor
 				if (!File.Exists(userFileEditor))
 				{
 					if (gamePluginZip == null)
-						gamePluginZip = ZipFile.Read(EditorRes.GeneralRes.GamePluginTemplate);
+						gamePluginZip = ZipFile.Read(Properties.GeneralRes.GamePluginTemplate);
 					foreach (var e in gamePluginZip.Entries)
 					{
 						if (string.Equals(Path.GetFileName(e.FileName), Path.GetFileName(userFileEditor), StringComparison.InvariantCultureIgnoreCase))
@@ -724,15 +780,14 @@ namespace DualityEditor
 				{
 					try
 					{
-						userDoc = new XmlDocument();
-						userDoc.Load(userFileEditor);
-						foreach (XmlElement element in userDoc.GetElementsByTagName("StartProgram").OfType<XmlElement>())
-							element.InnerText = Path.GetFullPath("DualityEditor.exe");
-						foreach (XmlElement element in userDoc.GetElementsByTagName("StartWorkingDirectory").OfType<XmlElement>())
-							element.InnerText = Path.GetFullPath(".");
+						userDoc = XDocument.Load(userFileEditor);
+						foreach (XElement element in userDoc.Descendants("StartProgram", true))
+							element.Value = Path.GetFullPath("DualityEditor.exe");
+						foreach (XElement element in userDoc.Descendants("StartWorkingDirectory", true))
+							element.Value = Path.GetFullPath(".");
 						userDoc.Save(userFileEditor);
 					}
-					catch (XmlException e)
+					catch (Exception e)
 					{
 						Log.Editor.WriteError("An error occured while updating the editor plugin file {0}: {1}", userFileEditor, e.Message);
 					}
@@ -756,11 +811,10 @@ namespace DualityEditor
 			// Read root namespaces
 			if (File.Exists(EditorHelper.SourceCodeProjectCorePluginFile))
 			{
-				XmlDocument projXml = new XmlDocument();
-				projXml.Load(EditorHelper.SourceCodeProjectCorePluginFile);
-				foreach (XmlElement element in projXml.GetElementsByTagName("RootNamespace").OfType<XmlElement>())
+				XDocument projXml = XDocument.Load(EditorHelper.SourceCodeProjectCorePluginFile);
+				foreach (XElement element in projXml.Descendants("RootNamespace", true))
 				{
-					if (rootNamespace == null) rootNamespace = element.InnerText;
+					if (rootNamespace == null) rootNamespace = element.Value;
 				}
 			}
 		}
@@ -769,7 +823,7 @@ namespace DualityEditor
 			// Create solution file if not existing yet
 			if (!File.Exists(EditorHelper.SourceCodeSolutionFile))
 			{
-				using (ZipFile gamePluginZip = ZipFile.Read(EditorRes.GeneralRes.GamePluginTemplate))
+				using (ZipFile gamePluginZip = ZipFile.Read(Properties.GeneralRes.GamePluginTemplate))
 				{
 					gamePluginZip.ExtractAll(EditorHelper.SourceCodeDirectory, ExtractExistingFileAction.DoNotOverwrite);
 				}
@@ -793,24 +847,22 @@ namespace DualityEditor
 			// Update root namespaces
 			if (File.Exists(EditorHelper.SourceCodeProjectCorePluginFile))
 			{
-				XmlDocument projXml = new XmlDocument();
-				projXml.Load(EditorHelper.SourceCodeProjectCorePluginFile);
-				foreach (XmlElement element in projXml.GetElementsByTagName("RootNamespace").OfType<XmlElement>())
+				XDocument projXml = XDocument.Load(EditorHelper.SourceCodeProjectCorePluginFile);
+				foreach (XElement element in projXml.Descendants("RootNamespace", true))
 				{
-					if (oldRootNamespaceCore == null) oldRootNamespaceCore = element.InnerText;
-					element.InnerText = newRootNamespaceCore;
+					if (oldRootNamespaceCore == null) oldRootNamespaceCore = element.Value;
+					element.Value = newRootNamespaceCore;
 				}
 				projXml.Save(EditorHelper.SourceCodeProjectCorePluginFile);
 			}
 
 			if (File.Exists(EditorHelper.SourceCodeProjectEditorPluginFile))
 			{
-				XmlDocument projXml = new XmlDocument();
-				projXml.Load(EditorHelper.SourceCodeProjectEditorPluginFile);
-				foreach (XmlElement element in projXml.GetElementsByTagName("RootNamespace").OfType<XmlElement>())
+				XDocument projXml = XDocument.Load(EditorHelper.SourceCodeProjectEditorPluginFile);
+				foreach (XElement element in projXml.Descendants("RootNamespace", true))
 				{
-					if (oldRootNamespaceEditor == null) oldRootNamespaceEditor = element.InnerText;
-					element.InnerText = newRootNamespaceEditor;
+					if (oldRootNamespaceEditor == null) oldRootNamespaceEditor = element.Value;
+					element.Value = newRootNamespaceEditor;
 				}
 				projXml.Save(EditorHelper.SourceCodeProjectEditorPluginFile);
 			}
@@ -987,8 +1039,8 @@ namespace DualityEditor
 		{
 			if (Sandbox.State == SandboxState.Playing) return true;
 			DialogResult result = MessageBox.Show(
-				EditorRes.GeneralRes.Msg_ConfirmDeleteSelectedObjects_Text, 
-				EditorRes.GeneralRes.Msg_ConfirmDeleteSelectedObjects_Caption, 
+				Properties.GeneralRes.Msg_ConfirmDeleteSelectedObjects_Text, 
+				Properties.GeneralRes.Msg_ConfirmDeleteSelectedObjects_Caption, 
 				MessageBoxButtons.YesNo, 
 				MessageBoxIcon.Question);
 			return result == DialogResult.Yes;
@@ -1015,21 +1067,31 @@ namespace DualityEditor
 		public static bool DisplayConfirmBreakPrefabLink()
 		{
 			DialogResult result = MessageBox.Show(
-				EditorRes.GeneralRes.Msg_ConfirmBreakPrefabLink_Desc, 
-				EditorRes.GeneralRes.Msg_ConfirmBreakPrefabLink_Caption, 
+				Properties.GeneralRes.Msg_ConfirmBreakPrefabLink_Desc, 
+				Properties.GeneralRes.Msg_ConfirmBreakPrefabLink_Caption, 
 				MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 			return result == DialogResult.Yes;
 		}
-
-		private static void OnIdling()
+		
+		private static void OnEventLoopIdling()
 		{
-			if (Idling != null)
-				Idling(null, EventArgs.Empty);
+			if (EventLoopIdling != null)
+				EventLoopIdling(null, EventArgs.Empty);
+		}
+		private static void OnEditorIdling()
+		{
+			if (EditorIdling != null)
+				EditorIdling(null, EventArgs.Empty);
 		}
 		private static void OnUpdatingEngine()
 		{
 			if (UpdatingEngine != null)
 				UpdatingEngine(null, EventArgs.Empty);
+		}
+		private static void OnHightlightObject(object sender, ObjectSelection target, HighlightMode mode)
+		{
+			if (HighlightObject != null)
+				HighlightObject(sender, new HighlightObjectEventArgs(target, mode));
 		}
 		private static void OnSelectionChanged(object sender, ObjectSelection.Category changedCategoryFallback)
 		{
@@ -1149,12 +1211,15 @@ namespace DualityEditor
 		private static void Application_Idle(object sender, EventArgs e)
 		{
 			Application.Idle -= Application_Idle;
+			
+			// Trigger global event loop idle event.
+			OnEventLoopIdling();
 
 			// Perform some global operations, if no modal dialog is open
 			if (mainForm.Visible && mainForm.CanFocus)
 			{
-				// Trigger global idle event.
-				OnIdling();
+				// Trigger global editor idle event.
+				OnEditorIdling();
 
 				// Trigger autosave after a while
 				if (autosaveFrequency != AutosaveFrequency.Disabled)
@@ -1204,10 +1269,10 @@ namespace DualityEditor
 				// Give the processor a rest if we have the time, don't use 100% CPU
 				while (watch.Elapsed.TotalSeconds < 0.01d)
 				{
-				    // Sleep a little
-				    System.Threading.Thread.Sleep(1);
-				    // App wants to do something? Stop waiting.
-				    if (!AppStillIdle) break;
+					// Sleep a little
+					System.Threading.Thread.Sleep(1);
+					// App wants to do something? Stop waiting.
+					if (!AppStillIdle) break;
 				}
 			}
 
@@ -1269,9 +1334,9 @@ namespace DualityEditor
 			// Deselect disposed Resources
 			if (selectionCurrent.Resources.Contains(e.Content.Res))
 				Deselect(sender, new ObjectSelection(e.Content.Res));
-            // Unflag disposed Resources
-            if (unsavedResources.Contains(e.Content.Res))
-                FlagResourceSaved(e.Content.Res);
+			// Unflag disposed Resources
+			if (unsavedResources.Contains(e.Content.Res))
+				FlagResourceSaved(e.Content.Res);
 		}
 
 		private static void mainForm_Activated(object sender, EventArgs e)
@@ -1323,12 +1388,11 @@ namespace DualityEditor
 
 		private static void FileEventManager_PluginChanged(object sender, FileSystemEventArgs e)
 		{
-            string pluginStr = Path.Combine("Plugins", e.Name);
-            if (!corePluginReloader.ReloadSchedule.Contains(pluginStr))
-            {
-                corePluginReloader.ReloadSchedule.Add(pluginStr);
-                DualityApp.AppData.Version++;
-            }
+			if (!corePluginReloader.ReloadSchedule.Contains(e.FullPath))
+			{
+				corePluginReloader.ReloadSchedule.Add(e.FullPath);
+				DualityApp.AppData.Version++;
+			}
 			corePluginReloader.State = ReloadCorePluginDialog.ReloaderState.WaitForPlugins;
 		}
 		private static void DualityApp_PluginReady(object sender, CorePluginEventArgs e)

@@ -1,8 +1,11 @@
 ﻿using System.Reflection;
 using System.Linq;
 
-namespace EditorBase.PropertyEditors
+using Duality.Resources;
+
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(Pixmap), PropertyEditorAssignmentAttribute.PrioritySpecialized)]
 	public class PixmapPropertyEditor : ResourcePropertyEditor
 	{
 		public PixmapPropertyEditor()

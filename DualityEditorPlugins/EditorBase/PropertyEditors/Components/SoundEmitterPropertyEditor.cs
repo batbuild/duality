@@ -4,20 +4,18 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
-using AdamsLair.PropertyGrid;
+using AdamsLair.WinForms;
 
 using Duality;
 using Duality.Components;
 using Duality.Resources;
+using Duality.Editor;
+using Duality.Editor.UndoRedoActions;
+using Duality.Editor.Plugins.Base.UndoRedoActions;
 
-using DualityEditor;
-using DualityEditor.UndoRedoActions;
-using DualityEditor.CorePluginInterface;
-
-using EditorBase.UndoRedoActions;
-
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(SoundEmitterPropertyEditor), "MatchToProperty")]
 	public class SoundEmitterPropertyEditor : ComponentPropertyEditor
 	{
 		private	List<SoundEmitterSourcePropertyEditor>	soundSourceEditors	= new List<SoundEmitterSourcePropertyEditor>();
@@ -137,6 +135,15 @@ namespace EditorBase.PropertyEditors
 				}
 			};
 		}
+
+		private static int MatchToProperty(Type propertyType, ProviderContext context)
+		{
+			bool compRef = !(context.ParentEditor is GameObjectOverviewPropertyEditor);
+			if (typeof(SoundEmitter).IsAssignableFrom(propertyType) && !compRef)
+				return PropertyEditorAssignmentAttribute.PrioritySpecialized;
+			else
+				return PropertyEditorAssignmentAttribute.PriorityNone;
+		}
 	}
 
 	public class SoundEmitterSourcePropertyEditor : MemberwisePropertyEditor
@@ -152,7 +159,7 @@ namespace EditorBase.PropertyEditors
 		public SoundEmitterSourcePropertyEditor()
 		{
 			this.EditedType = typeof(SoundEmitter.Source);
-			this.HeaderStyle = AdamsLair.PropertyGrid.Renderer.GroupHeaderStyle.SmoothSunken;
+			this.HeaderStyle = AdamsLair.WinForms.Renderer.GroupHeaderStyle.SmoothSunken;
 			this.HeaderHeight = 30;
 		}
 

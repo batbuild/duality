@@ -6,8 +6,9 @@ using FarseerPhysics.Dynamics;
 using FarseerPhysics.Factories;
 using FarseerPhysics.Dynamics.Joints;
 
-using Duality.EditorHints;
+using Duality.Editor;
 using Duality.Resources;
+using Duality.Cloning;
 
 namespace Duality.Components.Physics
 {
@@ -16,7 +17,7 @@ namespace Duality.Components.Physics
 	/// by connecting it to fixed world coordinates or other Colliders.
 	/// </summary>
 	[Serializable]
-	public abstract class JointInfo : Duality.Cloning.ICloneable
+	public abstract class JointInfo : ICloneExplicit
 	{
 		[NonSerialized]	
 		internal protected	Joint	joint	= null;
@@ -135,7 +136,7 @@ namespace Duality.Components.Physics
 			return newObj;
 		}
 
-		void Cloning.ICloneable.CopyDataTo(object targetObj, Cloning.CloneProvider provider)
+		void ICloneExplicit.CopyDataTo(object targetObj, CloneProvider provider)
 		{
 			JointInfo targetJoint = targetObj as JointInfo;
 			this.CopyTo(targetJoint);

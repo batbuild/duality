@@ -2,16 +2,17 @@
 using System.Linq;
 using System.Reflection;
 
-using AdamsLair.PropertyGrid;
+using AdamsLair.WinForms;
 
 using Duality;
 using Duality.Components.Physics;
 
-using DualityEditor;
-using DualityEditor.UndoRedoActions;
+using Duality.Editor;
+using Duality.Editor.UndoRedoActions;
 
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(ShapeInfo))]
 	public class RigidBodyShapePropertyEditor : MemberwisePropertyEditor
 	{
 		public RigidBodyShapePropertyEditor()

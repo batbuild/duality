@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Duality.ColorFormat;
-using Duality.EditorHints;
-using Duality.VertexFormat;
+using Duality.Drawing;
+using Duality.Editor;
 using Duality.Resources;
 using Duality.Components.Physics;
+using Duality.Properties;
 
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -19,6 +19,8 @@ namespace Duality.Components.Diagnostics
 	/// </summary>
 	[Serializable]
 	[RequiredComponent(typeof(RigidBody))]
+	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryDiagnostics)]
+	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageRigidBodyRenderer)]
 	public class RigidBodyRenderer : Renderer
 	{
 		private	ContentRef<Material>	areaMaterial			= Material.Checkerboard;
@@ -123,32 +125,32 @@ namespace Duality.Components.Diagnostics
 			Canvas canvas = new Canvas(device, this.vertexBuffer);
 
 			// Draw Shape Areas
-			canvas.CurrentState.ZOffset = this.offset;
-			canvas.CurrentState.SetMaterial(this.areaMaterial);
+			canvas.State.ZOffset = this.offset;
+			canvas.State.SetMaterial(this.areaMaterial);
 			foreach (ShapeInfo shape in body.Shapes)
 			{
 				if (!shape.IsValid)
-					canvas.CurrentState.ColorTint = this.colorTint * ColorRgba.Red;
+					canvas.State.ColorTint = this.colorTint * ColorRgba.Red;
 				else if (shape.IsSensor)
-					canvas.CurrentState.ColorTint = this.colorTint.WithAlpha(0.25f);
+					canvas.State.ColorTint = this.colorTint.WithAlpha(0.25f);
 				else
-					canvas.CurrentState.ColorTint = this.colorTint;
+					canvas.State.ColorTint = this.colorTint;
 				this.DrawShapeArea(canvas, tranform, shape);
 			}
 
 			// Draw Shape Outlines
 			if (this.outlineWidth > 0.0f)
 			{
-				canvas.CurrentState.ZOffset = this.offset - 1;
-				canvas.CurrentState.SetMaterial(this.outlineMaterial);
+				canvas.State.ZOffset = this.offset - 1;
+				canvas.State.SetMaterial(this.outlineMaterial);
 				foreach (ShapeInfo shape in body.Shapes)
 				{
 					if (!shape.IsValid)
-						canvas.CurrentState.ColorTint = this.colorTint * ColorRgba.Red;
+						canvas.State.ColorTint = this.colorTint * ColorRgba.Red;
 					else if (shape.IsSensor)
-						canvas.CurrentState.ColorTint = this.colorTint.WithAlpha(0.4f);
+						canvas.State.ColorTint = this.colorTint.WithAlpha(0.4f);
 					else
-						canvas.CurrentState.ColorTint = this.colorTint;
+						canvas.State.ColorTint = this.colorTint;
 					this.DrawShapeOutline(canvas, tranform, shape);
 				}
 			}
@@ -170,13 +172,13 @@ namespace Duality.Components.Diagnostics
 
 			if (this.wrapTexture)
 			{
-				canvas.CurrentState.TextureCoordinateRect = new Rect(
-					shape.Radius * 2.0f / canvas.CurrentState.TextureBaseSize.X,
-					shape.Radius * 2.0f / canvas.CurrentState.TextureBaseSize.Y);
+				canvas.State.TextureCoordinateRect = new Rect(
+					shape.Radius * 2.0f / canvas.State.TextureBaseSize.X,
+					shape.Radius * 2.0f / canvas.State.TextureBaseSize.Y);
 			}
-			canvas.CurrentState.TransformScale = new Vector2(scale, scale);
-			canvas.CurrentState.TransformAngle = angle;
-			canvas.CurrentState.TransformHandle = -shape.Position;
+			canvas.State.TransformScale = new Vector2(scale, scale);
+			canvas.State.TransformAngle = angle;
+			canvas.State.TransformHandle = -shape.Position;
 			canvas.FillCircle(
 				pos.X, 
 				pos.Y, 
@@ -192,12 +194,12 @@ namespace Duality.Components.Diagnostics
 			if (this.wrapTexture)
 			{
 				Rect pointBoundingRect = shape.Vertices.BoundingBox();
-				canvas.CurrentState.TextureCoordinateRect = new Rect(
-					pointBoundingRect.W / canvas.CurrentState.TextureBaseSize.X,
-					pointBoundingRect.H / canvas.CurrentState.TextureBaseSize.Y);
+				canvas.State.TextureCoordinateRect = new Rect(
+					pointBoundingRect.W / canvas.State.TextureBaseSize.X,
+					pointBoundingRect.H / canvas.State.TextureBaseSize.Y);
 			}
-			canvas.CurrentState.TransformAngle = angle;
-			canvas.CurrentState.TransformScale = new Vector2(scale, scale);
+			canvas.State.TransformAngle = angle;
+			canvas.State.TransformScale = new Vector2(scale, scale);
 			canvas.FillPolygon(shape.Vertices, pos.X, pos.Y, pos.Z);
 		}
 		private void DrawShapeArea(Canvas canvas, Transform transform, LoopShapeInfo shape)
@@ -221,13 +223,13 @@ namespace Duality.Components.Diagnostics
 
 			if (this.wrapTexture)
 			{
-				canvas.CurrentState.TextureCoordinateRect = new Rect(
-					shape.Radius * 2.0f / canvas.CurrentState.TextureBaseSize.X,
-					shape.Radius * 2.0f / canvas.CurrentState.TextureBaseSize.Y);
+				canvas.State.TextureCoordinateRect = new Rect(
+					shape.Radius * 2.0f / canvas.State.TextureBaseSize.X,
+					shape.Radius * 2.0f / canvas.State.TextureBaseSize.Y);
 			}
-			canvas.CurrentState.TransformScale = new Vector2(scale, scale);
-			canvas.CurrentState.TransformAngle = angle;
-			canvas.CurrentState.TransformHandle = -shape.Position;
+			canvas.State.TransformScale = new Vector2(scale, scale);
+			canvas.State.TransformAngle = angle;
+			canvas.State.TransformHandle = -shape.Position;
 			canvas.FillCircleSegment(
 				pos.X, 
 				pos.Y, 
@@ -246,12 +248,12 @@ namespace Duality.Components.Diagnostics
 			if (this.wrapTexture)
 			{
 				Rect pointBoundingRect = shape.Vertices.BoundingBox();
-				canvas.CurrentState.TextureCoordinateRect = new Rect(
-					pointBoundingRect.W / canvas.CurrentState.TextureBaseSize.X,
-					pointBoundingRect.H / canvas.CurrentState.TextureBaseSize.Y);
+				canvas.State.TextureCoordinateRect = new Rect(
+					pointBoundingRect.W / canvas.State.TextureBaseSize.X,
+					pointBoundingRect.H / canvas.State.TextureBaseSize.Y);
 			}
-			canvas.CurrentState.TransformAngle = angle;
-			canvas.CurrentState.TransformScale = new Vector2(scale, scale);
+			canvas.State.TransformAngle = angle;
+			canvas.State.TransformScale = new Vector2(scale, scale);
 			canvas.FillPolygonOutline(shape.Vertices, this.outlineWidth, pos.X, pos.Y, pos.Z);
 		}
 		private void DrawShapeOutline(Canvas canvas, Transform transform, LoopShapeInfo shape)
@@ -263,12 +265,12 @@ namespace Duality.Components.Diagnostics
 			if (this.wrapTexture)
 			{
 				Rect pointBoundingRect = shape.Vertices.BoundingBox();
-				canvas.CurrentState.TextureCoordinateRect = new Rect(
-					pointBoundingRect.W / canvas.CurrentState.TextureBaseSize.X,
-					pointBoundingRect.H / canvas.CurrentState.TextureBaseSize.Y);
+				canvas.State.TextureCoordinateRect = new Rect(
+					pointBoundingRect.W / canvas.State.TextureBaseSize.X,
+					pointBoundingRect.H / canvas.State.TextureBaseSize.Y);
 			}
-			canvas.CurrentState.TransformAngle = angle;
-			canvas.CurrentState.TransformScale = new Vector2(scale, scale);
+			canvas.State.TransformAngle = angle;
+			canvas.State.TransformScale = new Vector2(scale, scale);
 			canvas.FillPolygonOutline(shape.Vertices, this.outlineWidth, pos.X, pos.Y, pos.Z);
 		}
 

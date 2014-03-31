@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Aga.Controls.Tree;
-using Duality;
-using DualityEditor.CorePluginInterface;
 
-namespace EditorBase.Modules
+namespace Duality.Editor.Plugins.Base.Modules
 {
 	public partial class ObjectSelector : Form
 	{

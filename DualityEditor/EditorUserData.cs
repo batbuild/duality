@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Xml;
-using Duality;
+using System.Xml.Linq;
 
-namespace DualityEditor
+namespace Duality.Editor
 {
 	public class EditorUserData
 	{
@@ -21,7 +20,7 @@ namespace DualityEditor
 
 			if (!File.Exists(UserDataFile))
 			{
-				File.WriteAllText(UserDataFile, EditorRes.GeneralRes.DefaultEditorUserData);
+				File.WriteAllText(UserDataFile, Properties.GeneralRes.DefaultEditorUserData);
 				if (!File.Exists(UserDataFile)) return;
 			}
 
@@ -45,18 +44,18 @@ namespace DualityEditor
 		public void SaveEditorUserData(StreamWriter writer, bool backupsEnabled, AutosaveFrequency autosaveFrequency, string launcherApp, List<EditorPlugin> plugins)
 		{
 			// --- Save custom user data here ---
-			XmlDocument xmlDoc = new XmlDocument();
-			XmlElement rootElement = xmlDoc.CreateElement("UserData");
-			xmlDoc.AppendChild(rootElement);
-			XmlElement editorAppElement = xmlDoc.CreateElement("EditorApp");
-			rootElement.AppendChild(editorAppElement);
-			editorAppElement.SetAttribute("backups", backupsEnabled.ToString(System.Globalization.CultureInfo.InvariantCulture));
-			editorAppElement.SetAttribute("autosaves", autosaveFrequency.ToString());
-			editorAppElement.SetAttribute("launcher", launcherApp);
+			XDocument xmlDoc = new XDocument();
+			XElement rootElement = new XElement("UserData");
+			xmlDoc.Add(rootElement);
+			XElement editorAppElement = new XElement("EditorApp");
+			rootElement.Add(editorAppElement);
+			editorAppElement.SetAttributeValue("backups", backupsEnabled.ToString(System.Globalization.CultureInfo.InvariantCulture));
+			editorAppElement.SetAttributeValue("autosaves", autosaveFrequency.ToString());
+			editorAppElement.SetAttributeValue("launcher", launcherApp);
 			foreach (EditorPlugin plugin in plugins)
 			{
-				XmlElement pluginXmlElement = xmlDoc.CreateElement("Plugin_" + plugin.Id);
-				rootElement.AppendChild(pluginXmlElement);
+				XElement pluginXmlElement = new XElement("Plugin_" + plugin.Id);
+				rootElement.Add(pluginXmlElement);
 				plugin.SaveUserData(pluginXmlElement);
 			}
 			xmlDoc.Save(writer.BaseStream);

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using System.Drawing;
 
 using Duality;
 using Duality.Resources;
 
-namespace DualityEditor.CorePluginInterface
+namespace Duality.Editor
 {
 	public enum PreviewSizeMode
 	{
@@ -17,6 +18,22 @@ namespace DualityEditor.CorePluginInterface
 
 	public static class PreviewProvider
 	{
+		private static List<IPreviewGenerator> previewGenerators = new List<IPreviewGenerator>();
+
+		internal static void Init()
+		{
+			foreach (Type genType in DualityEditorApp.GetAvailDualityEditorTypes(typeof(IPreviewGenerator)))
+			{
+				if (genType.IsAbstract) continue;
+				IPreviewGenerator gen = genType.CreateInstanceOf() as IPreviewGenerator;
+				if (gen != null) previewGenerators.Add(gen);
+			}
+		}
+		internal static void Terminate()
+		{
+			previewGenerators.Clear();
+		}
+
 		public static Bitmap GetPreviewImage(object obj, int desiredWidth, int desiredHeight, PreviewSizeMode mode = PreviewSizeMode.FixedNone)
 		{
 			PreviewImageQuery query = new PreviewImageQuery(obj, desiredWidth, desiredHeight, mode);
@@ -33,15 +50,14 @@ namespace DualityEditor.CorePluginInterface
 		{
 			if (DualityApp.ExecContext == DualityApp.ExecutionContext.Terminated) return;
 			if (query == null) return;
-			
-			//System.Diagnostics.Stopwatch w = new System.Diagnostics.Stopwatch();
-			//w.Restart();
 
+			// Query all IPreviewGenerator instances that match the specified query
 			var generators = (
-				from g in CorePluginRegistry.GetPreviewGenerators()
+				from g in previewGenerators
 				orderby query.SourceFits(g.ObjectType) descending, g.Priority descending
 				select g).ToArray();
 
+			// Iterate over available generators until one can handle the preview query
 			foreach (IPreviewGenerator gen in generators)
 			{
 				if (!query.TransformSource(gen.ObjectType)) continue;
@@ -50,8 +66,6 @@ namespace DualityEditor.CorePluginInterface
 
 				if (query.Result != null) break;
 			}
-
-			//Log.Editor.Write("Generating preview for {0} / {1} took {2:F} ms", query.OriginalSource, query.GetType().Name, w.Elapsed.TotalMilliseconds);
 		}
 	}
 
@@ -149,9 +163,14 @@ namespace DualityEditor.CorePluginInterface
 	}
 	public abstract class PreviewGenerator<T> : IPreviewGenerator
 	{
+		public const int PriorityNone			= 0;
+		public const int PriorityGeneral		= 20;
+		public const int PrioritySpecialized	= 50;
+		public const int PriorityOverride		= 100;
+
 		public virtual int Priority
 		{
-			get { return CorePluginRegistry.Priority_General; }
+			get { return PriorityGeneral; }
 		}
 		public Type ObjectType
 		{

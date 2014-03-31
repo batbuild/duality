@@ -4,9 +4,10 @@ using System.Linq;
 
 using Duality.Resources;
 using Duality.Cloning;
-using Duality.EditorHints;
+using Duality.Editor;
+using Duality.Properties;
 
-using ICloneable = Duality.Cloning.ICloneable;
+using ICloneable = Duality.Cloning.ICloneExplicit;
 
 namespace Duality
 {
@@ -21,6 +22,8 @@ namespace Duality
 	/// <seealso cref="Duality.Resources.Scene"/>
 	/// <seealso cref="Duality.Resources.PrefabLink"/>
 	[Serializable]
+	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryNone)]
+	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageGameObject)]
 	public sealed class GameObject : IManageableObject, ICloneable, Serialization.IUniqueIdentifyable
 	{
 		[NonSerialized] 
@@ -674,6 +677,54 @@ namespace Duality
 		}
 
 		/// <summary>
+		/// Iterates over all Components that are instances of Type T. Unlike iterating manually over <see cref="GetComponents{T}"/>,
+		/// this method allows the underlying collection to change while iterating, making it a good candidate for ICmp notify operations.
+		/// </summary>
+		/// <typeparam name="T">The base Type of Components that are iterated. May be an ICmp interface or similar.</typeparam>
+		/// <param name="forEach">The operation that is performed on each Component.</param>
+		/// <param name="where">An optional predicate that needs to return true in order to perform the operation.</param>
+		public void IterateComponents<T>(Action<T> forEach, Predicate<T> where = null) where T : class
+		{
+			for (int i = this.executionOrder.Count - 1; i >= 0; --i)
+			{
+				T cmp = this.compList[this.executionOrder[i]] as T;
+
+				// Perform operation on elements matching predicate and Type
+				if (cmp != null && (where == null || where(cmp)))
+				{
+					forEach(cmp);
+
+					// Fix index, in case the collection changed
+					if (i > this.compList.Count) i = this.compList.Count;
+				}
+			}
+		}
+		/// <summary>
+		/// Iterates over all child GameObjects. Unlike iterating manually over <see cref="Children"/>,
+		/// this method allows the underlying collection to change while iterating, making it a good candidate for notify operations
+		/// that may execute code which adds or removed children.
+		/// </summary>
+		/// <param name="forEach">The operation that is performed on each child object.</param>
+		/// <param name="where">An optional predicate that needs to return true in order to perform the operation.</param>
+		public void IterateChildren(Action<GameObject> forEach, Predicate<GameObject> where = null)
+		{
+			if (this.children == null) return;
+			for (int i = this.children.Count - 1; i >= 0; --i)
+			{
+				GameObject obj = this.children[i];
+
+				// Perform operation on elements matching the predicate
+				if (where == null || where(obj))
+				{
+					forEach(obj);
+
+					// Fix index, in case the collection changed
+					if (i > this.children.Count) i = this.children.Count;
+				}
+			}
+		}
+
+		/// <summary>
 		/// Disposes this GameObject as well as all of its child GameObjects and <see cref="Component">Components</see>.
 		/// You usually don't need this - use <see cref="ExtMethodsIManageableObject.DisposeLater"/> instead.
 		/// </summary>
@@ -777,24 +828,16 @@ namespace Duality
 		internal void Update()
 		{
 			// Update Components
-			for (var index = 0; index < this.executionOrder.Count; index++)
-			{
-				var c = this.compList[this.executionOrder[index]];
-
-				if (!c.Active) continue;
-				ICmpUpdatable selfUpd = c as ICmpUpdatable;
-				if (selfUpd != null) selfUpd.OnUpdate();
-			}
+			this.IterateComponents<ICmpUpdatable>(
+				l => l.OnUpdate(),
+				l => (l as Component).Active);
 		}
 		internal void EditorUpdate()
 		{
 			// Update Components
-			foreach (Component c in this.compList)
-			{
-				if (!c.Active) continue;
-				ICmpEditorUpdatable selfUpd = c as ICmpEditorUpdatable;
-				if (selfUpd != null) selfUpd.OnUpdate();
-			}
+			this.IterateComponents<ICmpEditorUpdatable>(
+				l => l.OnUpdate(),
+				l => (l as Component).Active);
 		}
 
 		/// <summary>
@@ -864,81 +907,45 @@ namespace Duality
 		}
 		internal void OnLoaded(bool deep = false)
 		{
-			// Notify Components
-			foreach (Component c in this.compList)
-			{
-				ICmpInitializable cInit = c as ICmpInitializable;
-				if (cInit != null) cInit.OnInit(Component.InitContext.Loaded);
-			}
+			SetComponentExecutionOrder();
 
-			if (deep && this.children != null)
-			{
-				foreach (GameObject c in this.children) c.OnLoaded(deep);
-			}
+			// Notify Components
+			this.IterateComponents<ICmpInitializable>(l => l.OnInit(Component.InitContext.Loaded));
+			// Notify children
+			if (deep) this.IterateChildren(c => c.OnLoaded(deep));
 		}
 		internal void OnSaving(bool deep = false)
 		{
 			// Notify Components
-			foreach (Component c in this.compList)
-			{
-				ICmpInitializable cInit = c as ICmpInitializable;
-				if (cInit != null) cInit.OnShutdown(Component.ShutdownContext.Saving);
-			}
-
-			if (deep && this.children != null)
-			{
-				foreach (GameObject c in this.children) c.OnSaving(deep);
-			}
+			this.IterateComponents<ICmpInitializable>(l => l.OnShutdown(Component.ShutdownContext.Saving));
+			// Notify children
+			if (deep) this.IterateChildren(c => c.OnSaving(deep));
 		}
 		internal void OnSaved(bool deep = false)
 		{
 			// Notify Components
-			foreach (Component c in this.compList)
-			{
-				ICmpInitializable cInit = c as ICmpInitializable;
-				if (cInit != null) cInit.OnInit(Component.InitContext.Saved);
-			}
-
-			if (deep && this.children != null)
-			{
-				foreach (GameObject c in this.children) c.OnSaved(deep);
-			}
+			this.IterateComponents<ICmpInitializable>(l => l.OnInit(Component.InitContext.Saved));
+			// Notify children
+			if (deep) this.IterateChildren(c => c.OnSaved(deep));
 		}
 		internal void OnActivate()
 		{
 			SetComponentExecutionOrder();
 
 			// Notify Components
-			for (var index = 0; index < this.executionOrder.Count; index++)
-			{
-				var c = this.compList[this.executionOrder[index]];
-				if (!c.ActiveSingle) continue;
-				ICmpInitializable cInit = c as ICmpInitializable;
-				if (cInit != null) cInit.OnInit(Component.InitContext.Activate);
-			}
+			this.IterateComponents<ICmpInitializable>(
+				l => l.OnInit(Component.InitContext.Activate),
+				l => (l as Component).ActiveSingle);
 		}
-
 		internal void OnDeactivate()
 		{
 			// Notify Components
-			for (var index = 0; index < this.executionOrder.Count; index++)
-			{
-				var c = this.compList[this.executionOrder[index]];
-				if (!c.ActiveSingle) continue;
-				ICmpInitializable cInit = c as ICmpInitializable;
-				if (cInit != null) cInit.OnShutdown(Component.ShutdownContext.Deactivate);
-			}
+			this.IterateComponents<ICmpInitializable>(
+				l => l.OnShutdown(Component.ShutdownContext.Deactivate),
+				l => (l as Component).ActiveSingle);
 		}
 		private void OnParentChanged(GameObject oldParent, GameObject newParent)
 		{
-			// Notify Components
-			foreach (Component c in this.compList)
-			{
-				if (!c.Active) continue;
-				ICmpGameObjectListener cParent = c as ICmpGameObjectListener;
-				if (cParent != null) cParent.OnGameObjectParentChanged(oldParent, this.parent);
-			}
-
 			// Public event
 			if (this.eventParentChanged != null)
 				this.eventParentChanged(this, new GameObjectParentChangedEventArgs(this, oldParent, newParent));
@@ -948,12 +955,6 @@ namespace Duality
 			// Notify Components
 			ICmpInitializable cmpInit = cmp as ICmpInitializable;
 			if (cmpInit != null) cmpInit.OnInit(Component.InitContext.AddToGameObject);
-			foreach (Component c in this.compList)
-			{
-				if (!c.Active || c == cmp) continue;
-				ICmpComponentListener cTemp = c as ICmpComponentListener;
-				if (cTemp != null) cTemp.OnComponentAdded(cmp);
-			}
 
 			// Public event
 			if (this.eventComponentAdded != null)
@@ -964,12 +965,6 @@ namespace Duality
 			// Notify Components
 			ICmpInitializable cmpInit = cmp as ICmpInitializable;
 			if (cmpInit != null) cmpInit.OnShutdown(Component.ShutdownContext.RemovingFromGameObject);
-			foreach (Component c in this.compList)
-			{
-				if (!c.Active || c == cmp) continue;
-				ICmpComponentListener cTemp = c as ICmpComponentListener;
-				if (cTemp != null) cTemp.OnComponentRemoving(cmp);
-			}
 
 			// Public event
 			if (this.eventComponentRemoving != null)
@@ -995,6 +990,9 @@ namespace Duality
 				if(this.executionOrder.Contains(i) == false)
 					this.executionOrder.Add(i);
 			}
+
+			// the component collection will be iterated backwards, so reverse the order
+			this.executionOrder.Reverse();
 		}
 
 		public override string ToString()

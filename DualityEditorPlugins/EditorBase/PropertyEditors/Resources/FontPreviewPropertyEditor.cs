@@ -4,17 +4,15 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.Renderer;
-using BorderStyle = AdamsLair.PropertyGrid.Renderer.BorderStyle;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.Renderer;
+using BorderStyle = AdamsLair.WinForms.Renderer.BorderStyle;
 
 using Duality;
+using Duality.Editor;
 using Font = Duality.Resources.Font;
 
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
-
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
 	public partial class FontPreviewPropertyEditor : PropertyEditor
 	{
@@ -67,9 +65,9 @@ namespace EditorBase.PropertyEditors
 			this.Invalidate();
 		}
 
-		public override void PerformGetValue()
+		protected override void OnGetValue()
 		{
-			base.PerformGetValue();
+			base.OnGetValue();
 			Font[] values = this.GetValue().OfType<Font>().ToArray();
 			this.value = values.NotNull().FirstOrDefault() as Font;
 			this.GeneratePreviewImage();

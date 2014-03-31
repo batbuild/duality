@@ -5,17 +5,17 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.Renderer;
-using ButtonState = AdamsLair.PropertyGrid.Renderer.ButtonState;
-using BorderStyle = AdamsLair.PropertyGrid.Renderer.BorderStyle;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.Renderer;
+using ButtonState = AdamsLair.WinForms.Renderer.ButtonState;
+using BorderStyle = AdamsLair.WinForms.Renderer.BorderStyle;
 
 using Duality;
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
+using Duality.Editor;
 
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(GameObjectRefPropertyEditor), "MatchToProperty")]
 	public class GameObjectRefPropertyEditor : ObjectRefPropertyEditor
 	{
 		protected	GameObject	gameObj			= null;
@@ -42,9 +42,7 @@ namespace EditorBase.PropertyEditors
 		public override void ShowReferencedContent()
 		{
 			if (this.gameObj == null) return;
-			SceneView view = EditorBasePlugin.Instance.RequestSceneView();
-			view.FlashNode(view.FindNode(this.gameObj));
-			System.Media.SystemSounds.Beep.Play();
+			DualityEditorApp.Highlight(this, new ObjectSelection(this.gameObj));
 		}
 		public override void ResetReference()
 		{
@@ -54,9 +52,9 @@ namespace EditorBase.PropertyEditors
 			this.PerformGetValue();
 			this.OnEditingFinished(FinishReason.LeapValue);
 		}
-		public override void PerformGetValue()
+		protected override void OnGetValue()
 		{
-			base.PerformGetValue();
+			base.OnGetValue();
 			GameObject[] values = this.GetValue().Cast<GameObject>().ToArray();
 
 			this.BeginUpdate();
@@ -133,6 +131,14 @@ namespace EditorBase.PropertyEditors
 		protected override bool CanDeserializeFromData(DataObject data)
 		{
 			return new ConvertOperation(data, ConvertOperation.Operation.Convert).CanPerform(typeof(GameObject));
+		}
+
+		private static int MatchToProperty(Type propertyType, ProviderContext context)
+		{
+			if (typeof(GameObject).IsAssignableFrom(propertyType) && context.ParentEditor != null)
+				return PropertyEditorAssignmentAttribute.PrioritySpecialized;
+			else
+				return PropertyEditorAssignmentAttribute.PriorityNone;
 		}
 	}
 }

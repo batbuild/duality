@@ -6,12 +6,6 @@ using OpenTK;
 namespace Duality.Tests.Components
 {
 	[TestFixture]
-	public class TransformIntegrationTests
-	{
-
-	}
-
-	[TestFixture]
 	public class TransformTests
 	{
 		private Vector3 _expectedPosition;

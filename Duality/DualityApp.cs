@@ -12,7 +12,7 @@ using OpenTK.Audio.OpenAL;
 
 using Duality.Resources;
 using Duality.Serialization;
-using Duality.Profiling;
+using Duality.Drawing;
 
 namespace Duality
 {
@@ -64,11 +64,11 @@ namespace Duality
 			Editor
 		}
 
-		public const string CmdArgDebug = "debug";
-		public const string CmdArgEditor = "editor";
+		public const string CmdArgDebug		= "debug";
+		public const string CmdArgEditor	= "editor";
 		public const string CmdArgProfiling = "profile";
 		public const string PluginDirectory = "Plugins";
-		public const string DataDirectory = "Data";
+		public const string DataDirectory	= "Data";
 
 
 		private	static	Thread						mainThread			= null;
@@ -78,6 +78,7 @@ namespace Duality
 		private	static	bool						terminateScheduled	= false;
 		private	static	string						logfilePath			= "logfile.txt";
 		private	static	StreamWriter				logfile				= null;
+		private	static	TextWriterLogOutput			logfileOutput		= null;
 		private	static	Vector2						targetResolution	= Vector2.Zero;
 		private	static	GraphicsMode				targetMode			= null;
 		private	static	HashSet<GraphicsMode>		availModes			= new HashSet<GraphicsMode>(new GraphicsModeComparer());
@@ -357,7 +358,7 @@ namespace Duality
 			{
 				logfile = new StreamWriter(logfilePath);
 				logfile.AutoFlush = true;
-				TextWriterLogOutput logfileOutput = new TextWriterLogOutput(logfile);
+				logfileOutput = new TextWriterLogOutput(logfile);
 				Log.Game.AddOutput(logfileOutput);
 				Log.Core.AddOutput(logfileOutput);
 				Log.Editor.AddOutput(logfileOutput);
@@ -470,10 +471,16 @@ namespace Duality
 				Log.Core.Write("DualityApp terminated");
 			}
 
+			// Terminate Logfile
 			if (logfile != null)
 			{
+				Log.Game.RemoveOutput(logfileOutput);
+				Log.Core.RemoveOutput(logfileOutput);
+				Log.Editor.RemoveOutput(logfileOutput);
+				logfileOutput = null;
 				logfile.Flush();
 				logfile.Close();
+				logfile = null;
 			}
 
 			initialized = false;
@@ -490,11 +497,13 @@ namespace Duality
 
 			Time.FrameTick();
 			Profile.FrameTick();
+			VisualLog.UpdateLogEntries();
 			OnBeforeUpdate();
 			UpdateUserInput();
 			Scene.Current.Update();
 			sound.Update();
 			OnAfterUpdate();
+			VisualLog.PrepareRenderLogEntries();
 			CheckOpenALErrors();
 			//CheckOpenGLErrors();
 			RunCleanup();
@@ -504,11 +513,7 @@ namespace Duality
 
 			if (terminateScheduled) Terminate();
 		}
-		/// <summary>
-		/// Updates all input devices and fires input events, when necessary. You don't usually need to call this manually, 
-		/// since it is automatically called each frame.
-		/// </summary>
-		public static void UpdateUserInput()
+		private static void UpdateUserInput()
 		{
 			mouse.Update();
 			keyboard.Update();
@@ -540,14 +545,15 @@ namespace Duality
 		public static void RunCleanup()
 		{
 			// Perform scheduled object disposals
-			foreach (object o in disposeSchedule)
+			object[] disposeScheduleArray = disposeSchedule.ToArray();
+			disposeSchedule.Clear();
+			foreach (object o in disposeScheduleArray)
 			{
 				IManageableObject m = o as IManageableObject;
 				if (m != null) { m.Dispose(); continue; }
 				IDisposable d = o as IDisposable;
 				if (d != null) { d.Dispose(); continue; }
 			}
-			disposeSchedule.Clear();
 
 			// Perform late finalization and remove disposed object references
 			Resource.RunCleanup();
@@ -561,6 +567,10 @@ namespace Duality
 
 			Time.FrameTick(forceFixedStep);
 			Profile.FrameTick();
+			if (execContext == ExecutionContext.Game && !freezeScene)
+			{
+				VisualLog.UpdateLogEntries();
+			}
 			OnBeforeUpdate();
 			if (execContext == ExecutionContext.Game)
 			{
@@ -582,6 +592,7 @@ namespace Duality
 			}
 			sound.Update();
 			OnAfterUpdate();
+			VisualLog.PrepareRenderLogEntries();
 			CheckOpenALErrors();
 			//CheckOpenGLErrors();
 			RunCleanup();
@@ -623,29 +634,7 @@ namespace Duality
 		/// </summary>
 		public static void LoadAppData()
 		{
-			string path = AppDataPath;
-			if (File.Exists(path))
-			{
-				try
-				{
-					Log.Core.Write("Loading AppData..");
-					Log.Core.PushIndent();
-					using (FileStream str = File.OpenRead(path))
-					{
-						using (var formatter = Formatter.Create(str))
-						{
-							appData = formatter.ReadObject<DualityAppData>() ?? new DualityAppData();
-						}
-					}
-					Log.Core.PopIndent();
-				}
-				catch (Exception)
-				{
-					appData = new DualityAppData();
-				}
-			}
-			else
-				appData = new DualityAppData();
+			appData = Formatter.TryReadObject<DualityAppData>(AppDataPath) ?? new DualityAppData();
 		}
 		/// <summary>
 		/// Triggers Duality to (re)load its <see cref="DualityUserData"/>.
@@ -654,135 +643,40 @@ namespace Duality
 		{
 			string path = UserDataPath;
 			if (!File.Exists(path) || execContext == ExecutionContext.Editor || runFromEditor) path = "defaultuserdata.dat";
-			if (File.Exists(path))
-			{
-				try
-				{
-					Log.Core.Write("Loading UserData..");
-					Log.Core.PushIndent();
-					using (FileStream str = File.OpenRead(path))
-					{
-						using (var formatter = Formatter.Create(str))
-						{
-							UserData = formatter.ReadObject<DualityUserData>() ?? new DualityUserData();
-						}
-					}
-					Log.Core.PopIndent();
-				}
-				catch (Exception)
-				{
-					UserData = new DualityUserData();
-				}
-			}
-			else
-				UserData = new DualityUserData();
+			userData = Formatter.TryReadObject<DualityUserData>(path) ?? new DualityUserData();
 		}
 		/// <summary>
 		/// Triggers Duality to (re)load its <see cref="DualityMetaData"/>.
 		/// </summary>
 		public static void LoadMetaData()
 		{
-			string path = MetaDataPath;
-			if (File.Exists(path))
-			{
-				try
-				{
-					Log.Core.Write("Loading MetaData..");
-					Log.Core.PushIndent();
-					using (FileStream str = File.OpenRead(path))
-					{
-						using (var formatter = Formatter.Create(str))
-						{
-							metaData = formatter.ReadObject<DualityMetaData>() ?? new DualityMetaData();
-						}
-					}
-					Log.Core.PopIndent();
-				}
-				catch (Exception)
-				{
-					metaData = new DualityMetaData();
-				}
-			}
-			else
-				metaData = new DualityMetaData();
+			metaData = Formatter.TryReadObject<DualityMetaData>(MetaDataPath) ?? new DualityMetaData();
 		}
 		/// <summary>
 		/// Triggers Duality to save its <see cref="DualityAppData"/>.
 		/// </summary>
 		public static void SaveAppData()
 		{
-			Log.Core.Write("Saving AppData..");
-			Log.Core.PushIndent();
-
-			try
-			{
-				string path = AppDataPath;
-				string dirName = Path.GetDirectoryName(path);
-				if (!string.IsNullOrEmpty(dirName) && !Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
-				using (FileStream str = File.Open(path, FileMode.Create))
-				{
-					using (var formatter = Formatter.Create(str, FormattingMethod.Xml))
-					{
-						formatter.WriteObject(appData);
-					}
-				}
-			}
-			catch (Exception e) { Log.Core.WriteError(Log.Exception(e)); }
-
-			Log.Core.PopIndent();
+			Formatter.WriteObject(appData, AppDataPath, FormattingMethod.Xml);
 		}
 		/// <summary>
 		/// Triggers Duality to save its <see cref="DualityUserData"/>.
 		/// </summary>
 		public static void SaveUserData()
 		{
-			Log.Core.Write("Saving UserData..");
-			Log.Core.PushIndent();
-
-			try
+			string path = UserDataPath;
+			Formatter.WriteObject(userData, UserDataPath, FormattingMethod.Xml);
+			if (execContext == ExecutionContext.Editor)
 			{
-				string path = UserDataPath;
-				string dirName = Path.GetDirectoryName(path);
-				if (!string.IsNullOrEmpty(dirName) && !Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
-				if (execContext == ExecutionContext.Editor) path = "defaultuserdata.dat";
-
-				using (FileStream str = File.Open(path, FileMode.Create))
-				{
-					using (var formatter = Formatter.Create(str, FormattingMethod.Xml))
-					{
-						formatter.WriteObject(userData);
-					}
-				}
+				Formatter.WriteObject(userData, "defaultuserdata.dat", FormattingMethod.Xml);
 			}
-			catch (Exception e) { Log.Core.WriteError(Log.Exception(e)); }
-
-			Log.Core.PopIndent();
 		}
 		/// <summary>
 		/// Triggers Duality to save its <see cref="DualityMetaData"/>.
 		/// </summary>
 		public static void SaveMetaData()
 		{
-			Log.Core.Write("Saving MetaData..");
-			Log.Core.PushIndent();
-
-			try
-			{
-				string path = MetaDataPath;
-				string dirName = Path.GetDirectoryName(path);
-				if (!string.IsNullOrEmpty(dirName) && !Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
-
-				using (FileStream str = File.Open(path, FileMode.Create))
-				{
-					using (var formatter = Formatter.Create(str, FormattingMethod.Xml))
-					{
-						formatter.WriteObject(metaData);
-					}
-				}
-			}
-			catch (Exception e) { Log.Core.WriteError(Log.Exception(e)); }
-
-			Log.Core.PopIndent();
+			Formatter.WriteObject(metaData, MetaDataPath, FormattingMethod.Xml);
 		}
 
 		private static void LoadPlugins()
@@ -792,14 +686,11 @@ namespace Duality
 			Log.Core.Write("Scanning for core plugins...");
 			Log.Core.PushIndent();
 
-			if (Directory.Exists("Plugins"))
+			foreach (string dllPath in GetPluginLibPaths("*.core.dll"))
 			{
-				string[] pluginDllPaths = Directory.GetFiles("Plugins", "*.core.dll", SearchOption.AllDirectories);
-				foreach (string dllPath in pluginDllPaths)
-				{
-					LoadPlugin(dllPath);
-				}
+				LoadPlugin(dllPath);
 			}
+
 			Log.Core.PopIndent();
 		}
 
@@ -820,7 +711,7 @@ namespace Duality
 				else
 					pluginAssembly = Assembly.Load(File.ReadAllBytes(pluginFilePath));
 
-				plugin = AddPlugin(pluginAssembly, pluginFilePath);
+				plugin = LoadPlugin(pluginAssembly, pluginFilePath);
 				if (plugin == null)
 				{
 					Log.Core.WriteWarning("Can't find CorePlugin class. Discarding plugin...");
@@ -850,9 +741,9 @@ namespace Duality
 		/// <param name="pluginAssembly"></param>
 		/// <param name="pluginFilePath"></param>
 		/// <returns></returns>
-		public static CorePlugin AddPlugin(Assembly pluginAssembly, string pluginFilePath)
+		public static CorePlugin LoadPlugin(Assembly pluginAssembly, string pluginFilePath)
 		{
-			if (disposedPlugins.Contains(pluginAssembly)) return null;
+			disposedPlugins.Remove(pluginAssembly);
 
 			string asmName = pluginAssembly.GetShortAssemblyName();
 			CorePlugin plugin = plugins.Values.FirstOrDefault(p => p.AssemblyName == asmName);
@@ -1003,6 +894,27 @@ namespace Duality
 		}
 
 		/// <summary>
+		/// Enumerates all available plugin directory file paths that match the specified search pattern.
+		/// This method 
+		/// </summary>
+		/// <param name="searchPattern"></param>
+		/// <returns></returns>
+		public static IEnumerable<string> GetPluginLibPaths(string searchPattern)
+		{
+			// Search for plugin libraries in both "WorkingDir/Plugins" and "ExecDir/Plugins"
+			IEnumerable<string> availLibFiles = new string[0];
+			if (Directory.Exists(PluginDirectory)) 
+			{
+				availLibFiles = availLibFiles.Concat(Directory.EnumerateFiles(PluginDirectory, searchPattern, SearchOption.AllDirectories));
+			}
+			string execPluginDir = Path.Combine(PathHelper.ExecutingAssemblyDir, PluginDirectory);
+			if (Path.GetFullPath(execPluginDir) != Path.GetFullPath(PluginDirectory) && Directory.Exists(execPluginDir))
+			{
+				availLibFiles = availLibFiles.Concat(Directory.EnumerateFiles(execPluginDir, searchPattern, SearchOption.AllDirectories));
+			}
+			return availLibFiles;
+		}
+		/// <summary>
 		/// Enumerates all currently loaded assemblies that are part of Duality, i.e. Duality itsself and all loaded plugins.
 		/// </summary>
 		/// <returns></returns>
@@ -1010,6 +922,17 @@ namespace Duality
 		{
 			yield return typeof(DualityApp).Assembly;
 			foreach (CorePlugin p in LoadedPlugins) yield return p.PluginAssembly;
+		}
+		/// <summary>
+		/// Enumerates all currently loaded assemblies.
+		/// </summary>
+		/// <returns></returns>
+		public static IEnumerable<Assembly> GetLoadedAssemblies()
+		{
+			return GetDualityAssemblies()
+				.Concat(GetDualityAssemblies().SelectMany(a => a.GetReferencedAssemblies().Select(n => Assembly.Load(n))))
+				.Distinct()
+				.Where(a => !disposedPlugins.Contains(a));
 		}
 		/// <summary>
 		/// Enumerates all available Duality <see cref="System.Type">Types</see> that are assignable
@@ -1091,6 +1014,7 @@ namespace Duality
 				DiscardPluginData(null, EventArgs.Empty);
 
 			// Dispose any existing Resources that could reference plugin data
+			VisualLog.ClearAll();
 			if (!Scene.Current.IsEmpty)
 				Scene.Current.Dispose();
 			foreach (Resource r in ContentProvider.EnumeratePluginContent().ToArray())
@@ -1106,7 +1030,9 @@ namespace Duality
 			availTypeDict.Clear();
 			ReflectionHelper.ClearTypeCache();
 			Component.ClearTypeCache();
-
+			Formatter.ClearTypeCache();
+			Cloning.CloneProvider.ClearTypeCache();
+			
 			// Clean input sources that a disposed Assembly forgot to unregister.
 			if (oldPlugins != null)
 			{
@@ -1211,7 +1137,8 @@ namespace Duality
 			// Not there? Search for other libraries in the Plugins folder
 			else
 			{
-				foreach (string libFile in Directory.EnumerateFiles(PluginDirectory, "*.dll", SearchOption.AllDirectories))
+				// Iterate over available library files
+				foreach (string libFile in GetPluginLibPaths("*.dll"))
 				{
 					string libFileName = Path.GetFileNameWithoutExtension(libFile);
 					if (libFileName.Equals(assemblyNameStub, StringComparison.InvariantCultureIgnoreCase))
@@ -1238,8 +1165,10 @@ namespace Duality
 						}
 					}
 				}
-				return null;
 			}
+
+			// Admit that we didn't find anything.
+			return null;
 		}
 		private static void CurrentDomain_AssemblyLoad(object sender, AssemblyLoadEventArgs args)
 		{
@@ -1294,6 +1223,19 @@ namespace Duality
 			}
 			if (found && !silent && System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
 			return found;
+		}
+
+		/// <summary>
+		/// This method performs an action only when compiling your plugin in debug mode.
+		/// In release mode, any calls to this method (and thus the specified action) are omitted
+		/// by the compiler. It is essentially syntactical sugar for one-line #if DEBUG blocks.
+		/// This method is intended to be used conveniently in conjunction with lambda expressions.
+		/// </summary>
+		/// <param name="action"></param>
+		[System.Diagnostics.Conditional("DEBUG")]
+		public static void Dbg(Action action)
+		{
+			action();
 		}
 
 		/// <summary>

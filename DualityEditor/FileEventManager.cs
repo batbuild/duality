@@ -6,28 +6,26 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Drawing;
-using System.Xml;
+using System.Xml.Linq;
 using System.Text.RegularExpressions;
 
 using Duality;
 using Duality.Resources;
 using Duality.Serialization;
-using Duality.Serialization.MetaFormat;
-
-using DualityEditor.Forms;
-using DualityEditor.CorePluginInterface;
+using Duality.Editor.Forms;
 
 using OpenTK;
 
 using Ionic.Zip;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace DualityEditor
+namespace Duality.Editor
 {
 	public static class FileEventManager
 	{
 		private	static DateTime						lastEventProc			= DateTime.Now;
-		private static FileSystemWatcher			pluginWatcher			= null;
+		private static FileSystemWatcher			pluginWatcherWorking	= null;
+		private static FileSystemWatcher			pluginWatcherExec		= null;
 		private static FileSystemWatcher			dataDirWatcher			= null;
 		private static FileSystemWatcher			sourceDirWatcher		= null;
 		private	static HashSet<string>				reimportSchedule		= new HashSet<string>();
@@ -50,16 +48,27 @@ namespace DualityEditor
 		internal static void Init()
 		{
 			// Set up different file system watchers
-			pluginWatcher = new FileSystemWatcher();
-			pluginWatcher.SynchronizingObject = DualityEditorApp.MainForm;
-			pluginWatcher.EnableRaisingEvents = false;
-			pluginWatcher.Filter = "*.dll";
-			pluginWatcher.IncludeSubdirectories = true;
-			pluginWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
-			pluginWatcher.Path = DualityApp.PluginDirectory;
-			pluginWatcher.Changed += corePluginWatcher_Changed;
-			pluginWatcher.Created += corePluginWatcher_Changed;
-			pluginWatcher.EnableRaisingEvents = true;
+			pluginWatcherWorking = new FileSystemWatcher();
+			pluginWatcherWorking.SynchronizingObject = DualityEditorApp.MainForm;
+			pluginWatcherWorking.EnableRaisingEvents = false;
+			pluginWatcherWorking.Filter = "*.dll";
+			pluginWatcherWorking.IncludeSubdirectories = true;
+			pluginWatcherWorking.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+			pluginWatcherWorking.Path = DualityApp.PluginDirectory;
+			pluginWatcherWorking.Changed += corePluginWatcher_Changed;
+			pluginWatcherWorking.Created += corePluginWatcher_Changed;
+			pluginWatcherWorking.EnableRaisingEvents = true;
+
+			pluginWatcherExec = new FileSystemWatcher();
+			pluginWatcherExec.SynchronizingObject = DualityEditorApp.MainForm;
+			pluginWatcherExec.EnableRaisingEvents = false;
+			pluginWatcherExec.Filter = "*.dll";
+			pluginWatcherExec.IncludeSubdirectories = true;
+			pluginWatcherExec.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+			pluginWatcherExec.Path = Path.Combine(PathHelper.ExecutingAssemblyDir, DualityApp.PluginDirectory);
+			pluginWatcherExec.Changed += corePluginWatcher_Changed;
+			pluginWatcherExec.Created += corePluginWatcher_Changed;
+			pluginWatcherExec.EnableRaisingEvents = true;
 			
 			dataDirWatcher = new FileSystemWatcher();
 			dataDirWatcher.SynchronizingObject = DualityEditorApp.MainForm;
@@ -85,23 +94,23 @@ namespace DualityEditor
 
 			// Register events
 			DualityEditorApp.MainForm.Activated += mainForm_Activated;
-			DualityEditorApp.Idling += DualityEditorApp_Idle;
+			DualityEditorApp.EditorIdling += DualityEditorApp_EditorIdling;
 			Resource.ResourceSaved += Resource_ResourceSaved;
 		}
 		internal static void Terminate()
 		{
 			// Unregister events
 			DualityEditorApp.MainForm.Activated -= mainForm_Activated;
-			DualityEditorApp.Idling -= DualityEditorApp_Idle;
+			DualityEditorApp.EditorIdling -= DualityEditorApp_EditorIdling;
 			Resource.ResourceSaved -= Resource_ResourceSaved;
 
 			// Destroy file system watchers
-			pluginWatcher.EnableRaisingEvents = false;
-			pluginWatcher.Changed -= corePluginWatcher_Changed;
-			pluginWatcher.Created -= corePluginWatcher_Changed;
-			pluginWatcher.SynchronizingObject = null;
-			pluginWatcher.Dispose();
-			pluginWatcher = null;
+			pluginWatcherWorking.EnableRaisingEvents = false;
+			pluginWatcherWorking.Changed -= corePluginWatcher_Changed;
+			pluginWatcherWorking.Created -= corePluginWatcher_Changed;
+			pluginWatcherWorking.SynchronizingObject = null;
+			pluginWatcherWorking.Dispose();
+			pluginWatcherWorking = null;
 
 			dataDirWatcher.EnableRaisingEvents = false;
 			dataDirWatcher.Created -= fileSystemWatcher_ForwardData;
@@ -226,15 +235,15 @@ namespace DualityEditor
 							if (isCurrentScene || DualityEditorApp.IsResourceUnsaved(e.FullPath))
 							{
 								DialogResult result = MessageBox.Show(
-									String.Format(EditorRes.GeneralRes.Msg_ConfirmReloadResource_Text, e.FullPath), 
-									EditorRes.GeneralRes.Msg_ConfirmReloadResource_Caption, 
+									String.Format(Properties.GeneralRes.Msg_ConfirmReloadResource_Text, e.FullPath), 
+									Properties.GeneralRes.Msg_ConfirmReloadResource_Caption, 
 									MessageBoxButtons.YesNo,
 									MessageBoxIcon.Exclamation);
 								if (result == DialogResult.Yes)
 								{
 									string curScenePath = Scene.CurrentPath;
 									ContentProvider.RemoveContent(args.Path);
-									if (isCurrentScene) Scene.Current = ContentProvider.RequestContent<Scene>(curScenePath).Res;
+									if (isCurrentScene) Scene.SwitchTo(ContentProvider.RequestContent<Scene>(curScenePath), true);
 								}
 							}
 							else
@@ -262,8 +271,8 @@ namespace DualityEditor
 							if (FileImportProvider.IsImportFileExisting(e.FullPath))
 							{
 								DialogResult result = MessageBox.Show(
-									String.Format(EditorRes.GeneralRes.Msg_ImportConfirmOverwrite_Text, e.FullPath), 
-									EditorRes.GeneralRes.Msg_ImportConfirmOverwrite_Caption, 
+									String.Format(Properties.GeneralRes.Msg_ImportConfirmOverwrite_Text, e.FullPath), 
+									Properties.GeneralRes.Msg_ImportConfirmOverwrite_Caption, 
 									MessageBoxButtons.YesNo, 
 									MessageBoxIcon.Warning);
 								abort = result == DialogResult.No;
@@ -275,8 +284,8 @@ namespace DualityEditor
 								if (!importedSuccessfully)
 								{
 									MessageBox.Show(
-										String.Format(EditorRes.GeneralRes.Msg_CantImport_Text, e.FullPath), 
-										EditorRes.GeneralRes.Msg_CantImport_Caption, 
+										String.Format(Properties.GeneralRes.Msg_CantImport_Text, e.FullPath), 
+										Properties.GeneralRes.Msg_CantImport_Caption, 
 										MessageBoxButtons.OK, 
 										MessageBoxIcon.Error);
 								}
@@ -344,8 +353,8 @@ namespace DualityEditor
 				// Don't do it now - schedule it for the main form event loop so we don't block here.
 				DualityEditorApp.MainForm.BeginInvoke((Action)delegate() {
 					ProcessingBigTaskDialog taskDialog = new ProcessingBigTaskDialog( 
-						EditorRes.GeneralRes.TaskRenameContentRefs_Caption, 
-						EditorRes.GeneralRes.TaskRenameContentRefs_Desc, 
+						Properties.GeneralRes.TaskRenameContentRefs_Caption, 
+						Properties.GeneralRes.TaskRenameContentRefs_Desc, 
 						async_RenameContentRefs, renameEventBuffer);
 					taskDialog.ShowDialog(DualityEditorApp.MainForm);
 				});
@@ -387,7 +396,7 @@ namespace DualityEditor
 			}
 		}
 
-		private static void DualityEditorApp_Idle(object sender, EventArgs e)
+		private static void DualityEditorApp_EditorIdling(object sender, EventArgs e)
 		{
 			// Process file / source events regularily, if no modal dialog is open.
 			if ((DateTime.Now - lastEventProc).TotalMilliseconds > 100.0d)

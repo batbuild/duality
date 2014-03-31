@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
 using System.Reflection;
+using System.Windows.Forms;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.PropertyEditors;
-using PropertyGrid = AdamsLair.PropertyGrid.PropertyGrid;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.PropertyEditors;
+using PropertyGrid = AdamsLair.WinForms.PropertyGrid;
 
 using Duality;
-using Duality.EditorHints;
+using Duality.Editor;
+using Duality.Editor.UndoRedoActions;
+using Duality.Editor.Forms;
 
-using DualityEditor.UndoRedoActions;
-
-namespace DualityEditor.Controls
+namespace Duality.Editor.Controls
 {
 	public class DualitorPropertyGrid : PropertyGrid, IHelpProvider
 	{
@@ -24,6 +25,7 @@ namespace DualityEditor.Controls
 			this.ControlRenderer.ColorVeryLightBackground = Color.FromArgb(224, 224, 224);
 			this.ControlRenderer.ColorLightBackground = Color.FromArgb(212, 212, 212);
 			this.ControlRenderer.ColorBackground = Color.FromArgb(196, 196, 196);
+			this.RegisterEditorProvider(new PropertyEditors.DualityPropertyEditorProvider());
 		}
 
 		public override void ConfigureEditor(PropertyEditor editor, object configureData = null)
@@ -34,7 +36,7 @@ namespace DualityEditor.Controls
 			{
 				IEnumerable<EditorHintAttribute> parentHintOverride = editor.ParentEditor.ConfigureData as IEnumerable<EditorHintAttribute>;
 				if (editor.ParentEditor.EditedMember != null)
-					parentHint = editor.ParentEditor.EditedMember.GetEditorHints<EditorHintAttribute>(parentHintOverride);
+					parentHint = EditorHintAttribute.GetAll<EditorHintAttribute>(editor.ParentEditor.EditedMember, parentHintOverride);
 				else
 					parentHint = parentHintOverride;
 			}
@@ -75,7 +77,7 @@ namespace DualityEditor.Controls
 				dictEditor.DictionaryKeySetter = this.EditorDictionaryKeySetter;
 			}
 
-			var flagsAttrib = editor.EditedMember.GetEditorHint<EditorHintFlagsAttribute>(hintOverride);
+			var flagsAttrib = EditorHintAttribute.Get<EditorHintFlagsAttribute>(editor.EditedMember, hintOverride);
 			if (flagsAttrib != null)
 			{
 				editor.ForceWriteBack = (flagsAttrib.Flags & MemberFlags.ForceWriteback) == MemberFlags.ForceWriteback;
@@ -85,14 +87,16 @@ namespace DualityEditor.Controls
 
 			if (editor is NumericPropertyEditor)
 			{
-				var rangeAttrib = editor.EditedMember.GetEditorHint<EditorHintRangeAttribute>(hintOverride);
-				var incAttrib = editor.EditedMember.GetEditorHint<EditorHintIncrementAttribute>(hintOverride);
-				var placesAttrib = editor.EditedMember.GetEditorHint<EditorHintDecimalPlacesAttribute>(hintOverride);
+				var rangeAttrib = EditorHintAttribute.Get<EditorHintRangeAttribute>(editor.EditedMember, hintOverride);
+				var incAttrib = EditorHintAttribute.Get<EditorHintIncrementAttribute>(editor.EditedMember, hintOverride);
+				var placesAttrib = EditorHintAttribute.Get<EditorHintDecimalPlacesAttribute>(editor.EditedMember, hintOverride);
 				NumericPropertyEditor numEditor = editor as NumericPropertyEditor;
 				if (rangeAttrib != null)
 				{
-					numEditor.Maximum = rangeAttrib.Max;
-					numEditor.Minimum = rangeAttrib.Min;
+					numEditor.ValueBarMaximum = rangeAttrib.ReasonableMaximum;
+					numEditor.ValueBarMinimum = rangeAttrib.ReasonableMinimum;
+					numEditor.Maximum = rangeAttrib.LimitMaximum;
+					numEditor.Minimum = rangeAttrib.LimitMinimum;
 				}
 				if (incAttrib != null) numEditor.Increment = incAttrib.Increment;
 				if (placesAttrib != null) numEditor.DecimalPlaces = placesAttrib.Places;
@@ -113,12 +117,30 @@ namespace DualityEditor.Controls
 			base.OnEditingFinished(e);
 			UndoRedoManager.Finish();
 		}
+		public override object CreateObjectInstance(Type objectType)
+		{
+			object obj = null;
+
+			if (objectType.IsAbstract || objectType.IsInterface || objectType == typeof(object))
+			{
+				CreateObjectDialog createDialog = new CreateObjectDialog();
+				createDialog.BaseType = objectType;
+				createDialog.ShowNamespaces = objectType == typeof(object);
+				DialogResult result = createDialog.ShowDialog();
+				if (result == DialogResult.OK)
+				{
+					obj = createDialog.SelectedType.CreateInstanceOf();
+				}
+			}
+
+			return obj ?? base.CreateObjectInstance(objectType);
+		}
 
 		private bool EditorMemberPredicate(MemberInfo info, bool showNonPublic)
 		{
 			PropertyInfo property = info as PropertyInfo;
 			FieldInfo field = info as FieldInfo;
-			EditorHintFlagsAttribute flagsAttrib = info.GetEditorHint<EditorHintFlagsAttribute>();
+			EditorHintFlagsAttribute flagsAttrib = info.GetCustomAttributes<EditorHintFlagsAttribute>().FirstOrDefault();
 
 			// Accept all members in "Debug Mode", if not declared inside Duality itself
 			if (showNonPublic && info.DeclaringType.Assembly != typeof(DualityApp).Assembly) return true;
@@ -147,7 +169,7 @@ namespace DualityEditor.Controls
 		}
 		private bool EditorMemberAffectsOthers(MemberInfo info)
 		{
-			EditorHintFlagsAttribute flagsAttrib = info.GetEditorHint<EditorHintFlagsAttribute>();
+			EditorHintFlagsAttribute flagsAttrib = info.GetCustomAttributes<EditorHintFlagsAttribute>().FirstOrDefault();
 			return this.ShowNonPublic || (flagsAttrib != null && (flagsAttrib.Flags & MemberFlags.AffectsOthers) != MemberFlags.None);
 		}
 		private void EditorMemberPropertySetter(PropertyInfo property, IEnumerable<object> targetObjects, IEnumerable<object> values)

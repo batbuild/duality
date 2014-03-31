@@ -70,6 +70,26 @@ namespace Duality
 			Log.Core.Write("..done");
 		}
 		/// <summary>
+		/// Initializes Dualitys embedded default content.
+		/// </summary>
+		public static void DisposeDefaultContent()
+		{
+			if (!defaultContentInitialized) return;
+			Log.Core.Write("Disposing default content..");
+			Log.Core.PushIndent();
+
+			foreach (Resource r in defaultContent.ToArray())
+			{
+				resLibrary.Remove(r.Path);
+				r.Dispose();
+			}
+			defaultContent.Clear();
+
+			defaultContentInitialized = false;
+			Log.Core.PopIndent();
+			Log.Core.Write("..done");
+		}
+		/// <summary>
 		/// Returns whether or not the specified path points to Duality default content.
 		/// </summary>
 		/// <param name="resPath"></param>
@@ -147,7 +167,7 @@ namespace Duality
 		public static List<IContentRef> GetAvailableContent(Type t, string baseDirectory = null)
 		{
 			if (baseDirectory == null) baseDirectory = DualityApp.DataDirectory;
-			IEnumerable<string> resFiles = Directory.EnumerateFiles(DualityApp.DataDirectory, "*" + Resource.FileExt, SearchOption.AllDirectories);
+			IEnumerable<string> resFiles = Directory.EnumerateFiles(baseDirectory, "*" + Resource.FileExt, SearchOption.AllDirectories);
 			return resFiles
 				.Select(p => new ContentRef<Resource>(null, p) as IContentRef)
 				.Where(r => r.Is(t))

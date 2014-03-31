@@ -4,19 +4,20 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-using AdamsLair.PropertyGrid;
-using ButtonState = AdamsLair.PropertyGrid.Renderer.ButtonState;
+using AdamsLair.WinForms;
+using ButtonState = AdamsLair.WinForms.Renderer.ButtonState;
 
 using Duality;
-using Duality.ColorFormat;
+using Duality.Drawing;
 
-using DualityEditor.Forms;
+using Duality.Editor.Forms;
 
-namespace DualityEditor.Controls.PropertyEditors
+namespace Duality.Editor.Controls.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(IColorData))]
 	public class IColorDataPropertyEditor : PropertyEditor
 	{
-		protected	ColorPickerDialog	dialog	= new ColorPickerDialog();
+		protected	ColorPickerDialog	dialog	= new ColorPickerDialog { BackColor = Color.FromArgb(212, 212, 212) };
 		protected	IColorData	value			= null;
 		protected	Rectangle	rectPanel		= Rectangle.Empty;
 		protected	Rectangle	rectButton		= Rectangle.Empty;
@@ -37,9 +38,9 @@ namespace DualityEditor.Controls.PropertyEditors
 			this.dialog.ColorEdited += this.dialog_ColorEdited;
 		}
 
-		public override void PerformGetValue()
+		protected override void OnGetValue()
 		{
-			base.PerformGetValue();
+			base.OnGetValue();
 			IColorData[] values = this.GetValue().Cast<IColorData>().ToArray();
 
 			this.BeginUpdate();
@@ -119,7 +120,7 @@ namespace DualityEditor.Controls.PropertyEditors
 				this.rectButton, 
 				buttonState, 
 				null, 
-				EditorRes.GeneralResCache.ColorWheel);
+				Properties.GeneralResCache.ColorWheel);
 		}
 		protected override void OnKeyDown(KeyEventArgs e)
 		{

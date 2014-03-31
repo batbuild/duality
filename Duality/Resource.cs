@@ -6,10 +6,11 @@ using System.IO;
 using System.Reflection;
 
 using Duality.Serialization;
-using Duality.EditorHints;
+using Duality.Editor;
 using Duality.Cloning;
+using Duality.Properties;
 
-using ICloneable = Duality.Cloning.ICloneable;
+using ICloneable = Duality.Cloning.ICloneExplicit;
 
 namespace Duality
 {
@@ -20,6 +21,7 @@ namespace Duality
 	/// <seealso cref="ContentRef{T}"/>
 	/// <seealso cref="ContentProvider"/>
 	[Serializable]
+	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageResource)]
 	public abstract class Resource : IManageableObject, IDisposable, ICloneable
 	{
 		/// <summary>
@@ -499,11 +501,14 @@ namespace Duality
 
 		internal static void RunCleanup()
 		{
-			while (finalizeSched.Count > 0)
+			if (finalizeSched.Count > 0)
 			{
-				if (finalizeSched[finalizeSched.Count - 1] != null)
-					finalizeSched[finalizeSched.Count - 1].Dispose(false);
-				finalizeSched.RemoveAt(finalizeSched.Count - 1);
+				Resource[] finalizeSchedArray = finalizeSched.NotNull().ToArray();
+				finalizeSched.Clear();
+				foreach (Resource res in finalizeSchedArray)
+				{
+					res.Dispose(false);
+				}
 			}
 		}
 	}

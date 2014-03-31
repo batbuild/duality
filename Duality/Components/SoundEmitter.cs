@@ -4,9 +4,10 @@ using System.Linq;
 
 using OpenTK;
 
-using Duality.EditorHints;
+using Duality.Editor;
 using Duality.Resources;
-using ICloneable = Duality.Cloning.ICloneable;
+using Duality.Properties;
+using Duality.Cloning;
 
 namespace Duality.Components
 {
@@ -15,13 +16,15 @@ namespace Duality.Components
 	/// </summary>
 	[Serializable]
 	[RequiredComponent(typeof(Transform))]
+	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategorySound)]
+	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageSoundEmitter)]
 	public sealed class SoundEmitter : Component, ICmpUpdatable, ICmpInitializable, ICmpEditorUpdatable
 	{
 		/// <summary>
 		/// A single sound source.
 		/// </summary>
 		[Serializable]
-		public class Source : ICloneable
+		public class Source : ICloneExplicit
 		{
 			private	ContentRef<Sound>	sound		= ContentRef<Sound>.Null;
 			private	bool				looped		= true;
@@ -159,7 +162,7 @@ namespace Duality.Components
 				return true;
 			}
 
-			void ICloneable.CopyDataTo(object targetObj, Cloning.CloneProvider provider)
+			void ICloneExplicit.CopyDataTo(object targetObj, Cloning.CloneProvider provider)
 			{
 				Source newSrc = targetObj as Source;
 				newSrc.sound			= this.sound;
@@ -209,7 +212,7 @@ namespace Duality.Components
 		}
 		void ICmpInitializable.OnShutdown(ShutdownContext context)
 		{
-			if (context == ShutdownContext.Deactivate || context == ShutdownContext.RemovingFromGameObject)
+			if (context == ShutdownContext.Deactivate)
 			{
 				for (int i = this.sources.Count - 1; i >= 0; i--)
 					if (this.sources[i].Instance != null) this.sources[i].Instance.Stop();

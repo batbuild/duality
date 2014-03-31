@@ -5,25 +5,23 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.Renderer;
-using ButtonState = AdamsLair.PropertyGrid.Renderer.ButtonState;
-using BorderStyle = AdamsLair.PropertyGrid.Renderer.BorderStyle;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.Renderer;
+using ButtonState = AdamsLair.WinForms.Renderer.ButtonState;
+using BorderStyle = AdamsLair.WinForms.Renderer.BorderStyle;
 
 using Duality;
 using Duality.Resources;
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
+using Duality.Editor;
+using Duality.Editor.Plugins.Base.Properties;
 
-using EditorBase.PluginRes;
-
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
 	public abstract class ObjectRefPropertyEditor : PropertyEditor
 	{
-		private static readonly IconImage iconShow = new IconImage(PluginRes.EditorBaseResCache.IconEye.ToBitmap());
-		private static readonly IconImage iconReset = new IconImage(PluginRes.EditorBaseResCache.IconAbortCross);
-		private static readonly IconImage iconSet = new IconImage(PluginRes.EditorBaseResCache.IconDatabase);
+		private static readonly IconImage iconShow = new IconImage(Properties.EditorBaseRes.IconEye.ToBitmap());
+		private static readonly IconImage iconReset = new IconImage(Properties.EditorBaseRes.IconAbortCross);
+		private static readonly IconImage iconSet = new IconImage(Properties.EditorBaseRes.database);
 
 		protected	bool		multiple			= false;
 		protected	bool		dragHover			= false;
@@ -146,13 +144,13 @@ namespace EditorBase.PropertyEditors
 			{
 				if (this.prevSoundInst != null)
 				{
-					e.Graphics.DrawImage(darkBg ? EditorBaseResCache.IconSpeakerWhite : EditorBaseResCache.IconSpeakerBlack, 
+					e.Graphics.DrawImage(darkBg ? EditorBaseRes.IconSpeakerWhite : EditorBaseRes.IconSpeakerBlack, 
 						this.rectPrevSound.X, 
 						this.rectPrevSound.Y);
 				}
 				else
 				{
-					e.Graphics.DrawImageAlpha(darkBg ? EditorBaseResCache.IconSpeakerWhite : EditorBaseResCache.IconSpeakerBlack, 
+					e.Graphics.DrawImageAlpha(darkBg ? EditorBaseRes.IconSpeakerWhite : EditorBaseRes.IconSpeakerBlack, 
 						0.5f,
 						this.rectPrevSound.X, 
 						this.rectPrevSound.Y);

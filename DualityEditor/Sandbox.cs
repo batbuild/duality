@@ -7,9 +7,11 @@ using System.Windows.Forms;
 using Duality;
 using Duality.Resources;
 
+using Duality.Editor.Properties;
+
 using OpenTK;
 
-namespace DualityEditor
+namespace Duality.Editor
 {
 	public enum SandboxState
 	{
@@ -69,8 +71,8 @@ namespace DualityEditor
 			{
 				askUnsaved = false;
 				DialogResult result = MessageBox.Show(DualityEditorApp.MainForm,
-					EditorRes.GeneralRes.Msg_EnterSandboxUnsavedScene_Desc,
-					EditorRes.GeneralRes.Msg_EnterSandboxUnsavedScene_Caption,
+					GeneralRes.Msg_EnterSandboxUnsavedScene_Desc,
+					GeneralRes.Msg_EnterSandboxUnsavedScene_Caption,
 					MessageBoxButtons.YesNoCancel,
 					MessageBoxIcon.Question);
 				if (result == DialogResult.Cancel) return false;
@@ -104,7 +106,7 @@ namespace DualityEditor
 
 				// (Re)Load Scene.
 				if (curPath != null)
-					Scene.Current = ContentProvider.RequestContent<Scene>(curPath).Res;
+					Scene.SwitchTo(ContentProvider.RequestContent<Scene>(curPath), true);
 			}
 
 			OnSandboxStateChanged();
@@ -143,7 +145,7 @@ namespace DualityEditor
 			
 			// (Re)Load Scene
 			if (curPath != null)
-				Scene.Current = ContentProvider.RequestContent<Scene>(curPath).Res;
+				Scene.SwitchTo(ContentProvider.RequestContent<Scene>(curPath));
 
 			OnLeaveSandbox();
 			OnSandboxStateChanged();

@@ -5,17 +5,17 @@ using System.Text;
 using System.IO;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Reflection;
 
 using Duality;
 
-using DualityEditor.CorePluginInterface;
-
 using OpenTK;
 
-namespace DualityEditor
+namespace Duality.Editor
 {
 	public static class HelpSystem
 	{
+		private	static XmlCodeDoc		docDatabase			= new XmlCodeDoc();
 		private	static InputEventMessageFilter	inputFilter	= null;
 		private	static Control			hoveredControl		= null;
 		private	static IHelpProvider	hoveredHelpProvider	= null;
@@ -50,11 +50,13 @@ namespace DualityEditor
 			inputFilter.MouseUp += inputFilter_MouseUp;
 			Application.AddMessageFilter(inputFilter);
 
-			DualityEditorApp.Idling += DualityEditorApp_Idling;
+			DualityEditorApp.EventLoopIdling += DualityEditorApp_EventLoopIdling;
 		}
 		internal static void Terminate()
 		{
-			DualityEditorApp.Idling -= DualityEditorApp_Idling;
+			docDatabase.Clear();
+
+			DualityEditorApp.EventLoopIdling -= DualityEditorApp_EventLoopIdling;
 
 			// Remove global message filter
 			Application.RemoveMessageFilter(inputFilter);
@@ -67,14 +69,27 @@ namespace DualityEditor
 		
 		public static void LoadXmlCodeDoc()
 		{
-			LoadXmlCodeDoc("Duality.xml");
-			foreach (string xmlDocFile in Directory.EnumerateFiles("Plugins", "*.core.xml", SearchOption.AllDirectories))
+			string mainDocPath = "Duality.xml";
+			
+			if (!File.Exists(mainDocPath))
+			{
+				string remappedPath = Path.Combine(PathHelper.ExecutingAssemblyDir, mainDocPath);
+				if (File.Exists(remappedPath))
+					mainDocPath = remappedPath;
+			}
+
+			if (File.Exists(mainDocPath)) LoadXmlCodeDoc(mainDocPath);
+			foreach (string xmlDocFile in DualityApp.GetPluginLibPaths("*.core.xml"))
 				LoadXmlCodeDoc(xmlDocFile);
 		}
 		public static void LoadXmlCodeDoc(string file)
 		{
 			XmlCodeDoc xmlDoc = new XmlCodeDoc(file);
-			CorePluginRegistry.RegisterXmlCodeDoc(xmlDoc);
+			docDatabase.AppendDoc(xmlDoc);
+		}
+		public static XmlCodeDoc.Entry GetXmlCodeDoc(MemberInfo info)
+		{
+			return docDatabase.GetMemberDoc(info);
 		}
 
 		private static void UpdateHelpStack()
@@ -151,7 +166,7 @@ namespace DualityEditor
 			return success;
 		}
 		
-		private static void DualityEditorApp_Idling(object sender, EventArgs e)
+		private static void DualityEditorApp_EventLoopIdling(object sender, EventArgs e)
 		{
 			if (needStackUpdate)
 			{

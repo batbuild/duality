@@ -9,11 +9,11 @@ using System.Xml;
 using Duality;
 using Duality.Resources;
 
-using DualityEditor.EditorRes;
-
+using Duality.Editor.Properties;
+using DualityEditor.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace DualityEditor.Forms
+namespace Duality.Editor.Forms
 {
 	public partial class MainForm : Form, IHelpProvider
 	{
@@ -141,7 +141,7 @@ namespace DualityEditor.Forms
 			ToolStripMenuItem aboutItem =			this.RequestMenu(GeneralRes.MenuName_Help, GeneralRes.MenuItemName_About);
 
 			// ---------- File ----------
-			newProjectItem.Image = EditorRes.GeneralResCache.ImageAppCreate;
+			newProjectItem.Image = Properties.GeneralResCache.ImageAppCreate;
 			newProjectItem.Click += this.newProjectItem_Click;
 			newProjectItem.Tag = HelpInfo.FromText(newProjectItem.Text, GeneralRes.MenuItemInfo_NewProject);
 
@@ -368,33 +368,42 @@ namespace DualityEditor.Forms
 		private void actionRunApp_Click(object sender, EventArgs e)
 		{
 			DualityEditorApp.SaveAllProjectData();
+			this.VerifyStartScene();
+
 			System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
 			startInfo.FileName = Path.GetFileName(DualityEditorApp.LauncherAppPath);
 			startInfo.Arguments = DualityApp.CmdArgEditor;
 			startInfo.WorkingDirectory = Path.GetDirectoryName(DualityEditorApp.LauncherAppPath);
 			System.Diagnostics.Process appProc = System.Diagnostics.Process.Start(startInfo);
+
 			AppRunningDialog runningDialog = new AppRunningDialog(appProc);
 			runningDialog.ShowDialog(this);
 		}
 		private void actionDebugApp_Click(object sender, EventArgs e)
 		{
 			DualityEditorApp.SaveAllProjectData();
+			this.VerifyStartScene();
+
 			System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
 			startInfo.FileName = Path.GetFileName(DualityEditorApp.LauncherAppPath);
 			startInfo.Arguments = DualityApp.CmdArgEditor + " " + DualityApp.CmdArgDebug;
 			startInfo.WorkingDirectory = Path.GetDirectoryName(DualityEditorApp.LauncherAppPath);
 			System.Diagnostics.Process appProc = System.Diagnostics.Process.Start(startInfo);
+
 			AppRunningDialog runningDialog = new AppRunningDialog(appProc);
 			runningDialog.ShowDialog(this);
 		}
 		private void actionProfileApp_Click(object sender, EventArgs e)
 		{
 			DualityEditorApp.SaveAllProjectData();
+			this.VerifyStartScene();
+
 			System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
 			startInfo.FileName = Path.GetFileName(DualityEditorApp.LauncherAppPath);
 			startInfo.Arguments = DualityApp.CmdArgEditor + " " + DualityApp.CmdArgProfiling;
 			startInfo.WorkingDirectory = Path.GetDirectoryName(DualityEditorApp.LauncherAppPath);
 			System.Diagnostics.Process appProc = System.Diagnostics.Process.Start(startInfo);
+
 			AppRunningDialog runningDialog = new AppRunningDialog(appProc);
 			runningDialog.ShowDialog(this);
 		}
@@ -499,8 +508,8 @@ namespace DualityEditor.Forms
 			this.UpdateToolbar();
 
 			ProcessingBigTaskDialog taskDialog = new ProcessingBigTaskDialog(this, 
-				EditorRes.GeneralRes.TaskChangeDataFormat_Caption, 
-				string.Format(EditorRes.GeneralRes.TaskChangeDataFormat_Desc, Duality.Serialization.Formatter.DefaultMethod.ToString()), 
+				Properties.GeneralRes.TaskChangeDataFormat_Caption, 
+				string.Format(Properties.GeneralRes.TaskChangeDataFormat_Desc, Duality.Serialization.Formatter.DefaultMethod.ToString()), 
 				this.async_ChangeDataFormat, null);
 			taskDialog.ShowDialog();
 		}
@@ -511,16 +520,16 @@ namespace DualityEditor.Forms
 			this.UpdateToolbar();
 
 			ProcessingBigTaskDialog taskDialog = new ProcessingBigTaskDialog(this, 
-				EditorRes.GeneralRes.TaskChangeDataFormat_Caption, 
-				string.Format(EditorRes.GeneralRes.TaskChangeDataFormat_Desc, Duality.Serialization.Formatter.DefaultMethod.ToString()), 
+				Properties.GeneralRes.TaskChangeDataFormat_Caption, 
+				string.Format(Properties.GeneralRes.TaskChangeDataFormat_Desc, Duality.Serialization.Formatter.DefaultMethod.ToString()), 
 				this.async_ChangeDataFormat, null);
 			taskDialog.ShowDialog();
 		}
 		private void formatUpdateAll_Click(object sender, EventArgs e)
 		{
 			ProcessingBigTaskDialog taskDialog = new ProcessingBigTaskDialog(this, 
-				EditorRes.GeneralRes.TaskFormatUpdateAll_Caption, 
-				EditorRes.GeneralRes.TaskFormatUpdateAll_Desc, 
+				Properties.GeneralRes.TaskFormatUpdateAll_Caption, 
+				Properties.GeneralRes.TaskFormatUpdateAll_Desc, 
 				this.async_ChangeDataFormat, null);
 			taskDialog.ShowDialog();
 		}
@@ -694,6 +703,32 @@ namespace DualityEditor.Forms
 			this.menuRunApp.Enabled = launcherAvailable;
 			this.menuDebugApp.Enabled = launcherAvailable && EditorHelper.IsJITDebuggerAvailable;
 			this.menuProfileApp.Enabled = launcherAvailable;
+		}
+		private void VerifyStartScene()
+		{
+			if (DualityApp.AppData.StartScene != null) return;
+
+			// If there is no StartScene defined, attempt to find one automatically.
+			if (!Scene.Current.IsRuntimeResource)
+			{
+				DualityApp.AppData.StartScene = Scene.Current;
+				DualityApp.SaveAppData();
+			}
+			else
+			{
+				ContentRef<Scene> existingScene = ContentProvider.GetAvailableContent<Scene>().FirstOrDefault();
+				if (existingScene != null)
+				{
+					DualityApp.AppData.StartScene = existingScene;
+					DualityApp.SaveAppData();
+				}
+				else if (!Scene.Current.IsEmpty)
+				{
+					DualityEditorApp.SaveCurrentScene(false);
+					DualityApp.AppData.StartScene = Scene.Current;
+					DualityApp.SaveAppData();
+				}
+			}
 		}
 
 		private void AddLayoutNamesToMenu(IEnumerable<string> layouts)

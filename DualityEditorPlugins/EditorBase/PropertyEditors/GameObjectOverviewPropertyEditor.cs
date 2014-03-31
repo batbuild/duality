@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AdamsLair.PropertyGrid;
+using AdamsLair.WinForms;
 
 using Duality;
 
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(GameObjectOverviewPropertyEditor), "MatchToProperty")]
 	public class GameObjectOverviewPropertyEditor : GroupedPropertyEditor
 	{
 		private	GameObjectPropertyEditor		gameObjEditor		= null;
@@ -46,9 +47,9 @@ namespace EditorBase.PropertyEditors
 			this.componentEditors.Clear();
 		}
 
-		public override void PerformGetValue()
+		protected override void OnGetValue()
 		{
-			base.PerformGetValue();
+			base.OnGetValue();
 			GameObject[] values = this.GetValue().Cast<GameObject>().ToArray();
 			if (values == null) return;
 
@@ -68,9 +69,9 @@ namespace EditorBase.PropertyEditors
 				this.Expanded = !this.ContentInitialized || this.Children.Any();
 			}
 		}
-		public override void PerformSetValue()
+		protected override void OnSetValue()
 		{
-			base.PerformSetValue();
+			base.OnSetValue();
 			if (this.ReadOnly) return;
 			if (!this.Children.Any()) return;
 
@@ -127,6 +128,14 @@ namespace EditorBase.PropertyEditors
 		{
 			// We don't need a setter. At all.
 			return v => {};
+		}
+
+		private static int MatchToProperty(Type propertyType, ProviderContext context)
+		{
+			if (typeof(GameObject).IsAssignableFrom(propertyType) && context.ParentEditor == null)
+				return PropertyEditorAssignmentAttribute.PrioritySpecialized;
+			else
+				return PropertyEditorAssignmentAttribute.PriorityNone;
 		}
 	}
 }

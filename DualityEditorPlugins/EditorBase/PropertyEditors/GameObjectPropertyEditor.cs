@@ -4,16 +4,15 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.Renderer;
-using ButtonState = AdamsLair.PropertyGrid.Renderer.ButtonState;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.Renderer;
+using ButtonState = AdamsLair.WinForms.Renderer.ButtonState;
 
 using Duality;
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
-using DualityEditor.UndoRedoActions;
+using Duality.Editor;
+using Duality.Editor.UndoRedoActions;
 
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
 	public partial class GameObjectPropertyEditor : PropertyEditor, IHelpProvider
 	{
@@ -63,9 +62,9 @@ namespace EditorBase.PropertyEditors
 				new object[] { active }));
 		}
 
-		public override void PerformGetValue()
+		protected override void OnGetValue()
 		{
-			base.PerformGetValue();
+			base.OnGetValue();
 			GameObject[] values = this.GetValue().Cast<GameObject>().ToArray();
 
 			this.BeginUpdate();
@@ -83,7 +82,7 @@ namespace EditorBase.PropertyEditors
 				}
 				else
 				{
-					this.displayedName = string.Format(DualityEditor.EditorRes.GeneralRes.PropertyGrid_N_Objects, values.Count());
+					this.displayedName = string.Format(Duality.Editor.Properties.GeneralRes.PropertyGrid_N_Objects, values.Count());
 					this.displayedNameExt = "";
 				}
 				this.prefabLinked = values.Any(o => o.PrefabLink != null);
@@ -163,7 +162,7 @@ namespace EditorBase.PropertyEditors
 			ControlRenderer.DrawGroupHeaderBackground(e.Graphics, this.rectHeader, SystemColors.Control, GroupHeaderStyle.Emboss);
 			ControlRenderer.DrawGroupHeaderBackground(e.Graphics, this.rectPrefab, SystemColors.Control.ScaleBrightness(0.95f), GroupHeaderStyle.SmoothSunken);
 			if (this.Focused)
-				ControlRenderer.DrawBorder(e.Graphics, this.ClientRectangle, AdamsLair.PropertyGrid.Renderer.BorderStyle.Simple, BorderState.Normal);
+				ControlRenderer.DrawBorder(e.Graphics, this.ClientRectangle, AdamsLair.WinForms.Renderer.BorderStyle.Simple, BorderState.Normal);
 
 			CheckBoxState activeState = CheckBoxState.UncheckedDisabled;
 			if (!this.ReadOnly && this.Enabled)
@@ -318,7 +317,7 @@ namespace EditorBase.PropertyEditors
 			if (e.KeyCode == Keys.Return)
 			{
 				GameObject[] values = this.GetValue().Cast<GameObject>().ToArray();
-				var actions = CorePluginRegistry.GetEditorActions<GameObject>(CorePluginRegistry.ActionContext_OpenRes, values);
+				var actions = DualityEditorApp.GetEditorActions(typeof(GameObject), values, DualityEditorApp.ActionContextOpenRes);
 				var action = actions.FirstOrDefault();
 				if (action != null)
 				{
@@ -342,9 +341,7 @@ namespace EditorBase.PropertyEditors
 			GameObject[] values = this.GetValue().Cast<GameObject>().Where(o => o.PrefabLink != null).ToArray();
 			Duality.Resources.PrefabLink link = values.First().PrefabLink;
 
-			ProjectFolderView view = EditorBasePlugin.Instance.RequestProjectView();
-			view.FlashNode(view.NodeFromPath(link.Prefab.Path));
-			System.Media.SystemSounds.Beep.Play();
+			DualityEditorApp.Highlight(this, new ObjectSelection(link.Prefab.Res));
 		}
 		private void OnPrefabLinkRevertPressed()
 		{

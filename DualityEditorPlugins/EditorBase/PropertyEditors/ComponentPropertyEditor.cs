@@ -5,17 +5,16 @@ using System.Reflection;
 using System.Windows.Forms;
 using System.Drawing;
 
-using AdamsLair.PropertyGrid;
+using AdamsLair.WinForms;
 
 using Duality;
-using Duality.ColorFormat;
+using Duality.Drawing;
+using Duality.Editor;
+using Duality.Editor.UndoRedoActions;
 
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
-using DualityEditor.UndoRedoActions;
-
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(ComponentPropertyEditor), "MatchToProperty")]
 	public class ComponentPropertyEditor : MemberwisePropertyEditor
 	{
 		private	bool isInvokingDirectChild = false;
@@ -25,7 +24,7 @@ namespace EditorBase.PropertyEditors
 			this.Hints |= HintFlags.HasActiveCheck | HintFlags.ActiveEnabled;
 			this.PropertyName = "Component";
 			this.HeaderHeight = 20;
-			this.HeaderStyle = AdamsLair.PropertyGrid.Renderer.GroupHeaderStyle.Emboss;
+			this.HeaderStyle = AdamsLair.WinForms.Renderer.GroupHeaderStyle.Emboss;
 		}
 
 		public void PerformSetActive(bool active)
@@ -76,7 +75,7 @@ namespace EditorBase.PropertyEditors
 			base.OnUpdateFromObjects(values);
 
 			this.Hints |= HintFlags.HasButton | HintFlags.ButtonEnabled;
-			this.ButtonIcon = PluginRes.EditorBaseResCache.DropdownSettingsBlack;
+			this.ButtonIcon = Properties.EditorBaseRes.DropdownSettingsBlack;
 			this.PropertyName = this.EditedType.GetTypeCSCodeName(true);
 			this.HeaderValueText = null;
 			if (!values.Any() || values.All(o => o == null))
@@ -114,16 +113,16 @@ namespace EditorBase.PropertyEditors
 		protected override void OnActiveChanged()
 		{
 			base.OnActiveChanged();
-			if (!this.IsUpdatingFromObject) this.PerformSetActive(this.Active);
+			if (!this.IsUpdating) this.PerformSetActive(this.Active);
 		}
 		protected override void OnEditedTypeChanged()
 		{
 			base.OnEditedTypeChanged();
 
-			System.Drawing.Bitmap iconBitmap = CorePluginRegistry.GetTypeImage(this.EditedType) as System.Drawing.Bitmap;
+			System.Drawing.Bitmap iconBitmap = this.EditedType.GetEditorImage() as System.Drawing.Bitmap;
 			ColorHsva avgClr = iconBitmap != null ? 
 				iconBitmap.GetAverageColor().ToHsva() : 
-				Duality.ColorFormat.ColorHsva.TransparentWhite;
+				Duality.Drawing.ColorHsva.TransparentWhite;
 			if (avgClr.S <= 0.05f)
 			{
 				avgClr = new ColorHsva(
@@ -177,13 +176,13 @@ namespace EditorBase.PropertyEditors
 			menuPos.Y += thisLoc.Y;
 
 			// Default items
-			ToolStripItem itemReset = contextMenu.Items.Add(PluginRes.EditorBaseRes.MenuItemName_ResetComponent, null, this.contextMenu_ResetComponent);
-			ToolStripItem itemRemove = contextMenu.Items.Add(PluginRes.EditorBaseRes.MenuItemName_RemoveComponent, PluginRes.EditorBaseResCache.IconAbortCross, this.contextMenu_RemoveComponent);
+			ToolStripItem itemReset = contextMenu.Items.Add(Properties.EditorBaseRes.MenuItemName_ResetComponent, null, this.contextMenu_ResetComponent);
+			ToolStripItem itemRemove = contextMenu.Items.Add(Properties.EditorBaseRes.MenuItemName_RemoveComponent, Properties.EditorBaseRes.IconAbortCross, this.contextMenu_RemoveComponent);
 			itemRemove.Enabled = canRemove;
 			if (!canRemove) 
 			{
 				itemRemove.ToolTipText = string.Format(
-					PluginRes.EditorBaseRes.MenuItemDesc_CantRemoveComponent, 
+					Properties.EditorBaseRes.MenuItemDesc_CantRemoveComponent, 
 					values.First().GetType().Name, 
 					removeConflict.GetType().Name);
 			}
@@ -191,11 +190,7 @@ namespace EditorBase.PropertyEditors
 			contextMenu.Items.Add(itemDefaultSep);
 
 			// Custom actions
-			var customActions = CorePluginRegistry.GetEditorActions(
-				values.First().GetType(), 
-				CorePluginRegistry.ActionContext_ContextMenu, 
-				values)
-				.ToArray();
+			var customActions = DualityEditorApp.GetEditorActions(values.First().GetType(), values).ToArray();
 			foreach (var actionEntry in customActions)
 			{
 				ToolStripMenuItem actionItem = new ToolStripMenuItem(actionEntry.Name, actionEntry.Icon);
@@ -235,6 +230,15 @@ namespace EditorBase.PropertyEditors
 			ToolStripMenuItem clickedItem = sender as ToolStripMenuItem;
 			IEditorAction action = clickedItem.Tag as IEditorAction;
 			action.Perform(values);
+		}
+
+		private static int MatchToProperty(Type propertyType, ProviderContext context)
+		{
+			bool compRef = !(context.ParentEditor is GameObjectOverviewPropertyEditor);
+			if (typeof(Component).IsAssignableFrom(propertyType) && !compRef)
+				return PropertyEditorAssignmentAttribute.PriorityGeneral;
+			else
+				return PropertyEditorAssignmentAttribute.PriorityNone;
 		}
 	}
 }

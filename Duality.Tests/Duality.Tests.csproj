@@ -38,8 +38,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerOpenTK">
-      <HintPath>..\Duality\FarseerOpenTK.dll</HintPath>
+    <Reference Include="FarseerDuality">
+      <HintPath>..\Duality\FarseerDuality.dll</HintPath>
     </Reference>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>

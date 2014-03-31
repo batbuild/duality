@@ -5,10 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
-using Duality;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace DualityEditor
+namespace Duality.Editor
 {
 	public class Workspace
 	{

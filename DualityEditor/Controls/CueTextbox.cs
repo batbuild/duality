@@ -5,15 +5,15 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Drawing;
 
-namespace DualityEditor.Controls
+namespace Duality.Editor.Controls
 {
 	public class CueTextBox : TextBox
 	{
 		#region Native methods
 		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, string lParam);
-        private const int ECM_FIRST = 0x1500;
-        private const int EM_SETCUEBANNER = ECM_FIRST + 1;
+		private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, string lParam);
+		private const int ECM_FIRST = 0x1500;
+		private const int EM_SETCUEBANNER = ECM_FIRST + 1;
 		#endregion
 
 		private string cueText = null;

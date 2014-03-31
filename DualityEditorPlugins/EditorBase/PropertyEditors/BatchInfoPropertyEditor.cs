@@ -5,20 +5,18 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.Drawing;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.PropertyEditors;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.PropertyEditors;
 
 using OpenTK;
 
 using Duality;
 using Duality.Resources;
-using Duality.EditorHints; 
+using Duality.Editor;
 
-using DualityEditor;
-using DualityEditor.CorePluginInterface;
-
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(BatchInfo), PropertyEditorAssignmentAttribute.PrioritySpecialized)]
 	public class BatchInfoPropertyEditor : MemberwisePropertyEditor
 	{
 		private	Point	dragBeginPos	= Point.Empty;
@@ -216,7 +214,7 @@ namespace EditorBase.PropertyEditors
 				if (invokeSetter)
 				{
 					this.SetValues(batchInfos);
-					if (!this.IsUpdatingFromObject)
+					if (!this.IsUpdating)
 						this.PerformGetValue();
 				}
 			}

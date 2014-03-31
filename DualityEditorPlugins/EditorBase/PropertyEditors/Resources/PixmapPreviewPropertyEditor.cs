@@ -5,16 +5,15 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 
-using AdamsLair.PropertyGrid;
-using AdamsLair.PropertyGrid.EditorTemplates;
-using AdamsLair.PropertyGrid.Renderer;
-using BorderStyle = AdamsLair.PropertyGrid.Renderer.BorderStyle;
+using AdamsLair.WinForms;
+using AdamsLair.WinForms.EditorTemplates;
+using AdamsLair.WinForms.Renderer;
+using BorderStyle = AdamsLair.WinForms.Renderer.BorderStyle;
 
 using Duality;
 using Duality.Resources;
-using DualityEditor.CorePluginInterface;
 
-namespace EditorBase.PropertyEditors
+namespace Duality.Editor.Plugins.Base.PropertyEditors
 {
 	public class PixmapPreviewPropertyEditor : ImagePreviewPropertyEditor
 	{
@@ -72,9 +71,9 @@ namespace EditorBase.PropertyEditors
 			}
 		}
 
-		public override void PerformGetValue()
+		protected override void OnGetValue()
 		{
-			base.PerformGetValue();
+			base.OnGetValue();
 
 			Pixmap lastValue = this.value;
 			Pixmap[] values = this.GetValue().Cast<Pixmap>().ToArray();

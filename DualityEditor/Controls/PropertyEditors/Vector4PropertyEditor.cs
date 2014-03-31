@@ -5,8 +5,9 @@ using Vector4 = OpenTK.Vector4;
 
 using Duality;
 
-namespace DualityEditor.Controls.PropertyEditors
+namespace Duality.Editor.Controls.PropertyEditors
 {
+	[PropertyEditorAssignment(typeof(Vector4))]
 	public class Vector4PropertyEditor : VectorPropertyEditor
 	{
 		public override object DisplayedValue
@@ -27,9 +28,9 @@ namespace DualityEditor.Controls.PropertyEditors
 		}
 
 
-		public override void PerformGetValue()
+		protected override void OnGetValue()
 		{
-			base.PerformGetValue();
+			base.OnGetValue();
 			object[] values = this.GetValue().ToArray();
 
 			this.BeginUpdate();
@@ -63,7 +64,8 @@ namespace DualityEditor.Controls.PropertyEditors
 
 		private void editorX_Edited(object sender, EventArgs e)
 		{
-			if (this.IsUpdatingFromObject) return;
+			if (this.IsUpdating) return;
+			if (this.Disposed) return;
 			if (!this.ReadOnly)
 			{
 				object[] values = this.GetValue().ToArray();
@@ -84,7 +86,8 @@ namespace DualityEditor.Controls.PropertyEditors
 		}
 		private void editorY_Edited(object sender, EventArgs e)
 		{
-			if (this.IsUpdatingFromObject) return;
+			if (this.IsUpdating) return;
+			if (this.Disposed) return;
 			if (!this.ReadOnly)
 			{
 				object[] values = this.GetValue().ToArray();
@@ -105,7 +108,8 @@ namespace DualityEditor.Controls.PropertyEditors
 		}
 		private void editorZ_Edited(object sender, EventArgs e)
 		{
-			if (this.IsUpdatingFromObject) return;
+			if (this.IsUpdating) return;
+			if (this.Disposed) return;
 			if (!this.ReadOnly)
 			{
 				object[] values = this.GetValue().ToArray();
@@ -126,7 +130,8 @@ namespace DualityEditor.Controls.PropertyEditors
 		}
 		private void editorW_Edited(object sender, EventArgs e)
 		{
-			if (this.IsUpdatingFromObject) return;
+			if (this.IsUpdating) return;
+			if (this.Disposed) return;
 			if (!this.ReadOnly)
 			{
 				object[] values = this.GetValue().ToArray();

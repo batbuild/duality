@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 using Duality;
 
-namespace DualityEditor.CorePluginInterface
+namespace Duality.Editor
 {
 	public class ConversionData : IDataObject
 	{
@@ -123,6 +123,28 @@ namespace DualityEditor.CorePluginInterface
 
 			All		= Convert | CreateRes | CreateObj
 		}
+
+		
+		private static List<DataConverter> converters = new List<DataConverter>();
+		
+		internal static void Init()
+		{
+			foreach (Type genType in DualityEditorApp.GetAvailDualityEditorTypes(typeof(DataConverter)))
+			{
+				if (genType.IsAbstract) continue;
+				DataConverter gen = genType.CreateInstanceOf() as DataConverter;
+				if (gen != null) converters.Add(gen);
+			}
+		}
+		internal static void Terminate()
+		{
+			converters.Clear();
+		}
+		private static IEnumerable<DataConverter> GetConverters(Type target)
+		{
+			return converters.Where(c => target.IsAssignableFrom(c.TargetType));
+		}
+
 
 		private	Operation		allowedOp	= Operation.All;
 		private	ConversionData	data		= null;
@@ -254,7 +276,7 @@ namespace DualityEditor.CorePluginInterface
 			if (!result && this.data.ContainsComponentRefs(target)) result = true;
 			if (!result)
 			{
-				result = CorePluginRegistry.GetDataConverters(target).Any(s => !this.usedConverters.Contains(s) && s.CanConvertFrom(this));
+				result = GetConverters(target).Any(s => !this.usedConverters.Contains(s) && s.CanConvertFrom(this));
 			}
 
 			if (result || this.allowedOp != oldAllowedOp) this.checkedTypes.Remove(target);
@@ -311,7 +333,7 @@ namespace DualityEditor.CorePluginInterface
 			// No result yet? Search suitable converters
 			if (!fittingDataFound)
 			{
-				var converterQuery = CorePluginRegistry.GetDataConverters(target);
+				var converterQuery = GetConverters(target);
 				List<ConvComplexityEntry> converters = new List<ConvComplexityEntry>();
 				foreach (var c in converterQuery)
 				{
@@ -362,9 +384,15 @@ namespace DualityEditor.CorePluginInterface
 	}
 	public abstract class DataConverter
 	{
+		public const int PriorityNone			= 0;
+		public const int PriorityGeneral		= 20;
+		public const int PrioritySpecialized	= 50;
+		public const int PriorityOverride		= 100;
+
+		public abstract Type TargetType { get; }
 		public virtual int Priority
 		{
-			get { return CorePluginRegistry.Priority_General; }
+			get { return PriorityGeneral; }
 		}
 
 		public abstract bool CanConvertFrom(ConvertOperation convert);

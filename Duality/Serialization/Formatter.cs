@@ -41,7 +41,7 @@ namespace Duality.Serialization
 		public delegate bool FieldBlocker(FieldInfo field, object obj);
 
 		/// <summary>
-		/// Buffer object for <see cref="Duality.Serialization.ISerializable">custom de/serialization</see>, 
+		/// Buffer object for <see cref="Duality.Serialization.ISerializeExplicit">custom de/serialization</see>, 
 		/// providing read and write functionality.
 		/// </summary>
 		protected abstract class CustomSerialIOBase<T> : IDataReader, IDataWriter where T : Formatter
@@ -69,23 +69,12 @@ namespace Duality.Serialization
 			}
 
 			/// <summary>
-			/// Writes the contained data to the specified serializer.
-			/// </summary>
-			/// <param name="formatter">The serializer to write data to.</param>
-			public abstract void Serialize(T formatter);
-			/// <summary>
-			/// Reads data from the specified serializer
-			/// </summary>
-			/// <param name="formatter">The serializer to read data from.</param>
-			public abstract void Deserialize(T formatter);
-			/// <summary>
 			/// Clears all contained data.
 			/// </summary>
 			public void Clear()
 			{
 				this.data.Clear();
 			}
-			
 			/// <summary>
 			/// Writes the specified name and value.
 			/// </summary>
@@ -153,6 +142,82 @@ namespace Duality.Serialization
 			}
 		}
 
+		/// <summary>
+		/// Describes the serialization header of an object that is being de/serialized.
+		/// </summary>
+		protected class ObjectHeader
+		{
+			private	uint			objectId;
+			private	DataType		dataType;
+			private	SerializeType	serializeType;
+			private	string			typeString;
+
+			/// <summary>
+			/// [GET] The objects unique ID. May be zero for non-referenced object types.
+			/// </summary>
+			public uint ObjectId
+			{
+				get { return this.objectId; }
+			}
+			/// <summary>
+			/// [GET] The objects data type.
+			/// </summary>
+			public DataType DataType
+			{
+				get { return this.dataType; }
+			}
+			/// <summary>
+			/// [GET] The objects resolved serialization type information. May be unavailable / null when loading objects.
+			/// </summary>
+			public SerializeType SerializeType
+			{
+				get { return this.serializeType; }
+			}
+			/// <summary>
+			/// [GET] The objects resolved type information. May be unavailable / null when loading objects.
+			/// </summary>
+			public Type ObjectType
+			{
+				get { return (this.serializeType != null) ? this.serializeType.Type : null; }
+			}
+			/// <summary>
+			/// [GET] The string representing this objects type in the serialized data stream.
+			/// </summary>
+			public string TypeString
+			{
+				get { return this.typeString; }
+			}
+			/// <summary>
+			/// [GET] Whether or not the object is considered a primitive value according to its <see cref="DataType"/>.
+			/// </summary>
+			public bool IsPrimitive
+			{
+				get { return this.dataType.IsPrimitiveType(); }
+			}
+			/// <summary>
+			/// [GET] Returns whether this kind of object requires an explicit <see cref="ObjectType"/> to be fully described described during serialization.
+			/// </summary>
+			public bool IsObjectTypeRequired
+			{
+				get { return this.dataType.HasTypeName(); }
+			}
+			/// <summary>
+			/// [GET] Returns whether this kind of object requires an <see cref="ObjectId"/> to be fully described during serialization.
+			/// </summary>
+			public bool IsObjectIdRequired
+			{
+				get { return this.dataType.HasObjectId(); }
+			}
+
+			public ObjectHeader(uint id, DataType dataType, SerializeType serializeType)
+			{
+				this.objectId = id;
+				this.dataType = dataType;
+				this.serializeType = serializeType;
+				this.typeString = serializeType != null ? serializeType.TypeString : null;
+			}
+		}
+
 
 		/// <summary>
 		/// The de/serialization <see cref="Duality.Log"/>.
@@ -162,13 +227,6 @@ namespace Duality.Serialization
 		/// returns true upon serializing a specific field, a default value is assumed instead.
 		/// </summary>
 		protected	List<FieldBlocker>	fieldBlockers	= new List<FieldBlocker>();
-		/// <summary>
-		/// A list of <see cref="Duality.Serialization.ISurrogate">Serialization Surrogates</see>. If any of them
-		/// matches the <see cref="System.Type"/> of an object that is to be serialized, instead of letting it
-		/// serialize itsself, the <see cref="Duality.Serialization.ISurrogate"/> with the highest <see cref="Duality.Serialization.ISurrogate.Priority"/>
-		/// is used instead.
-		/// </summary>
-		protected	List<ISurrogate>	surrogates		= new List<ISurrogate>();
 		/// <summary>
 		/// Manages object IDs during de/serialization.
 		/// </summary>
@@ -187,9 +245,9 @@ namespace Duality.Serialization
 		/// </summary>
 		public abstract bool CanWrite { get; }
 		/// <summary>
-		/// [GET / SET] The de/serialization <see cref="Duality.Log"/>.
+		/// [GET / SET] The local de/serialization <see cref="Duality.Log"/>.
 		/// </summary>
-		public Log SerializationLog
+		public Log LocalLog
 		{
 			get { return this.log; }
 			set { this.log = value ?? new Log("Serialize"); }
@@ -203,17 +261,7 @@ namespace Duality.Serialization
 			get { return this.fieldBlockers; }
 		}
 		/// <summary>
-		/// [GET] Enumerates registered <see cref="Duality.Serialization.ISurrogate">Serialization Surrogates</see>. If any of them
-		/// matches the <see cref="System.Type"/> of an object that is to be serialized, instead of letting it
-		/// serialize itsself, the <see cref="Duality.Serialization.ISurrogate"/> with the highest <see cref="Duality.Serialization.ISurrogate.Priority"/>
-		/// is used instead.
-		/// </summary>
-		public IEnumerable<ISurrogate> Surrogates
-		{
-			get { return this.surrogates; }
-		}
-		/// <summary>
-		/// [GET] Whether this binary serializer has been disposed. A disposed object cannot be used anymore.
+		/// [GET] Whether this formatter has been disposed. A disposed object cannot be used anymore.
 		/// </summary>
 		public bool Disposed
 		{
@@ -221,12 +269,7 @@ namespace Duality.Serialization
 		}
 
 
-		protected Formatter()
-		{
-			this.AddSurrogate(new Surrogates.BitmapSurrogate());
-			this.AddSurrogate(new Surrogates.DictionarySurrogate());
-			this.AddSurrogate(new Surrogates.GuidSurrogate());
-		}
+		protected Formatter() {}
 		~Formatter()
 		{
 			this.Dispose(false);
@@ -247,6 +290,10 @@ namespace Duality.Serialization
 		protected virtual void OnDisposed(bool manually) {}
 
 		
+		/// <summary>
+		/// Reads a single object and returns it.
+		/// </summary>
+		/// <returns></returns>
 		public object ReadObject()
 		{
 			if (!this.CanRead) throw new InvalidOperationException("Can't read object from a write-only serializer!");
@@ -255,16 +302,31 @@ namespace Duality.Serialization
 			this.EndReadOperation();
 			return result;
 		}
+		/// <summary>
+		/// Reads a single object, casts it to the specified Type and returns it.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
 		public T ReadObject<T>()
 		{
 			object result = this.ReadObject();
 			return result is T ? (T)result : default(T);
 		}
+		/// <summary>
+		/// Reads a single object, casts it to the specified Type and returns it via output parameter.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="obj"></param>
 		public void ReadObject<T>(out T obj)
 		{
 			object result = this.ReadObject();
 			obj = result is T ? (T)result : default(T);
 		}
+
+		/// <summary>
+		/// Writes a single object.
+		/// </summary>
+		/// <param name="obj"></param>
 		public void WriteObject(object obj)
 		{
 			if (!this.CanWrite) throw new InvalidOperationException("Can't write object to a read-only serializer!");
@@ -272,6 +334,11 @@ namespace Duality.Serialization
 			this.WriteObjectData(obj);
 			this.EndWriteOperation();
 		}
+		/// <summary>
+		/// Writes a single object.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="obj"></param>
 		public void WriteObject<T>(T obj)
 		{
 			this.WriteObject((object)obj);
@@ -314,41 +381,6 @@ namespace Duality.Serialization
 			return this.fieldBlockers.Any(blocker => blocker(field, obj));
 		}
 
-		/// <summary>
-		/// Unregisters all <see cref="Duality.Serialization.ISurrogate">Surrogates</see>.
-		/// </summary>
-		public void ClearSurrogates()
-		{
-			this.surrogates.Clear();
-		}
-		/// <summary>
-		/// Registers a new <see cref="Duality.Serialization.ISurrogate">Surrogate</see>.
-		/// </summary>
-		/// <param name="surrogate"></param>
-		public void AddSurrogate(ISurrogate surrogate)
-		{
-			if (this.surrogates.Contains(surrogate)) return;
-			this.surrogates.Add(surrogate);
-			this.surrogates.StableSort((s1, s2) => s1.Priority - s2.Priority);
-		}
-		/// <summary>
-		/// Unregisters an existing <see cref="Duality.Serialization.ISurrogate">Surrogate</see>.
-		/// </summary>
-		/// <param name="surrogate"></param>
-		public void RemoveSurrogate(ISurrogate surrogate)
-		{
-			this.surrogates.Remove(surrogate);
-		}
-		/// <summary>
-		/// Retrieves a matching <see cref="Duality.Serialization.ISurrogate"/> for the specified <see cref="System.Type"/>.
-		/// </summary>
-		/// <param name="t">The <see cref="System.Type"/> to retrieve a <see cref="Duality.Serialization.ISurrogate"/> for.</param>
-		/// <returns></returns>
-		public ISurrogate GetSurrogateFor(Type t)
-		{
-			return this.surrogates.FirstOrDefault(s => s.MatchesType(t));
-		}
-		
 
 		/// <summary>
 		/// Writes the specified object including all referenced objects.
@@ -384,29 +416,18 @@ namespace Duality.Serialization
 		}
 		
 		/// <summary>
-		/// Returns an object indicating a "null" value.
-		/// </summary>
-		/// <returns></returns>
-		protected virtual object GetNullObject() 
-		{
-			return null;
-		}
-		/// <summary>
-		/// Determines internal data for writing a given object.
+		/// Prepares an object for serialization and generates its header information.
 		/// </summary>
 		/// <param name="obj">The object to write</param>
-		/// <param name="objSerializeType">The <see cref="Duality.Serialization.SerializeType"/> that describes the specified object.</param>
-		/// <param name="dataType">The <see cref="Duality.Serialization.DataType"/> that is used for writing the specified object.</param>
-		/// <param name="objId">An object id that is assigned to the specified object.</param>
-		protected virtual void GetWriteObjectData(object obj, out SerializeType objSerializeType, out DataType dataType, out uint objId)
+		protected ObjectHeader PrepareWriteObject(object obj)
 		{
 			Type objType = obj.GetType();
-			objSerializeType = objType.GetSerializeType();
-			objId = 0;
-			dataType = objSerializeType.DataType;
+			SerializeType objSerializeType = objType.GetSerializeType();
+			DataType dataType = objSerializeType.DataType;
+			uint objId = 0;
 			
 			// Check whether it's going to be an ObjectRef or not
-			if (dataType == DataType.Array || dataType == DataType.Class || dataType == DataType.Delegate || dataType.IsMemberInfoType())
+			if (objSerializeType.CanBeReferenced)
 			{
 				bool newId;
 				objId = this.idManager.Request(obj, out newId);
@@ -415,18 +436,22 @@ namespace Duality.Serialization
 				if (!newId) dataType = DataType.ObjectRef;
 			}
 
+			// Check whether the object is expected to be serialized
 			if (dataType != DataType.ObjectRef &&
 				!objSerializeType.Type.IsSerializable && 
-				!typeof(ISerializable).IsAssignableFrom(objSerializeType.Type) &&
-				this.GetSurrogateFor(objSerializeType.Type) == null) 
+				!typeof(ISerializeExplicit).IsAssignableFrom(objSerializeType.Type) &&
+				GetSurrogateFor(objSerializeType.Type) == null) 
 			{
-				this.SerializationLog.WriteWarning("Serializing object of Type '{0}' which isn't [Serializable]", Log.Type(objSerializeType.Type));
+				this.LocalLog.WriteWarning("Serializing object of Type '{0}' which isn't [Serializable]", Log.Type(objSerializeType.Type));
 			}
+
+			// Generate object header information
+			return new ObjectHeader(objId, dataType, objSerializeType);
 		}
 
 
 		/// <summary>
-		/// Logs an error that occurred during <see cref="Duality.Serialization.ISerializable">custom serialization</see>.
+		/// Logs an error that occurred during <see cref="Duality.Serialization.ISerializeExplicit">custom serialization</see>.
 		/// </summary>
 		/// <param name="objId">The object id of the affected object.</param>
 		/// <param name="serializeType">The <see cref="System.Type"/> of the affected object.</param>
@@ -440,7 +465,7 @@ namespace Duality.Serialization
 				Log.Exception(e));
 		}
 		/// <summary>
-		/// Logs an error that occurred during <see cref="Duality.Serialization.ISerializable">custom deserialization</see>.
+		/// Logs an error that occurred during <see cref="Duality.Serialization.ISerializeExplicit">custom deserialization</see>.
 		/// </summary>
 		/// <param name="objId">The object id of the affected object.</param>
 		/// <param name="serializeType">The <see cref="System.Type"/> of the affected object.</param>
@@ -478,19 +503,13 @@ namespace Duality.Serialization
 
 			if (field == null)
 			{
-				if (!this.HandleAssignValueToField(objSerializeType, obj, fieldName, fieldValue))
-				{
-					this.SerializationLog.WriteWarning("Field '{0}' not found. Discarding value '{1}'", fieldName, fieldValue);
-				}
+				this.HandleAssignValueToField(objSerializeType, obj, fieldName, fieldValue);
 				return;
 			}
 
 			if (field.IsNotSerialized)
 			{
-				if (!this.HandleAssignValueToField(objSerializeType, obj, fieldName, fieldValue))
-				{
-					this.SerializationLog.WriteWarning("Field '{0}' flagged as [NonSerialized]. Discarding value '{1}'", fieldName, fieldValue);
-				}
+				this.HandleAssignValueToField(objSerializeType, obj, fieldName, fieldValue);
 				return;
 			}
 
@@ -498,23 +517,23 @@ namespace Duality.Serialization
 			{
 				if (!this.HandleAssignValueToField(objSerializeType, obj, fieldName, fieldValue))
 				{
-					this.SerializationLog.WriteWarning("Actual Type '{0}' of object value in field '{1}' does not match reflected FieldType '{2}'. Trying to convert...'", 
+					this.LocalLog.WriteWarning("Actual Type '{0}' of object value in field '{1}' does not match reflected FieldType '{2}'. Trying to convert...'", 
 						fieldValue != null ? Log.Type(fieldValue.GetType()) : "unknown", 
 						fieldName, 
 						Log.Type(field.FieldType));
-					this.SerializationLog.PushIndent();
+					this.LocalLog.PushIndent();
 					object castVal;
 					try
 					{
 						castVal = Convert.ChangeType(fieldValue, field.FieldType, System.Globalization.CultureInfo.InvariantCulture);
-						this.SerializationLog.Write("...succeeded! Assigning value '{0}'", castVal);
+						this.LocalLog.Write("...succeeded! Assigning value '{0}'", castVal);
 						field.SetValue(obj, castVal);
 					}
 					catch (Exception)
 					{
-						this.SerializationLog.WriteWarning("...failed! Discarding value '{0}'", fieldValue);
+						this.LocalLog.WriteWarning("...failed! Discarding value '{0}'", fieldValue);
 					}
-					this.SerializationLog.PopIndent();
+					this.LocalLog.PopIndent();
 				}
 				return;
 			}
@@ -597,7 +616,9 @@ namespace Duality.Serialization
 		}
 
 
-		private static FormattingMethod defaultMethod = FormattingMethod.Xml;
+		private	static List<ISerializeSurrogate>	surrogates		= null;
+		private static FormattingMethod defaultMethod	= FormattingMethod.Xml;
+
 		/// <summary>
 		/// [GET / SET] The default formatting method to use, if no other is specified.
 		/// </summary>
@@ -605,6 +626,26 @@ namespace Duality.Serialization
 		{
 			get { return defaultMethod; }
 			set { defaultMethod = value; }
+		}
+
+		/// <summary>
+		/// Retrieves a matching <see cref="Duality.Serialization.ISerializeSurrogate"/> for the specified <see cref="System.Type"/>.
+		/// </summary>
+		/// <param name="t">The <see cref="System.Type"/> to retrieve a <see cref="Duality.Serialization.ISerializeSurrogate"/> for.</param>
+		/// <returns></returns>
+		protected static ISerializeSurrogate GetSurrogateFor(Type type)
+		{
+			if (surrogates == null)
+			{
+				surrogates = 
+					DualityApp.GetAvailDualityTypes(typeof(ISerializeSurrogate))
+					.Select(t => t.CreateInstanceOf())
+					.OfType<ISerializeSurrogate>()
+					.NotNull()
+					.ToList();
+				surrogates.StableSort((s1, s2) => s1.Priority - s2.Priority);
+			}
+			return surrogates.FirstOrDefault(s => s.MatchesType(type));
 		}
 		
 		internal static void InitDefaultMethod()
@@ -622,7 +663,7 @@ namespace Duality.Serialization
 					{
 						try
 						{
-							defaultMethod = XmlFormatterBase.IsXmlStream(stream) ? FormattingMethod.Xml : FormattingMethod.Binary;
+							defaultMethod = XmlFormatter.IsXmlStream(stream) ? FormattingMethod.Xml : FormattingMethod.Binary;
 							break;
 						}
 						catch (Exception) {}
@@ -630,6 +671,11 @@ namespace Duality.Serialization
 				}
 			}
 		}
+		internal static void ClearTypeCache()
+		{
+			surrogates = null;
+		}
+
 		/// <summary>
 		/// Creates a new Formatter using the specified stream for I/O.
 		/// </summary>
@@ -645,7 +691,7 @@ namespace Duality.Serialization
 			{
 				if (stream.CanRead && stream.CanSeek && stream.Length > 0)
 				{
-					if (XmlFormatterBase.IsXmlStream(stream))
+					if (XmlFormatter.IsXmlStream(stream))
 						method = FormattingMethod.Xml;
 					else
 						method = FormattingMethod.Binary;
@@ -660,33 +706,110 @@ namespace Duality.Serialization
 				return new BinaryFormatter(stream);
 		}
 		/// <summary>
-		/// Creates a new MetaFormat Formatter using the specified stream for I/O.
+		/// Reads an object of the specified Type from an existing data file, expecting that it might fail.
+		/// This method does not throw an Exception when the file does not exist or another
+		/// error occurred during the read operation. Instead, it will simply return null in these cases.
 		/// </summary>
-		/// <param name="stream">The stream to use.</param>
-		/// <param name="method">
-		/// The formatting method to prefer. If <see cref="FormattingMethod.Unknown"/> is specified, if the stream
-		/// is read- and seekable, auto-detection is used. Otherwise, the <see cref="DefaultMethod">default formatting method</see> is used.
-		/// </param>
-		/// <returns>A newly created MetaFormat Formatter meeting the specified criteria.</returns>
-		public static Formatter CreateMeta(Stream stream, FormattingMethod method = FormattingMethod.Unknown)
+		/// <typeparam name="T"></typeparam>
+		/// <param name="file"></param>
+		/// <param name="method"></param>
+		/// <returns></returns>
+		public static T TryReadObject<T>(string file, FormattingMethod method = FormattingMethod.Unknown)
 		{
-			if (method == FormattingMethod.Unknown)
+			try
 			{
-				if (stream.CanRead && stream.CanSeek && stream.Length > 0)
+				if (!File.Exists(file)) return default(T);
+				using (FileStream str = File.OpenRead(file))
 				{
-					if (XmlFormatterBase.IsXmlStream(stream))
-						method = FormattingMethod.Xml;
-					else
-						method = FormattingMethod.Binary;
+					return Formatter.TryReadObject<T>(str, method);
 				}
-				else
-					method = defaultMethod;
 			}
-
-			if (method == FormattingMethod.Xml)
-				return new MetaFormat.XmlMetaFormatter(stream);
-			else
-				return new MetaFormat.BinaryMetaFormatter(stream);
+			catch (Exception)
+			{
+				return default(T);
+			}
+		}
+		/// <summary>
+		/// Reads an object of the specified Type from an existing data Stream, expecting that it might fail.
+		/// This method does not throw an Exception when the file does not exist or an expected
+		/// error occurred during the read operation. Instead, it will simply return null in these cases.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="stream"></param>
+		/// <param name="method"></param>
+		/// <returns></returns>
+		public static T TryReadObject<T>(Stream stream, FormattingMethod method = FormattingMethod.Unknown)
+		{
+			try
+			{
+				using (Formatter formatter = Formatter.Create(stream, method))
+				{
+					return formatter.ReadObject<T>();
+				}
+			}
+			catch (Exception)
+			{
+				return default(T);
+			}
+		}
+		/// <summary>
+		/// Reads an object of the specified Type from an existing data file. 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="file"></param>
+		/// <param name="method"></param>
+		/// <returns></returns>
+		public static T ReadObject<T>(string file, FormattingMethod method = FormattingMethod.Unknown)
+		{
+			using (FileStream str = File.OpenRead(file))
+			{
+				return Formatter.ReadObject<T>(str, method);
+			}
+		}
+		/// <summary>
+		/// Reads an object of the specified Type from an existing data Stream.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="stream"></param>
+		/// <param name="method"></param>
+		/// <returns></returns>
+		public static T ReadObject<T>(Stream stream, FormattingMethod method = FormattingMethod.Unknown)
+		{
+			using (Formatter formatter = Formatter.Create(stream, method))
+			{
+				return formatter.ReadObject<T>();
+			}
+		}
+		/// <summary>
+		/// Saves an object to the specified data file. If it already exists, the file will be overwritten.
+		/// Automatically creates the appropriate directory structure, if it doesn't exist yet.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="obj"></param>
+		/// <param name="file"></param>
+		/// <param name="method"></param>
+		public static void WriteObject<T>(T obj, string file, FormattingMethod method = FormattingMethod.Unknown)
+		{
+			string dirName = Path.GetDirectoryName(file);
+			if (!string.IsNullOrEmpty(dirName) && !Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
+			using (FileStream str = File.Open(file, FileMode.Create))
+			{
+				Formatter.WriteObject<T>(obj, str, method);
+			}
+		}
+		/// <summary>
+		/// Saves an object to the specified data stream.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="obj"></param>
+		/// <param name="stream"></param>
+		/// <param name="method"></param>
+		public static void WriteObject<T>(T obj, Stream stream, FormattingMethod method = FormattingMethod.Unknown)
+		{
+			using (Formatter formatter = Formatter.Create(stream, method))
+			{
+				formatter.WriteObject(obj);
+			}
 		}
 	}
 }

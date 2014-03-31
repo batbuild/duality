@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 
 using Duality.Cloning;
+using Duality.Properties;
+using Duality.Editor;
 
 namespace Duality.Resources
 {
@@ -15,6 +17,8 @@ namespace Duality.Resources
 	/// </summary>
 	[Serializable]
 	[ExplicitResourceReference()]
+	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryNone)]
+	[EditorHintImage(typeof(CoreRes), CoreResNames.ImagePrefab)]
 	public class Prefab : Resource
 	{
 		/// <summary>
@@ -161,7 +165,7 @@ namespace Duality.Resources
 				this.objTree.OnLoaded(true);
 			}
 		}
-		protected override void OnCopyTo(Resource r, Duality.Cloning.CloneProvider provider)
+		protected override void OnCopyTo(Resource r, CloneProvider provider)
 		{
 			base.OnCopyTo(r, provider);
 			Prefab c = r as Prefab;
@@ -175,7 +179,7 @@ namespace Duality.Resources
 	/// <seealso cref="Prefab"/>
 	/// <seealso cref="GameObject"/>
 	[Serializable]
-	public sealed class PrefabLink : Duality.Cloning.ICloneable
+	public sealed class PrefabLink : ICloneExplicit
 	{
 		[Serializable]
 		private struct VarMod
@@ -213,12 +217,11 @@ namespace Duality.Resources
 			}
 		}
 
-		private static CloneProvider changeListValueCloneProvider = null;
-
+		private static readonly CloneProvider changeListValueCloneProvider;
 		static PrefabLink()
 		{
 			changeListValueCloneProvider = new CloneProvider();
-			changeListValueCloneProvider.SetExplicitUnwrap(typeof(System.Collections.ICollection));
+			changeListValueCloneProvider.ExplicitUnwrap.Add(typeof(System.Collections.ICollection));
 		}
 
 
@@ -620,7 +623,7 @@ namespace Duality.Resources
 			return appliedLinks;
 		}
 
-		void Cloning.ICloneable.CopyDataTo(object targetObj, Cloning.CloneProvider provider)
+		void ICloneExplicit.CopyDataTo(object targetObj, CloneProvider provider)
 		{
 			PrefabLink castObj = targetObj as PrefabLink;
 

@@ -5,7 +5,7 @@ using System.Reflection;
 
 using Duality;
 
-namespace DualityEditor
+namespace Duality.Editor
 {
 	public class HelpStackChangedEventArgs : EventArgs
 	{
@@ -70,6 +70,27 @@ namespace DualityEditor
 			if (this.diffCat == ObjectSelection.Category.None) this.diffCat = changedCategoryFallback;
 			this.added = this.current - this.previous;
 			this.removed = this.previous - this.current;
+		}
+	}
+
+	public class HighlightObjectEventArgs : EventArgs
+	{
+		private	ObjectSelection	target;
+		private	HighlightMode	mode;
+
+		public ObjectSelection Target
+		{
+			get { return this.target; }
+		}
+		public HighlightMode Mode
+		{
+			get { return this.mode; }
+		}
+
+		public HighlightObjectEventArgs(ObjectSelection target, HighlightMode mode)
+		{
+			this.target = target;
+			this.mode = mode;
 		}
 	}
 

@@ -1,41 +1,63 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 
-using AdamsLair.PropertyGrid;
+using AdamsLair.WinForms;
 
 using OpenTK;
 
-using Duality;
-using Duality.ColorFormat;
+using Duality.Drawing;
 
-namespace DualityEditor.Controls.PropertyEditors
+
+namespace Duality.Editor.Controls.PropertyEditors
 {
 	public class DualityPropertyEditorProvider : IPropertyEditorProvider
 	{
 		public int IsResponsibleFor(Type baseType, ProviderContext context)
 		{
-			if (baseType == typeof(Vector2))		return PropertyGrid.EditorPriority_General;
-			else if (baseType == typeof(Vector3))	return PropertyGrid.EditorPriority_General;
-			else if (baseType == typeof(Vector4))	return PropertyGrid.EditorPriority_General;
-			else if (baseType == typeof(Rect))		return PropertyGrid.EditorPriority_General;
-			else if (baseType == typeof(Range))		return PropertyGrid.EditorPriority_General;
-
-			else if (typeof(IColorData).IsAssignableFrom(baseType))		return PropertyGrid.EditorPriority_General;
-
-			else return PropertyGrid.EditorPriority_None;
+			IEnumerable<Type> propertyEditorTypes = DualityEditorApp.GetAvailDualityEditorTypes(typeof(PropertyEditor));
+			if (propertyEditorTypes.Any())
+			{
+				int bestScore = PropertyGrid.EditorPriority_None;
+				foreach (Type editorType in propertyEditorTypes)
+				{
+					var assignment = editorType.GetCustomAttributes<PropertyEditorAssignmentAttribute>().FirstOrDefault();
+					if (assignment == null) continue;
+					int score = assignment.MatchToProperty(baseType, context);
+					if (score > bestScore)
+					{
+						bestScore = score;
+					}
+				}
+				return bestScore;
+			}
+			else
+			{
+				return PropertyGrid.EditorPriority_None;
+			}
 		}
 		public PropertyEditor CreateEditor(Type baseType, ProviderContext context)
 		{
-			PropertyEditor e = null;
+			IEnumerable<Type> propertyEditorTypes = DualityEditorApp.GetAvailDualityEditorTypes(typeof(PropertyEditor));
+			if (propertyEditorTypes.Any())
+			{
+				int bestScore = PropertyGrid.EditorPriority_None;
+				Type bestType = null;
+				foreach (Type editorType in propertyEditorTypes)
+				{
+					var assignment = editorType.GetCustomAttributes<PropertyEditorAssignmentAttribute>().FirstOrDefault();
+					if (assignment == null) continue;
+					int score = assignment.MatchToProperty(baseType, context);
+					if (score > bestScore)
+					{
+						bestScore = score;
+						bestType = editorType;
+					}
+				}
+				if (bestType != null) return bestType.CreateInstanceOf() as PropertyEditor;
+			}
 
-			if (baseType == typeof(Vector2))		e = new Vector2PropertyEditor();
-			else if (baseType == typeof(Vector3))	e = new Vector3PropertyEditor();
-			else if (baseType == typeof(Vector4))	e = new Vector4PropertyEditor();
-			else if (baseType == typeof(Rect))		e = new RectPropertyEditor();
-			else if (baseType == typeof(Range))		e = new RangePropertyEditor();
-
-			else if (typeof(IColorData).IsAssignableFrom(baseType))		e = new IColorDataPropertyEditor();
-
-			return e;
+			return null;
 		}
 	}
 }

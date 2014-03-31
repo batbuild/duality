@@ -1,4 +1,4 @@
-﻿namespace EditorBase.Modules
+﻿namespace Duality.Editor.Plugins.Base.Modules
 {
 	partial class ObjectSelector
 	{

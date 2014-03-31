@@ -7,8 +7,9 @@ using OpenTK;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Contacts;
 
-using Duality.EditorHints;
+using Duality.Editor;
 using Duality.Resources;
+using Duality.Properties;
 
 namespace Duality.Components.Physics
 {
@@ -17,6 +18,8 @@ namespace Duality.Components.Physics
 	/// </summary>
 	[Serializable]
 	[RequiredComponent(typeof(Transform))]
+	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryPhysics)]
+	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageRigidBody)]
 	public partial class RigidBody : Component, ICmpInitializable, ICmpUpdatable, ICmpEditorUpdatable
 	{
 		private struct ColEvent
@@ -59,6 +62,7 @@ namespace Duality.Components.Physics
 		private	List<ShapeInfo>	shapes		= null;
 		private	List<JointInfo>	joints		= null;
 
+		[NonSerialized]	private	float			lastScale		= 1.0f;
 		[NonSerialized]	private	InitState		bodyInitState	= InitState.Disposed;
 		[NonSerialized]	private	bool			schedUpdateBody	= false;
 		[NonSerialized]	private	bool			isUpdatingBody	= false;
@@ -108,7 +112,7 @@ namespace Duality.Components.Physics
 		/// <summary>
 		/// [GET / SET] The damping that is applied to the bodies velocity.
 		/// </summary>
-		[EditorHintRange(0.0f, 100.0f)]
+		[EditorHintRange(0.0f, 10000.0f, 0.0f, 10.0f)]
 		public float LinearDamping
 		{
 			get { return this.linearDamp; }
@@ -121,7 +125,7 @@ namespace Duality.Components.Physics
 		/// <summary>
 		/// [GET / SET] The damping that is applied to the bodies angular velocity.
 		/// </summary>
-		[EditorHintRange(0.0f, 100.0f)]
+		[EditorHintRange(0.0f, 10000.0f, 0.0f, 10.0f)]
 		public float AngularDamping
 		{
 			get { return this.angularDamp; }
@@ -198,7 +202,7 @@ namespace Duality.Components.Physics
 		/// [GET / SET] The bodies overall friction value. Usually a value between 0.0 and 1.0, but higher values can be used to indicate unusually strong friction.
 		/// </summary>
 		[EditorHintIncrement(0.05f)]
-		[EditorHintRange(0.0f, 10000.0f)]
+		[EditorHintRange(0.0f, 10000.0f, 0.0f, 1.0f)]
 		public float Friction
 		{
 			get { return this.shapes == null || this.shapes.Count == 0 ? 0.0f : this.shapes.Average(s => s.Friction); }
@@ -322,7 +326,7 @@ namespace Duality.Components.Physics
 		[EditorHintFlags(MemberFlags.Invisible)]
 		public IEnumerable<JointInfo> Joints
 		{
-		    get { return this.joints; }
+			get { return this.joints; }
 			set { this.SetJoints(value); }
 		}
 		/// <summary>
@@ -721,8 +725,8 @@ namespace Duality.Components.Physics
 					continue;
 
 				FarseerPhysics.Collision.AABB fAABBIntersect;
-				fAABBIntersect.LowerBound = Vector2.ComponentMax(fAABB.LowerBound, fsWorldAABB.LowerBound);
-				fAABBIntersect.UpperBound = Vector2.ComponentMin(fAABB.UpperBound, fsWorldAABB.UpperBound);
+				fAABBIntersect.LowerBound = Vector2.Max(fAABB.LowerBound, fsWorldAABB.LowerBound);
+				fAABBIntersect.UpperBound = Vector2.Min(fAABB.UpperBound, fsWorldAABB.UpperBound);
 
 				Vector2 fsWorldCoordStep = PhysicsConvert.ToPhysicalUnit(new Vector2(MathF.Max(s.AABB.W, 1.0f), MathF.Max(s.AABB.H, 1.0f)) * 0.05f);
 				Vector2 fsTemp = fAABBIntersect.LowerBound;
@@ -794,6 +798,7 @@ namespace Duality.Components.Physics
 			if (this.body == null) return;
 			this.isUpdatingBody = true;
 
+			this.lastScale = this.gameobj.Transform.Scale;
 			if (this.shapes != null)
 			{
 				foreach (ShapeInfo info in this.shapes) info.UpdateFixture();
@@ -831,9 +836,9 @@ namespace Duality.Components.Physics
 
 			// Manually generate OnSeparation events directy in-place, since 
 			// we won't receive next frames Farseer events anymore
-            ContactEdge edge = this.body.ContactList;
-            while (edge != null)
-            {
+			ContactEdge edge = this.body.ContactList;
+			while (edge != null)
+			{
 				if (edge.Contact != null && edge.Contact.IsTouching())
 				{
 					Fixture fixtureA = edge.Contact.FixtureA;
@@ -843,8 +848,8 @@ namespace Duality.Components.Physics
 					else if (fixtureB != null && fixtureB.Body != null && fixtureB.Body.UserData == this)
 						this.eventBuffer.Add(new ColEvent(ColEvent.EventType.Separation, fixtureB, fixtureA, null)); 
 				}
-                edge = edge.Next;
-            }
+				edge = edge.Next;
+			}
 
 			this.body.Dispose();
 			this.body = null;
@@ -942,11 +947,11 @@ namespace Duality.Components.Physics
 		{
 			this.eventBuffer.Add(new ColEvent(ColEvent.EventType.Separation, fixtureA, fixtureB, null));
 		}
-        private void body_PostSolve(Contact contact, ContactConstraint impulse)
-        {
-            int count = contact.Manifold.PointCount;
-            for (int i = 0; i < count; ++i)
-            {
+		private void body_PostSolve(Contact contact, ContactConstraint impulse)
+		{
+			int count = contact.Manifold.PointCount;
+			for (int i = 0; i < count; ++i)
+			{
 				if (impulse.Points[i].NormalImpulse != 0.0f || impulse.Points[i].TangentImpulse != 0.0f)
 				{
 					CollisionData colData = new CollisionData(this.body, impulse, i);
@@ -955,8 +960,8 @@ namespace Duality.Components.Physics
 					else
 						this.eventBuffer.Add(new ColEvent(ColEvent.EventType.PostSolve, contact.FixtureB, contact.FixtureA, colData));
 				}
-            }
-        }
+			}
+		}
 		private void ProcessCollisionEvents()
 		{
 			// Don't use foreach here in case someone decides to add something at the end while iterating..
@@ -989,27 +994,21 @@ namespace Duality.Components.Physics
 		
 		private void NotifyCollisionBegin(CollisionEventArgs args)
 		{
-			foreach (ICmpCollisionListener c in this.gameobj.GetComponents<ICmpCollisionListener>())
-			{
-				if (!(c as Component).Active) continue;
-				c.OnCollisionBegin(this, args);
-			}
+			this.gameobj.IterateComponents<ICmpCollisionListener>(
+				l => l.OnCollisionBegin(this, args), 
+				l => (l as Component).Active);
 		}
 		private void NotifyCollisionEnd(CollisionEventArgs args)
 		{
-			foreach (ICmpCollisionListener c in this.gameobj.GetComponents<ICmpCollisionListener>())
-			{
-				if (!(c as Component).Active) continue;
-				c.OnCollisionEnd(this, args);
-			}
+			this.gameobj.IterateComponents<ICmpCollisionListener>(
+				l => l.OnCollisionEnd(this, args), 
+				l => (l as Component).Active);
 		}
 		private void NotifyCollisionSolve(CollisionEventArgs args)
 		{
-			foreach (ICmpCollisionListener c in this.gameobj.GetComponents<ICmpCollisionListener>())
-			{
-				if (!(c as Component).Active) continue;
-				c.OnCollisionSolve(this, args);
-			}
+			this.gameobj.IterateComponents<ICmpCollisionListener>(
+				l => l.OnCollisionSolve(this, args), 
+				l => (l as Component).Active);
 		}
 
 		void ICmpUpdatable.OnUpdate()
@@ -1070,11 +1069,28 @@ namespace Duality.Components.Physics
 			Transform t = e.Component as Transform;
 
 			if ((e.Changes & Transform.DirtyFlags.Pos) != Transform.DirtyFlags.None)
-			    this.body.Position = PhysicsConvert.ToPhysicalUnit(t.Pos.Xy);
+				this.body.Position = PhysicsConvert.ToPhysicalUnit(t.Pos.Xy);
 			if ((e.Changes & Transform.DirtyFlags.Angle) != Transform.DirtyFlags.None)
-			    this.body.Rotation = t.Angle;
+				this.body.Rotation = t.Angle;
 			if ((e.Changes & Transform.DirtyFlags.Scale) != Transform.DirtyFlags.None)
-			    this.FlagBodyShape();
+			{
+				float scale = t.Scale;
+				if (scale == 0.0f || this.lastScale == 0.0f)
+				{
+					this.FlagBodyShape();
+				}
+				else
+				{
+					const float pixelLimit = 2;
+					float boundRadius = this.BoundRadius;
+					float upper = (boundRadius + pixelLimit) / boundRadius;
+					float lower = (boundRadius - pixelLimit) / boundRadius;
+					if (scale / this.lastScale >= upper || scale / this.lastScale <= lower)
+					{
+						this.FlagBodyShape();
+					}
+				}
+			}
 
 			if (e.Changes != Transform.DirtyFlags.None)
 				this.body.Awake = true;

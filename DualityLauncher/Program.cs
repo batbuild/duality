@@ -6,14 +6,13 @@ using System.Drawing;
 
 using Duality;
 using Duality.Resources;
-using Duality.Profiling;
 
 using OpenTK;
 using OpenTK.Input;
 using OpenTK.Graphics;
 using OpenTK.Platform.Windows;
 
-namespace DualityLauncher
+namespace Duality.Launcher
 {
 	public class DualityLauncher : GameWindow
 	{
@@ -141,11 +140,11 @@ namespace DualityLauncher
 				DualityApp.Keyboard.Source = new GameWindowKeyboardInputSource(launcherWindow.Keyboard);
 
 				// Load the starting Scene
-				Scene.Current = DualityApp.AppData.StartScene.Res;
+				Scene.SwitchTo(DualityApp.AppData.StartScene);
 
 				// Run the DualityApp
 				launcherWindow.CursorVisible = isDebugging || DualityApp.UserData.SystemCursorVisible;
-				launcherWindow.VSync = (isProfiling || isDebugging) ? VSyncMode.Off : VSyncMode.On; // Don't limit frame rate when debugging.
+				launcherWindow.VSync = (isProfiling || isDebugging || !DualityApp.UserData.VSync) ? VSyncMode.Off : VSyncMode.On;
 				launcherWindow.Run();
 
 				// Shut down the DualityApp
