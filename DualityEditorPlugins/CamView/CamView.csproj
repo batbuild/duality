@@ -42,7 +42,7 @@
     </Reference>
     <Reference Include="Aga.Controls, Version=1.7.0.1, Culture=neutral, PublicKeyToken=fcc90fbf924463a3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\TreeViewAdv.0.1.0.0\lib\net40\Aga.Controls.dll</HintPath>
+      <HintPath>..\..\packages\Aga.Controls.0.1.2\lib\net40\Aga.Controls.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
