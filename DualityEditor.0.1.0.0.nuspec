@@ -26,6 +26,13 @@
         <file src="DualityEditor\bin\Release\OpenTK.GLControl.xml" target="lib\net40\OpenTK.GLControl.xml" />
         <file src="DualityEditor\bin\Release\OpenTK.xml" target="lib\net40\OpenTK.xml" />        
         <file src="DualityEditor\bin\Release\WeifenLuo.WinFormsUI.Docking.dll" target="lib\net40\WeifenLuo.WinFormsUI.Docking.dll" />        
-        <file src="DualityEditor\bin\Release\Plugins\EditorBase.editor.dll" target="lib\net40\EditorBase.editor.dll" />        
+        <file src="DualityEditor\bin\Release\Plugins\EditorBase.editor.dll" target="lib\net40\EditorBase.editor.dll" />
+        <file src="DualityEditor\bin\Release\Plugins\CamView.editor.dll" target="lib\net40\CamView.editor.dll" />
+        <file src="DualityEditor\bin\Release\Plugins\Compatibility.core.dll" target="lib\net40\Compatibility.core.dll" />
+        <file src="DualityEditor\bin\Release\Plugins\HelpAdvisor.editor.dll" target="lib\net40\HelpAdvisor.editor.dll" />
+        <file src="DualityEditor\bin\Release\Plugins\LogView.editor.dll" target="lib\net40\LogView.editor.dll" />
+        <file src="DualityEditor\bin\Release\Plugins\ObjectInspector.editor.dll" target="lib\net40\ObjectInspector.editor.dll" />
+        <file src="DualityEditor\bin\Release\Plugins\ProjectView.editor.dll" target="lib\net40\ProjectView.editor.dll" />
+        <file src="DualityEditor\bin\Release\Plugins\SceneView.editor.dll" target="lib\net40\SceneView.editor.dll" />
     </files>
 </package>
