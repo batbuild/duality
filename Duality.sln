@@ -29,8 +29,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DualityDebuggingTest", "VisualStudio\DualityDebuggingTest\DualityDebuggingTest.csproj", "{7FA1C4E4-626E-476A-84A5-DEB9A7D83377}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compatibility", "DualityPlugins\Compatibility\Compatibility.csproj", "{FDA21F0F-1646-4E41-A1FC-1C3F05694CE4}"
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duality.Tests", "Duality.Tests\Duality.Tests.csproj", "{9A7492CF-9D22-4196-81FE-C6837E89E12C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duality.Tests", "Duality.Tests\Duality.Tests.csproj", "{9A7492CF-9D22-4196-81FE-C6837E89E12C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{25E5F85E-2B49-4959-A7F4-45E7C492F345}"
 EndProject
