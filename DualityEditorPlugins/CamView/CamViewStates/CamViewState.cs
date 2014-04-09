@@ -76,6 +76,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			{
 				get { return false; }
 			}
+			public virtual bool IsSubObject
+			{
+				get { return false; }
+			}
 			public virtual string DisplayObjectName
 			{
 				get { return this.ActualObject != null ? this.ActualObject.ToString() : "null"; }
@@ -106,7 +110,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			{
 				return this.ActualObject.GetHashCode();
 			}
-			public bool Equals(SelObj other)
+			public virtual bool Equals(SelObj other)
 			{
 				return this == other;
 			}
@@ -198,6 +202,32 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				var selObjPosition = selObj.Pos;
 				return MathF.PointLineDistance(mouseSpaceCoord.X, mouseSpaceCoord.Y, selObjPosition.X, selObjPosition.Y, selObjPosition.X, selObjPosition.Y - (ArrowLength/scale))
 					< (ArrowSelectionThreshold / scale);
+			}
+		}
+
+		public class VertexHandle
+		{
+			private const int GrabRectSize = 20;
+
+			public static void Draw(Canvas canvas, List<SelObj> transformObjSel, Vector3 position, float scale)
+			{
+				if (transformObjSel.Count != 1 || !(transformObjSel.First().ActualObject is GameObject))
+					return;
+
+				var screenGrabRectSize = GrabRectSize / scale;
+
+				canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Solid, new ColorRgba(175, 190, 253, 127)));
+				canvas.FillRect(position.X, position.Y - screenGrabRectSize, position.Z, screenGrabRectSize, screenGrabRectSize);
+
+				canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Solid, new ColorRgba(33, 75, 253, 127)));
+				canvas.DrawRect(position.X, position.Y - screenGrabRectSize, position.Z, screenGrabRectSize, screenGrabRectSize);
+			}
+
+			public static bool IsGrabRectSelected(SelObj selObj, float scale, Vector3 mouseSpaceCoord)
+			{
+				var selObjPosition = selObj.Pos;
+				var selectionRect = new Rect(selObjPosition.X, selObjPosition.Y - (GrabRectSize / scale), GrabRectSize / scale, GrabRectSize / scale);
+				return selectionRect.Contains(mouseSpaceCoord.Xy);
 			}
 		}
 
@@ -1115,8 +1145,12 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					MathF.Abs(mouseSpaceCoord.Y - this.selectionCenter.Y) * scale < boundaryThickness;
 				bool shift = (Control.ModifierKeys & Keys.Shift) != Keys.None;
 				bool ctrl = (Control.ModifierKeys & Keys.Control) != Keys.None;
+				bool ctrlShift = ctrl && shift;
 
 				bool anySelection = this.actionObjSel.Count > 0;
+				bool anyMouseoverSelection = mouseoverObject != null;
+				bool isSubObject = anyMouseoverSelection && mouseoverObject.IsSubObject;
+				bool alreadySelected = allObjSel.Contains(mouseoverObject);
 				bool canMove = this.actionObjSel.Any(s => s.IsActionAvailable(ObjectAction.Move));
 				bool canRotate = (canMove && this.actionObjSel.Count > 1) || this.actionObjSel.Any(s => s.IsActionAvailable(ObjectAction.Rotate));
 				bool canScale = (canMove && this.actionObjSel.Count > 1) || this.actionObjSel.Any(s => s.IsActionAvailable(ObjectAction.Scale));
@@ -1125,6 +1159,13 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				this.mouseoverSelect = false;
 				if (ctrl)
 					this.mouseoverAction = ObjectAction.RectSelect;
+				else if (isSubObject && shift)
+					this.mouseoverAction = ObjectAction.RectSelect;
+				else if (isSubObject && !alreadySelected)
+				{
+					this.mouseoverAction = ObjectAction.Move;
+					this.mouseoverSelect = true;
+				}
 				else if (anySelection && !tooSmall && mouseOverBoundary && mouseAtCenterAxis && this.selectionRadius > 0.0f && canScale)
 					this.mouseoverAction = ObjectAction.Scale;
 				else if (anySelection && !tooSmall && mouseOverBoundary && canRotate)
@@ -1133,7 +1174,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					this.mouseoverAction = ObjectAction.Move;
 				else if (shift) // Lower prio than Ctrl, because Shift also modifies mouse actions
 					this.mouseoverAction = ObjectAction.RectSelect;
-				else if (this.mouseoverObject != null && this.mouseoverObject.IsActionAvailable(ObjectAction.Move))
+				else if (anyMouseoverSelection && this.mouseoverObject.IsActionAvailable(ObjectAction.Move))
 				{
 					this.mouseoverAction = ObjectAction.Move; 
 					this.mouseoverSelect = true;
@@ -1277,7 +1318,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		}
 		protected Vector3 ApplyAxisLock(Vector3 baseVec, Vector3 lockedVec, Vector3 beginToTarget)
 		{
-			bool shift = (Control.ModifierKeys & Keys.Shift) != Keys.None;
+			bool shift = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
 			if (!shift)
 			{
 				this.actionLockedAxis = LockedAxis.None;

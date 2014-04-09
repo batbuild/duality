@@ -65,6 +65,96 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				return false;
 			}
 		}
+		
+		public class SelVertex : SelObj
+		{
+			private	PolyShapeInfo _shape;
+			private int _index;
+
+			private Vector2 Value
+			{
+				get { return _shape.Vertices[_index]; }
+				set
+				{
+					var verts = _shape.Vertices;
+					verts[_index] = value;
+					_shape.Vertices = verts;
+				}
+			}
+
+			public PolyShapeInfo Shape { get { return _shape; } }
+
+			public override object ActualObject
+			{
+				get { return _shape == null || _shape.Vertices == null || _shape.Vertices.Length < _index ? new Vector2() : Value; }
+			}
+
+			public override string DisplayObjectName
+			{
+				get { return Properties.CamViewRes.RigidBodyCamViewState_SelShapeName; }
+			}
+
+			public override bool IsSubObject
+			{
+				get { return true; }
+			}
+
+			public override bool HasTransform
+			{
+				get { return true; }
+			}
+
+			public override Vector3 Pos
+			{
+				get { return new Vector3(Value, 0) + _shape.Parent.GameObj.Transform.Pos; }
+				set { Value = value.Xy - _shape.Parent.GameObj.Transform.Pos.Xy; }
+			}
+
+			public override float BoundRadius
+			{
+				get { return 20; }
+			}
+
+			public SelVertex(PolyShapeInfo shape, int vertexIndex)
+			{
+				_shape = shape;
+				_index = vertexIndex;
+			}
+
+			public override bool Equals(object obj)
+			{
+
+				if (obj is SelObj)
+					return Equals(obj as SelObj);
+				else
+					return base.Equals(obj);
+			}
+
+			public override bool Equals(SelObj other)
+			{
+				if (other is SelVertex)
+					return this == (SelVertex)other;
+
+				return this == (SelObj)other;
+			}
+
+			public static bool operator ==(SelVertex first, SelVertex second)
+			{
+				if (object.ReferenceEquals(first, null))
+				{
+					if (object.ReferenceEquals(second, null)) return true;
+					else return false;
+				}
+				else if (object.ReferenceEquals(second, null))
+					return false;
+
+				return (first.ActualObject as Vector2?) == (second.ActualObject as Vector2?);
+			}
+			public static bool operator !=(SelVertex first, SelVertex second)
+			{
+				return !(first == second);
+			}
+		}
 
 		public abstract class SelShape : SelObj
 		{

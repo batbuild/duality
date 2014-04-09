@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 using Duality;
@@ -22,6 +23,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 {
 	public partial class RigidBodyEditorCamViewState : CamViewState
 	{
+		private const int VertexSize = 10;
+
 		public static readonly Cursor ArrowCreateCircle		= CursorHelper.CreateCursor(CamViewResCache.CursorArrowCreateCircle, 0, 0);
 		public static readonly Cursor ArrowCreatePolygon	= CursorHelper.CreateCursor(CamViewResCache.CursorArrowCreatePolygon, 0, 0);
 		public static readonly Cursor ArrowCreateEdge		= CursorHelper.CreateCursor(CamViewResCache.CursorArrowCreateEdge, 0, 0);
@@ -141,6 +144,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			RigidBody pickedCollider = null;
 			ShapeInfo pickedShape = null;
 
+			var pickedVertex = PickVertex(x, y);
+			if (pickedVertex != null)
+				return pickedVertex;
+
 			RigidBody[] visibleColliders = this.QueryVisibleColliders()
 				.Where(r => !DesignTimeObjectData.Get(r.GameObj).IsLocked)
 				.ToArray();
@@ -169,6 +176,45 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			return null;
 		}
+
+		private SelVertex PickVertex(int x, int y, int w = 0, int h = 0)
+		{
+			return PickVertices(x, y, w, h).FirstOrDefault();
+		}
+
+		private SelVertex[] PickVertices(int x, int y, int w = 0, int h = 0)
+		{
+			var result = new List<SelVertex>();
+			var shapes = this.allObjSel.OfType<SelPolyShape>();
+
+			foreach (var shape in shapes)
+			{
+				var polygon = shape.ActualObject as PolyShapeInfo;
+				if (polygon == null)
+					continue;
+
+				var transform = polygon.Parent.GameObj.Transform;
+				Vector3 worldCoord = this.GetSpaceCoord(new Vector3(x, y, transform.Pos.Z));
+				var scale = GetScaleAtZ(transform.Pos.Z);
+				var selectionRect = new Rect(worldCoord.X, worldCoord.Y, w/scale, h/scale);
+
+				float size = VertexSize/scale;
+
+				for (int i = 0; i < polygon.Vertices.Length; i++)
+				{
+					
+					var vertexPosition = transform.GetWorldPoint(polygon.Vertices[i]);
+					var vertexRect = new Rect(vertexPosition.X - size/2, vertexPosition.Y - size/2, size, size);
+					
+					if (selectionRect.Intersects(vertexRect))
+					{
+						result.Add(new SelVertex(polygon, i));
+					}
+				}
+			}
+			return result.ToArray();
+		}
+
 		public override List<CamViewState.SelObj> PickSelObjIn(int x, int y, int w, int h)
 		{
 			List<CamViewState.SelObj> result = new List<SelObj>();
@@ -207,6 +253,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				List<ShapeInfo> picked = this.PickShapes(pickedCollider, worldCoord.Xy, new Vector2(w / scale, h / scale));
 				if (picked.Count > 0) result.AddRange(picked.Select(s => SelShape.Create(s) as SelObj));
 			}
+
+			var pickedVertices = PickVertices(x, y, w, h);
+			result.AddRange(pickedVertices);
 
 			return result;
 		}
@@ -331,9 +380,24 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		{
 			base.SelectObjects(selObjEnum, mode);
 			if (!selObjEnum.Any()) return;
-			
+
+			if (selObjEnum.OfType<SelVertex>().Any())
+			{
+				var vertexQuery = selObjEnum.OfType<SelVertex>();
+				var distinctVertexQuery = vertexQuery.GroupBy(v => v.Shape.Parent).First(); // Assure there is only one collider active.
+				List<object> selected = new List<object>();
+				selected.AddRange(distinctVertexQuery);
+				var firstVertex = distinctVertexQuery.First();
+
+				// First, select the associated Collider
+				DualityEditorApp.Select(this, new ObjectSelection(firstVertex.Shape.Parent.GameObj), SelectMode.Set);
+				// Then, select actual Verticies
+				DualityEditorApp.Select(this, new ObjectSelection(selected), mode);
+				DualityEditorApp.Select(this, new ObjectSelection(new object[] { firstVertex.Shape }), SelectMode.Append);
+				
+			}
 			// Change shape selection
-			if (selObjEnum.OfType<SelShape>().Any())
+			else if (selObjEnum.OfType<SelShape>().Any())
 			{
 				var shapeQuery = selObjEnum.OfType<SelShape>();
 				var distinctShapeQuery = shapeQuery.GroupBy(s => s.Body).First(); // Assure there is only one collider active.
@@ -454,9 +518,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			Transform selTransform = selGameObj != null ? selGameObj.Transform : null;
 			if (selTransform == null) return;
 
+			var selPolyShapes = this.allObjSel.OfType<SelPolyShape>();
+			SelPolyShape selPolyShape = selPolyShapes.FirstOrDefault();
 			if (this.mouseState == CursorState.CreatePolygon)
 			{
-				SelPolyShape selPolyShape = this.allObjSel.OfType<SelPolyShape>().FirstOrDefault();
 				if (selPolyShape != null)
 				{
 					PolyShapeInfo polyShape = selPolyShape.ActualObject as PolyShapeInfo;
@@ -955,15 +1020,29 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			// Other selection changed
 			if ((e.AffectedCategories & ObjectSelection.Category.Other) != ObjectSelection.Category.None)
 			{
-				if (e.Current.OfType<ShapeInfo>().Any())
+				if (e.Current.OfType<SelVertex>().Any())
+				{
+					var shapes = e.Current.OfType<ShapeInfo>().Select(s => SelShape.Create(s) as SelObj).ToList();
+					var vertices = e.Current.OfType<SelVertex>().Cast<SelObj>().ToList();
+					this.actionObjSel = new List<SelObj>(vertices);
+					vertices.AddRange(shapes);
+					this.allObjSel = vertices;
+				}
+				else if (e.Current.OfType<ShapeInfo>().Any())
+				{
 					this.allObjSel = e.Current.OfType<ShapeInfo>().Select(s => SelShape.Create(s) as SelObj).ToList();
+					// Update (parent-free) action object selection
+					this.actionObjSel = this.allObjSel.ToList();
+				}
 				else
+				{
 					this.allObjSel = new List<SelObj>();
+					// Update (parent-free) action object selection
+					this.actionObjSel = this.allObjSel.ToList();
+				}
 
 				// Update indirect object selection
 				this.indirectObjSel.Clear();
-				// Update (parent-free) action object selection
-				this.actionObjSel = this.allObjSel.ToList();
 			}
 
 			this.InvalidateSelectionStats();

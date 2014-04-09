@@ -5,6 +5,7 @@ using System.Globalization;
 
 using Duality;
 using Duality.Drawing;
+using Duality.Editor.Plugins.CamView.CamViewStates;
 using Duality.Resources;
 using Duality.Components.Physics;
 using Duality.Editor;
@@ -71,6 +72,20 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 					return ColorRgba.Lerp(ColorRgba.Red, ColorRgba.VeryDarkGrey, 0.5f);
 			}
 		}
+		public ColorRgba VertexColor
+		{
+			get
+			{
+				var baseColor = new ColorRgba(175, 190, 253);
+				float fgLum = this.FgColor.GetLuminance();
+				if (fgLum > 0.5f)
+					return ColorRgba.Lerp(baseColor, ColorRgba.VeryLightGrey, 0.5f);
+				else
+					return ColorRgba.Lerp(baseColor, ColorRgba.VeryDarkGrey, 0.5f);
+			}
+		}
+
+		private const int VertexSize = 10;
 
 		protected internal override void OnCollectDrawcalls(Canvas canvas)
 		{
@@ -103,7 +118,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 				//	EdgeShapeInfo edge = s as EdgeShapeInfo;
 					LoopShapeInfo loop = s as LoopShapeInfo;
 
-					float shapeAlpha = colliderAlpha * (selectedBody == null || this.View.ActiveState.SelectedObjects.Any(sel => sel.ActualObject == s) ? 1.0f : 0.5f);
+					var shapeSelected = this.View.ActiveState.SelectedObjects.Any(sel => sel.ActualObject == s);
+					float shapeAlpha = colliderAlpha * (selectedBody == null || shapeSelected ? 1.0f : 0.5f);
 					float densityRelative = MathF.Abs(maxDensity - minDensity) < 0.01f ? 1.0f : s.Density / avgDensity;
 					ColorRgba clr = s.IsSensor ? this.ShapeSensorColor : this.ShapeColor;
 					ColorRgba fontClr = this.FgColor;
@@ -149,6 +165,22 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 						canvas.FillPolygon(polyVert, colliderPos.X, colliderPos.Y, colliderPos.Z);
 						canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Alpha, clr.WithAlpha(shapeAlpha)));
 						canvas.DrawPolygon(polyVert, colliderPos.X, colliderPos.Y, colliderPos.Z);
+
+						if (shapeSelected)
+						{
+							foreach (var vertex in poly.Vertices)
+							{
+								var vertexSelected = this.View.ActiveState.SelectedObjects.Any(v => (v.ActualObject as Vector2?) == vertex);
+								var vertexAlpha = colliderAlpha * (vertexSelected ? 1.0f : 0.5f);
+								var color = VertexColor.WithAlpha(vertexAlpha);
+								canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Alpha, color));
+								var z = colliderPos.Z;
+								var size = VertexSize / GetScaleAtZ(z);
+								var position = c.GameObj.Transform.GetWorldPoint(vertex);
+								canvas.FillRect(position.X - size / 2, position.Y - size / 2, z, size, size);
+								canvas.DrawRect(position.X - size / 2, position.Y - size / 2, z, size, size);
+							}
+						}
 					}
 					else if (loop != null)
 					{
