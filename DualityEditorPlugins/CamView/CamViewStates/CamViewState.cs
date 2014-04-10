@@ -1086,7 +1086,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				float scale = this.GetScaleAtZ(this.selectionCenter.Z);
 				const float boundaryThickness = 10.0f;
 
-				if (mouseoverObject == null && this.actionObjSel.Count == 1 && this.actionObjSel.First().ActualObject is GameObject && this.actionObjSel.First().HasTransform)
+				if (this.actionObjSel.Count == 1 && this.actionObjSel.First().ActualObject is GameObject && this.actionObjSel.First().HasTransform)
 				{
 					var selObjPosition = this.actionObjSel.First().Pos;
 
