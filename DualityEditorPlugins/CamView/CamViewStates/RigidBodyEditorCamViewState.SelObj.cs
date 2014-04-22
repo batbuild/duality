@@ -106,8 +106,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			public override Vector3 Pos
 			{
-				get { return new Vector3(Value, 0) * _shape.Parent.GameObj.Transform.Scale + _shape.Parent.GameObj.Transform.Pos; }
-				set { Value = value.Xy / _shape.Parent.GameObj.Transform.Scale - _shape.Parent.GameObj.Transform.Pos.Xy; }
+				get { return _shape.Parent.GameObj.Transform.GetWorldPoint(new Vector3(Value, 0)); }
+				set { Value = _shape.Parent.GameObj.Transform.GetLocalPoint(value).Xy; }
 			}
 
 			public override float BoundRadius
@@ -123,7 +123,6 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			public override bool Equals(object obj)
 			{
-
 				if (obj is SelObj)
 					return Equals(obj as SelObj);
 				else
