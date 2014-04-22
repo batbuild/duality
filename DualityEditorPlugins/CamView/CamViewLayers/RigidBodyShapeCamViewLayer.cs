@@ -4,6 +4,7 @@ using System.Linq;
 using System.Globalization;
 
 using Duality;
+using Duality.Components;
 using Duality.Drawing;
 using Duality.Editor.Plugins.CamView.CamViewStates;
 using Duality.Resources;
@@ -118,7 +119,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 				//	EdgeShapeInfo edge = s as EdgeShapeInfo;
 					LoopShapeInfo loop = s as LoopShapeInfo;
 
-					var shapeSelected = this.View.ActiveState.SelectedObjects.Any(sel => sel.ActualObject == s);
+					var shapeSelected = this.View != null && this.View.ActiveState != null && this.View.ActiveState.SelectedObjects != null &&
+					this.View.ActiveState.SelectedObjects.Any(sel => sel.ActualObject == s);
+
 					float shapeAlpha = colliderAlpha * (selectedBody == null || shapeSelected ? 1.0f : 0.5f);
 					float densityRelative = MathF.Abs(maxDensity - minDensity) < 0.01f ? 1.0f : s.Density / avgDensity;
 					ColorRgba clr = s.IsSensor ? this.ShapeSensorColor : this.ShapeColor;
@@ -148,7 +151,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 
 						center = circlePos;
 					}
-					else if (poly != null)
+					else if (poly != null && poly.Vertices != null)
 					{
 						Vector2[] polyVert = poly.Vertices.ToArray();
 						for (int i = 0; i < polyVert.Length; i++)
@@ -168,18 +171,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 
 						if (shapeSelected)
 						{
-							foreach (var vertex in poly.Vertices)
-							{
-								var vertexSelected = this.View.ActiveState.SelectedObjects.Any(v => (v.ActualObject as Vector2?) == vertex);
-								var vertexAlpha = colliderAlpha * (vertexSelected ? 1.0f : 0.5f);
-								var color = VertexColor.WithAlpha(vertexAlpha);
-								canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Alpha, color));
-								var z = colliderPos.Z;
-								var size = VertexSize / GetScaleAtZ(z);
-								var position = c.GameObj.Transform.GetWorldPoint(vertex);
-								canvas.FillRect(position.X - size / 2, position.Y - size / 2, z, size, size);
-								canvas.DrawRect(position.X - size / 2, position.Y - size / 2, z, size, size);
-							}
+							DrawVertexHandles(canvas, polyVert, colliderAlpha, c.GameObj.Transform);
 						}
 					}
 					else if (loop != null)
@@ -238,7 +230,23 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 				}
 			}
 		}
-		
+
+		private void DrawVertexHandles(Canvas canvas, Vector2[] polyVert, float colliderAlpha,Transform bodyTransform)
+		{
+			foreach (var vertex in polyVert)
+			{
+				var vertexSelected = this.View.ActiveState.SelectedObjects.Any(v => (v.ActualObject as Vector2?) == vertex);
+				var vertexAlpha = colliderAlpha*(vertexSelected ? 1.0f : 0.5f);
+				var color = VertexColor.WithAlpha(vertexAlpha);
+				canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Alpha, color));
+				var z = bodyTransform.Pos.Z;
+				var size = VertexSize/GetScaleAtZ(z);
+				var position = bodyTransform.GetWorldPoint(vertex);
+				canvas.FillRect(position.X - size/2, position.Y - size/2, z, size, size);
+				canvas.DrawRect(position.X - size/2, position.Y - size/2, z, size, size);
+			}
+		}
+
 		private void RetrieveResources()
 		{
 			if (!this.bigFont.IsAvailable)

@@ -886,7 +886,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.InvalidateSelectionStats();
 			this.Invalidate();
 		}
-		public void MoveSelectionTo(Vector3 target)
+		public void  MoveSelectionTo(Vector3 target)
 		{
 			this.MoveSelectionBy(target - this.selectionCenter);
 		}
@@ -1145,7 +1145,6 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					MathF.Abs(mouseSpaceCoord.Y - this.selectionCenter.Y) * scale < boundaryThickness;
 				bool shift = (Control.ModifierKeys & Keys.Shift) != Keys.None;
 				bool ctrl = (Control.ModifierKeys & Keys.Control) != Keys.None;
-				bool ctrlShift = ctrl && shift;
 
 				bool anySelection = this.actionObjSel.Count > 0;
 				bool anyMouseoverSelection = mouseoverObject != null;
