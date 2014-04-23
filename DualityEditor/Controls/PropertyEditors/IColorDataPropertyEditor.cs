@@ -4,8 +4,9 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-using AdamsLair.WinForms;
-using ButtonState = AdamsLair.WinForms.Renderer.ButtonState;
+using AdamsLair.WinForms.ColorControls;
+using AdamsLair.WinForms.PropertyEditing;
+using ButtonState = AdamsLair.WinForms.Drawing.ButtonState;
 
 using Duality;
 using Duality.Drawing;
@@ -100,6 +101,19 @@ namespace Duality.Editor.Controls.PropertyEditors
 					this.rectPanel.Y,
 					this.rectPanel.Width / 2,
 					this.rectPanel.Height);
+
+				ColorRgba rgba = this.value.ConvertTo<ColorRgba>();
+				Color textColor = rgba.GetLuminance() > 0.5f ? Color.Black : Color.White;
+				StringFormat format = StringFormat.GenericDefault;
+				format.Alignment = StringAlignment.Center;
+				format.LineAlignment = StringAlignment.Center;
+				format.Trimming = StringTrimming.EllipsisCharacter;
+				e.Graphics.DrawString(
+					string.Format("{0}, {1}, {2}, {3}", rgba.R, rgba.G, rgba.B, rgba.A),
+					this.ControlRenderer.DefaultFont,
+					new SolidBrush(Color.FromArgb(128, textColor)),
+					this.rectPanel,
+					format);
 			}
 			e.Graphics.DrawRectangle(SystemPens.ControlLightLight, 
 				this.rectPanel.X + 1,
