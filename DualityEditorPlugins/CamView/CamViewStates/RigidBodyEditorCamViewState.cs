@@ -185,6 +185,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		private SelVertex[] PickVertices(int x, int y, int w = 0, int h = 0)
 		{
 			var result = new List<SelVertex>();
+			if (this.allObjSel == null)
+				return result.ToArray();
 			var shapes = this.allObjSel.OfType<SelPolyShape>();
 
 			foreach (var shape in shapes)
@@ -194,6 +196,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					continue;
 
 				var transform = polygon.Parent.GameObj.Transform;
+				if (polygon.Parent == null || polygon.Parent.GameObj == null || polygon.Parent.GameObj.Transform == null)
+					continue;
+
 				Vector3 worldCoord = this.GetSpaceCoord(new Vector3(x, y, transform.Pos.Z));
 				var scale = GetScaleAtZ(transform.Pos.Z);
 				var selectionRect = new Rect(worldCoord.X, worldCoord.Y, w/scale, h/scale);

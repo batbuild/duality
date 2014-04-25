@@ -4,7 +4,7 @@ using System.Linq;
 using Duality;
 using Duality.Components;
 using Duality.Components.Physics;
-
+using Duality.Helpers;
 using OpenTK;
 
 namespace Duality.Editor.Plugins.CamView.CamViewStates
@@ -106,8 +106,22 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			public override Vector3 Pos
 			{
-				get { return _shape.Parent.GameObj.Transform.GetWorldPoint(new Vector3(Value, 0)); }
-				set { Value = _shape.Parent.GameObj.Transform.GetLocalPoint(value).Xy; }
+				get
+				{
+					Guard.NotNull(_shape, "A selected vertex has no Shape");
+					Guard.NotNull(_shape.Parent, "A selected vertex has no RigidBody");
+					Guard.NotNull(_shape.Parent.GameObj, "A selected vertex has no GameObject");
+					Guard.NotNull(_shape.Parent.GameObj.Transform, "A selected vertex has no Transform");
+					return _shape.Parent.GameObj.Transform.GetWorldPoint(new Vector3(Value, 0));
+				}
+				set
+				{
+					Guard.NotNull(_shape, "A selected vertex has no Shape");
+					Guard.NotNull(_shape.Parent, "A selected vertex has no RigidBody");
+					Guard.NotNull(_shape.Parent.GameObj, "A selected vertex has no GameObject");
+					Guard.NotNull(_shape.Parent.GameObj.Transform, "A selected vertex has no Transform");
+					Value = _shape.Parent.GameObj.Transform.GetLocalPoint(value).Xy;
+				}
 			}
 
 			public override float BoundRadius
@@ -117,6 +131,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			public SelVertex(PolyShapeInfo shape, int vertexIndex)
 			{
+				Guard.NotNull(shape, "A null shape was selected");
 				_shape = shape;
 				_index = vertexIndex;
 			}

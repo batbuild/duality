@@ -119,8 +119,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 				//	EdgeShapeInfo edge = s as EdgeShapeInfo;
 					LoopShapeInfo loop = s as LoopShapeInfo;
 
-					var shapeSelected = this.View != null && this.View.ActiveState != null && this.View.ActiveState.SelectedObjects != null &&
-					this.View.ActiveState.SelectedObjects.Any(sel => sel.ActualObject == s);
+					var shapeSelected = IsSelected(sel => sel.ActualObject == s);
 
 					float shapeAlpha = colliderAlpha * (selectedBody == null || shapeSelected ? 1.0f : 0.5f);
 					float densityRelative = MathF.Abs(maxDensity - minDensity) < 0.01f ? 1.0f : s.Density / avgDensity;
@@ -231,11 +230,23 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 			}
 		}
 
+		private bool IsSelected(Func<CamViewState.SelObj, bool> predicate)
+		{
+			if(this.View == null)
+				return false;
+			if(this.View.ActiveState == null)
+				return false;
+			if (this.View.ActiveState.SelectedObjects == null)
+				return false;
+			
+			return this.View.ActiveState.SelectedObjects.Any(predicate);
+		}
+
 		private void DrawVertexHandles(Canvas canvas, Vector2[] polyVert, float colliderAlpha,Transform bodyTransform)
 		{
 			foreach (var vertex in polyVert)
 			{
-				var vertexSelected = this.View.ActiveState.SelectedObjects.Any(v => (v.ActualObject as Vector2?) == vertex);
+				var vertexSelected = IsSelected(v => (v.ActualObject as Vector2?) == vertex);
 				var vertexAlpha = colliderAlpha*(vertexSelected ? 1.0f : 0.5f);
 				var color = VertexColor.WithAlpha(vertexAlpha);
 				canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Alpha, color));
