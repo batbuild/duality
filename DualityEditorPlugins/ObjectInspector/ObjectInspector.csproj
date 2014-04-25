@@ -37,8 +37,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AdamsLair.WinForms">
-      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.4\lib\net40\AdamsLair.WinForms.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.6\lib\net40\AdamsLair.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="PopupControl">
+      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.6\lib\net40\PopupControl.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />

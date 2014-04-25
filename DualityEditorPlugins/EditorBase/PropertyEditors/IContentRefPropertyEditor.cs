@@ -7,6 +7,8 @@ using System.Drawing.Drawing2D;
 
 using AdamsLair.WinForms.PropertyEditing;
 using AdamsLair.WinForms.Drawing;
+using Aga.Controls.Tree;
+using Duality.Editor.Plugins.Base.Modules;
 using ButtonState = AdamsLair.WinForms.Drawing.ButtonState;
 using BorderStyle = AdamsLair.WinForms.Drawing.BorderStyle;
 

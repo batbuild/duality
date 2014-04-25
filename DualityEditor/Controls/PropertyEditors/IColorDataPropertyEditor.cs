@@ -11,8 +11,6 @@ using ButtonState = AdamsLair.WinForms.Drawing.ButtonState;
 using Duality;
 using Duality.Drawing;
 
-using Duality.Editor.Forms;
-
 namespace Duality.Editor.Controls.PropertyEditors
 {
 	[PropertyEditorAssignment(typeof(IColorData))]
@@ -110,7 +108,7 @@ namespace Duality.Editor.Controls.PropertyEditors
 				format.Trimming = StringTrimming.EllipsisCharacter;
 				e.Graphics.DrawString(
 					string.Format("{0}, {1}, {2}, {3}", rgba.R, rgba.G, rgba.B, rgba.A),
-					this.ControlRenderer.DefaultFont,
+					this.ControlRenderer.FontRegular,
 					new SolidBrush(Color.FromArgb(128, textColor)),
 					this.rectPanel,
 					format);
