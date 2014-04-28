@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 using Duality;
@@ -144,7 +143,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			RigidBody pickedCollider = null;
 			ShapeInfo pickedShape = null;
 
-			var pickedVertex = PickVertex(x, y);
+			SelVertex pickedVertex = PickVertex(x, y);
 			if (pickedVertex != null)
 				return pickedVertex;
 
@@ -184,32 +183,32 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 		private SelVertex[] PickVertices(int x, int y, int w = 0, int h = 0)
 		{
-			var result = new List<SelVertex>();
+			List<SelVertex> result = new List<SelVertex>();
 			if (this.allObjSel == null)
 				return result.ToArray();
-			var shapes = this.allObjSel.OfType<SelPolyShape>();
+			IEnumerable<SelPolyShape> shapes = this.allObjSel.OfType<SelPolyShape>();
 
-			foreach (var shape in shapes)
+			foreach (SelPolyShape shape in shapes)
 			{
-				var polygon = shape.ActualObject as PolyShapeInfo;
+				PolyShapeInfo polygon = shape.ActualObject as PolyShapeInfo;
 				if (polygon == null)
 					continue;
 
-				var transform = polygon.Parent.GameObj.Transform;
+				Transform transform = polygon.Parent.GameObj.Transform;
 				if (polygon.Parent == null || polygon.Parent.GameObj == null || polygon.Parent.GameObj.Transform == null)
 					continue;
 
 				Vector3 worldCoord = this.GetSpaceCoord(new Vector3(x, y, transform.Pos.Z));
-				var scale = GetScaleAtZ(transform.Pos.Z);
-				var selectionRect = new Rect(worldCoord.X, worldCoord.Y, w/scale, h/scale);
+				float scale = GetScaleAtZ(transform.Pos.Z);
+				Rect selectionRect = new Rect(worldCoord.X, worldCoord.Y, w/scale, h/scale);
 
 				float size = VertexSize/scale;
 
 				for (int i = 0; i < polygon.Vertices.Length; i++)
 				{
 					
-					var vertexPosition = transform.GetWorldPoint(polygon.Vertices[i]);
-					var vertexRect = new Rect(vertexPosition.X - size/2, vertexPosition.Y - size/2, size, size);
+					Vector2 vertexPosition = transform.GetWorldPoint(polygon.Vertices[i]);
+					Rect vertexRect = new Rect(vertexPosition.X - size/2, vertexPosition.Y - size/2, size, size);
 					
 					if (selectionRect.Intersects(vertexRect))
 					{
@@ -388,11 +387,11 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			if (selObjEnum.OfType<SelVertex>().Any())
 			{
-				var vertexQuery = selObjEnum.OfType<SelVertex>();
-				var distinctVertexQuery = vertexQuery.GroupBy(v => v.Shape.Parent).First(); // Assure there is only one collider active.
+				IEnumerable<SelVertex> vertexQuery = selObjEnum.OfType<SelVertex>();
+				IEnumerable<SelVertex> distinctVertexQuery = vertexQuery.GroupBy(v => v.Shape.Parent).First(); // Assure there is only one collider active.
 				List<object> selected = new List<object>();
 				selected.AddRange(distinctVertexQuery);
-				var firstVertex = distinctVertexQuery.First();
+				SelVertex firstVertex = distinctVertexQuery.First();
 
 				// First, select the associated Collider
 				DualityEditorApp.Select(this, new ObjectSelection(firstVertex.Shape.Parent.GameObj), SelectMode.Set);
@@ -523,10 +522,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			Transform selTransform = selGameObj != null ? selGameObj.Transform : null;
 			if (selTransform == null) return;
 
-			var selPolyShapes = this.allObjSel.OfType<SelPolyShape>();
-			SelPolyShape selPolyShape = selPolyShapes.FirstOrDefault();
 			if (this.mouseState == CursorState.CreatePolygon)
 			{
+				SelPolyShape selPolyShape = this.allObjSel.OfType<SelPolyShape>().FirstOrDefault();
 				if (selPolyShape != null)
 				{
 					PolyShapeInfo polyShape = selPolyShape.ActualObject as PolyShapeInfo;
@@ -1027,8 +1025,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			{
 				if (e.Current.OfType<SelVertex>().Any())
 				{
-					var shapes = e.Current.OfType<ShapeInfo>().Select(s => SelShape.Create(s) as SelObj).ToList();
-					var vertices = e.Current.OfType<SelVertex>().Cast<SelObj>().ToList();
+					List<SelObj> shapes = e.Current.OfType<ShapeInfo>().Select(s => SelShape.Create(s) as SelObj).ToList();
+					List<SelObj> vertices = e.Current.OfType<SelVertex>().Cast<SelObj>().ToList();
 					this.actionObjSel = new List<SelObj>(vertices);
 					vertices.AddRange(shapes);
 					this.allObjSel = vertices;

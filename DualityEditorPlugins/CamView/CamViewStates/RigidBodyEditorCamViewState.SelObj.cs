@@ -68,25 +68,25 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		
 		public class SelVertex : SelObj
 		{
-			private	PolyShapeInfo _shape;
-			private int _index;
+			private	PolyShapeInfo shape;
+			private int index;
 
 			private Vector2 Value
 			{
-				get { return _shape.Vertices[_index]; }
+				get { return this.shape.Vertices[this.index]; }
 				set
 				{
-					var verts = _shape.Vertices;
-					verts[_index] = value;
-					_shape.Vertices = verts;
+					Vector2[] verts = this.shape.Vertices;
+					verts[this.index] = value;
+					this.shape.Vertices = verts;
 				}
 			}
 
-			public PolyShapeInfo Shape { get { return _shape; } }
+			public PolyShapeInfo Shape { get { return this.shape; } }
 
 			public override object ActualObject
 			{
-				get { return _shape == null || _shape.Vertices == null || _shape.Vertices.Length < _index ? new Vector2() : Value; }
+				get { return this.shape == null || this.shape.Vertices == null || this.shape.Vertices.Length < this.index ? new Vector2() : this.Value; }
 			}
 
 			public override string DisplayObjectName
@@ -108,19 +108,19 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			{
 				get
 				{
-					Guard.NotNull(_shape, "A selected vertex has no Shape");
-					Guard.NotNull(_shape.Parent, "A selected vertex has no RigidBody");
-					Guard.NotNull(_shape.Parent.GameObj, "A selected vertex has no GameObject");
-					Guard.NotNull(_shape.Parent.GameObj.Transform, "A selected vertex has no Transform");
-					return _shape.Parent.GameObj.Transform.GetWorldPoint(new Vector3(Value, 0));
+					Guard.NotNull(this.shape, "A selected vertex has no Shape");
+					Guard.NotNull(this.shape.Parent, "A selected vertex has no RigidBody");
+					Guard.NotNull(this.shape.Parent.GameObj, "A selected vertex has no GameObject");
+					Guard.NotNull(this.shape.Parent.GameObj.Transform, "A selected vertex has no Transform");
+					return this.shape.Parent.GameObj.Transform.GetWorldPoint(new Vector3(Value, 0));
 				}
 				set
 				{
-					Guard.NotNull(_shape, "A selected vertex has no Shape");
-					Guard.NotNull(_shape.Parent, "A selected vertex has no RigidBody");
-					Guard.NotNull(_shape.Parent.GameObj, "A selected vertex has no GameObject");
-					Guard.NotNull(_shape.Parent.GameObj.Transform, "A selected vertex has no Transform");
-					Value = _shape.Parent.GameObj.Transform.GetLocalPoint(value).Xy;
+					Guard.NotNull(this.shape, "A selected vertex has no Shape");
+					Guard.NotNull(this.shape.Parent, "A selected vertex has no RigidBody");
+					Guard.NotNull(this.shape.Parent.GameObj, "A selected vertex has no GameObject");
+					Guard.NotNull(this.shape.Parent.GameObj.Transform, "A selected vertex has no Transform");
+					this.Value = this.shape.Parent.GameObj.Transform.GetLocalPoint(value).Xy;
 				}
 			}
 
@@ -132,8 +132,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			public SelVertex(PolyShapeInfo shape, int vertexIndex)
 			{
 				Guard.NotNull(shape, "A null shape was selected");
-				_shape = shape;
-				_index = vertexIndex;
+				this.shape = shape;
+				this.index = vertexIndex;
 			}
 
 			public override bool Equals(object obj)

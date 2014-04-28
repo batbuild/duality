@@ -205,33 +205,6 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			}
 		}
 
-		public class VertexHandle
-		{
-			private const int GrabRectSize = 20;
-
-			public static void Draw(Canvas canvas, List<SelObj> transformObjSel, Vector3 position, float scale)
-			{
-				if (transformObjSel.Count != 1 || !(transformObjSel.First().ActualObject is GameObject))
-					return;
-
-				var screenGrabRectSize = GrabRectSize / scale;
-
-				canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Solid, new ColorRgba(175, 190, 253, 127)));
-				canvas.FillRect(position.X, position.Y - screenGrabRectSize, position.Z, screenGrabRectSize, screenGrabRectSize);
-
-				canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Solid, new ColorRgba(33, 75, 253, 127)));
-				canvas.DrawRect(position.X, position.Y - screenGrabRectSize, position.Z, screenGrabRectSize, screenGrabRectSize);
-			}
-
-			public static bool IsGrabRectSelected(SelObj selObj, float scale, Vector3 mouseSpaceCoord)
-			{
-				var selObjPosition = selObj.Pos;
-				var selectionRect = new Rect(selObjPosition.X, selObjPosition.Y - (GrabRectSize / scale), GrabRectSize / scale, GrabRectSize / scale);
-				return selectionRect.Contains(mouseSpaceCoord.Xy);
-			}
-		}
-
-
 		private static readonly ContentRef<Duality.Resources.Font> OverlayFont = Duality.Resources.Font.GenericMonospace8;
 
 		private Vector3			camVel					= Vector3.Zero;
@@ -886,7 +859,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.InvalidateSelectionStats();
 			this.Invalidate();
 		}
-		public void  MoveSelectionTo(Vector3 target)
+		public void MoveSelectionTo(Vector3 target)
 		{
 			this.MoveSelectionBy(target - this.selectionCenter);
 		}
@@ -1317,7 +1290,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		}
 		protected Vector3 ApplyAxisLock(Vector3 baseVec, Vector3 lockedVec, Vector3 beginToTarget)
 		{
-			bool shift = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
+			bool shift = (Control.ModifierKeys & Keys.Shift) != Keys.None;
 			if (!shift)
 			{
 				this.actionLockedAxis = LockedAxis.None;

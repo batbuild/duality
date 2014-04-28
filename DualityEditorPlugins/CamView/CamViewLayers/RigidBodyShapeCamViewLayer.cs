@@ -20,6 +20,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 	public class RigidBodyShapeCamViewLayer : CamViewLayer
 	{
 		private	ContentRef<Font>	bigFont	= new ContentRef<Font>(null, "__editor__bigfont__");
+		private const int VertexSize = 10;
 
 		public override string LayerName
 		{
@@ -77,7 +78,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 		{
 			get
 			{
-				var baseColor = new ColorRgba(175, 190, 253);
+				ColorRgba baseColor = new ColorRgba(175, 190, 253);
 				float fgLum = this.FgColor.GetLuminance();
 				if (fgLum > 0.5f)
 					return ColorRgba.Lerp(baseColor, ColorRgba.VeryLightGrey, 0.5f);
@@ -85,8 +86,6 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 					return ColorRgba.Lerp(baseColor, ColorRgba.VeryDarkGrey, 0.5f);
 			}
 		}
-
-		private const int VertexSize = 10;
 
 		protected internal override void OnCollectDrawcalls(Canvas canvas)
 		{
@@ -119,7 +118,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 				//	EdgeShapeInfo edge = s as EdgeShapeInfo;
 					LoopShapeInfo loop = s as LoopShapeInfo;
 
-					var shapeSelected = IsSelected(sel => sel.ActualObject == s);
+					bool shapeSelected = IsSelected(sel => sel.ActualObject == s);
 
 					float shapeAlpha = colliderAlpha * (selectedBody == null || shapeSelected ? 1.0f : 0.5f);
 					float densityRelative = MathF.Abs(maxDensity - minDensity) < 0.01f ? 1.0f : s.Density / avgDensity;
@@ -244,15 +243,15 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 
 		private void DrawVertexHandles(Canvas canvas, Vector2[] polyVert, float colliderAlpha,Transform bodyTransform)
 		{
-			foreach (var vertex in polyVert)
+			foreach (Vector2 vertex in polyVert)
 			{
-				var vertexSelected = IsSelected(v => (v.ActualObject as Vector2?) == vertex);
-				var vertexAlpha = colliderAlpha*(vertexSelected ? 1.0f : 0.5f);
-				var color = VertexColor.WithAlpha(vertexAlpha);
+				bool vertexSelected = IsSelected(v => (v.ActualObject as Vector2?) == vertex);
+				float vertexAlpha = colliderAlpha*(vertexSelected ? 1.0f : 0.5f);
+				ColorRgba color = this.VertexColor.WithAlpha(vertexAlpha);
 				canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Alpha, color));
-				var z = bodyTransform.Pos.Z;
-				var size = VertexSize/GetScaleAtZ(z);
-				var position = bodyTransform.GetWorldPoint(vertex);
+				float z = bodyTransform.Pos.Z;
+				float size = VertexSize/GetScaleAtZ(z);
+				Vector2 position = bodyTransform.GetWorldPoint(vertex);
 				canvas.FillRect(position.X - size/2, position.Y - size/2, z, size, size);
 				canvas.DrawRect(position.X - size/2, position.Y - size/2, z, size, size);
 			}
