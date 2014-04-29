@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime;
 using System.Windows.Forms;
 using System.Threading;
 using System.Globalization;
@@ -15,6 +16,9 @@ namespace Duality.Editor
 		[STAThread]
 		private static void Main(string[] args)
 		{
+			ProfileOptimization.SetProfileRoot(Environment.CurrentDirectory);
+			ProfileOptimization.StartProfile("DualityStartup.profile");
+			
 			bool recover = false;
 			foreach (string a in args)
 			{
