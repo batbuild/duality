@@ -76,6 +76,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			{
 				get { return false; }
 			}
+			public virtual bool IsSubObject
+			{
+				get { return false; }
+			}
 			public virtual string DisplayObjectName
 			{
 				get { return this.ActualObject != null ? this.ActualObject.ToString() : "null"; }
@@ -106,7 +110,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			{
 				return this.ActualObject.GetHashCode();
 			}
-			public bool Equals(SelObj other)
+			public virtual bool Equals(SelObj other)
 			{
 				return this == other;
 			}
@@ -200,7 +204,6 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					< (ArrowSelectionThreshold / scale);
 			}
 		}
-
 
 		private static readonly ContentRef<Duality.Resources.Font> OverlayFont = Duality.Resources.Font.GenericMonospace8;
 
@@ -1117,6 +1120,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				bool ctrl = (Control.ModifierKeys & Keys.Control) != Keys.None;
 
 				bool anySelection = this.actionObjSel.Count > 0;
+				bool anyMouseoverSelection = mouseoverObject != null;
+				bool isSubObject = anyMouseoverSelection && mouseoverObject.IsSubObject;
+				bool alreadySelected = allObjSel.Contains(mouseoverObject);
 				bool canMove = this.actionObjSel.Any(s => s.IsActionAvailable(ObjectAction.Move));
 				bool canRotate = (canMove && this.actionObjSel.Count > 1) || this.actionObjSel.Any(s => s.IsActionAvailable(ObjectAction.Rotate));
 				bool canScale = (canMove && this.actionObjSel.Count > 1) || this.actionObjSel.Any(s => s.IsActionAvailable(ObjectAction.Scale));
@@ -1125,6 +1131,13 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				this.mouseoverSelect = false;
 				if (ctrl)
 					this.mouseoverAction = ObjectAction.RectSelect;
+				else if (isSubObject && shift)
+					this.mouseoverAction = ObjectAction.RectSelect;
+				else if (isSubObject && !alreadySelected)
+				{
+					this.mouseoverAction = ObjectAction.Move;
+					this.mouseoverSelect = true;
+				}
 				else if (anySelection && !tooSmall && mouseOverBoundary && mouseAtCenterAxis && this.selectionRadius > 0.0f && canScale)
 					this.mouseoverAction = ObjectAction.Scale;
 				else if (anySelection && !tooSmall && mouseOverBoundary && canRotate)
@@ -1133,7 +1146,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					this.mouseoverAction = ObjectAction.Move;
 				else if (shift) // Lower prio than Ctrl, because Shift also modifies mouse actions
 					this.mouseoverAction = ObjectAction.RectSelect;
-				else if (this.mouseoverObject != null && this.mouseoverObject.IsActionAvailable(ObjectAction.Move))
+				else if (anyMouseoverSelection && this.mouseoverObject.IsActionAvailable(ObjectAction.Move))
 				{
 					this.mouseoverAction = ObjectAction.Move; 
 					this.mouseoverSelect = true;

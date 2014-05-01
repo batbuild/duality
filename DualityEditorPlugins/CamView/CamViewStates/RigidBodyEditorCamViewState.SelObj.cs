@@ -4,7 +4,7 @@ using System.Linq;
 using Duality;
 using Duality.Components;
 using Duality.Components.Physics;
-
+using Duality.Helpers;
 using OpenTK;
 
 namespace Duality.Editor.Plugins.CamView.CamViewStates
@@ -63,6 +63,110 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			public override bool IsActionAvailable(ObjectAction action)
 			{
 				return false;
+			}
+		}
+		
+		public class SelVertex : SelObj
+		{
+			private	PolyShapeInfo shape;
+			private int index;
+
+			private Vector2 Value
+			{
+				get { return this.shape.Vertices[this.index]; }
+				set
+				{
+					Vector2[] verts = this.shape.Vertices;
+					verts[this.index] = value;
+					this.shape.Vertices = verts;
+				}
+			}
+
+			public PolyShapeInfo Shape { get { return this.shape; } }
+
+			public override object ActualObject
+			{
+				get { return this.shape == null || this.shape.Vertices == null || this.shape.Vertices.Length < this.index ? new Vector2() : this.Value; }
+			}
+
+			public override string DisplayObjectName
+			{
+				get { return Properties.CamViewRes.RigidBodyCamViewState_SelShapeName; }
+			}
+
+			public override bool IsSubObject
+			{
+				get { return true; }
+			}
+
+			public override bool HasTransform
+			{
+				get { return true; }
+			}
+
+			public override Vector3 Pos
+			{
+				get
+				{
+					Guard.NotNull(this.shape, "A selected vertex has no Shape");
+					Guard.NotNull(this.shape.Parent, "A selected vertex has no RigidBody");
+					Guard.NotNull(this.shape.Parent.GameObj, "A selected vertex has no GameObject");
+					Guard.NotNull(this.shape.Parent.GameObj.Transform, "A selected vertex has no Transform");
+					return this.shape.Parent.GameObj.Transform.GetWorldPoint(new Vector3(Value, 0));
+				}
+				set
+				{
+					Guard.NotNull(this.shape, "A selected vertex has no Shape");
+					Guard.NotNull(this.shape.Parent, "A selected vertex has no RigidBody");
+					Guard.NotNull(this.shape.Parent.GameObj, "A selected vertex has no GameObject");
+					Guard.NotNull(this.shape.Parent.GameObj.Transform, "A selected vertex has no Transform");
+					this.Value = this.shape.Parent.GameObj.Transform.GetLocalPoint(value).Xy;
+				}
+			}
+
+			public override float BoundRadius
+			{
+				get { return 20; }
+			}
+
+			public SelVertex(PolyShapeInfo shape, int vertexIndex)
+			{
+				Guard.NotNull(shape, "A null shape was selected");
+				this.shape = shape;
+				this.index = vertexIndex;
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (obj is SelObj)
+					return Equals(obj as SelObj);
+				else
+					return base.Equals(obj);
+			}
+
+			public override bool Equals(SelObj other)
+			{
+				if (other is SelVertex)
+					return this == (SelVertex)other;
+
+				return this == (SelObj)other;
+			}
+
+			public static bool operator ==(SelVertex first, SelVertex second)
+			{
+				if (object.ReferenceEquals(first, null))
+				{
+					if (object.ReferenceEquals(second, null)) return true;
+					else return false;
+				}
+				else if (object.ReferenceEquals(second, null))
+					return false;
+
+				return (first.ActualObject as Vector2?) == (second.ActualObject as Vector2?);
+			}
+			public static bool operator !=(SelVertex first, SelVertex second)
+			{
+				return !(first == second);
 			}
 		}
 
