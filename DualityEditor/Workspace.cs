@@ -58,15 +58,17 @@ namespace Duality.Editor
 
 		public void LoadLayout(byte[] layoutData)
 		{
-			MemoryStream dockPanelDataStream = new MemoryStream(layoutData);
-			try
+			using (MemoryStream dockPanelDataStream = new MemoryStream(layoutData))
 			{
-				CloseOpenDockWindows();
-				this.mainDockPanel.LoadFromXml(dockPanelDataStream, DeserializeDockContent);
-			}
-			catch (XmlException e)
-			{
-				Log.Editor.WriteError("Cannot load DockPanel data due to malformed or non-existent Xml: {0}", Log.Exception(e));
+				try
+				{
+					CloseOpenDockWindows();
+					this.mainDockPanel.LoadFromXml(dockPanelDataStream, DeserializeDockContent);
+				}
+				catch (XmlException e)
+				{
+					Log.Editor.WriteError("Cannot load DockPanel data due to malformed or non-existent Xml: {0}", Log.Exception(e));
+				}
 			}
 		}
 
