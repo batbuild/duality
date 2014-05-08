@@ -140,12 +140,14 @@ namespace Duality.Editor.Plugins.CamView
 		private	CamViewState		activeState		= null;
 		private	List<CamViewLayer>	activeLayers	= null;
 		private	List<Type>			lockedLayers	= new List<Type>();
-		private	ColorPickerDialog	bgColorDialog	= new ColorPickerDialog { BackColor = Color.FromArgb(212, 212, 212) };
+		private	ColorPickerDialog	bgColorDialog	= null;
 		private	GameObject			nativeCamObj	= null;
 		private	string				loadTempState	= null;
 		private	string				loadTempPerspective	= null;
 		private	InputEventMessageRedirector	waitForInputFilter	= null;
 		private	ToolStripItem		activeToolItem	= null;
+		private Color				oldColorDialogColor;
+		private Color				selectedColorDialogColor;
 
 		private	Dictionary<Type,CamViewLayer>	availLayers	= new Dictionary<Type,CamViewLayer>();
 		private	Dictionary<Type,CamViewState>	availStates	= new Dictionary<Type,CamViewState>();
@@ -227,9 +229,8 @@ namespace Duality.Editor.Plugins.CamView
 		{
 			this.InitializeComponent();
 			this.loadTempState = initStateTypeName;
-			this.bgColorDialog.OldColor = Color.FromArgb(64, 64, 64);
-			this.bgColorDialog.SelectedColor = this.bgColorDialog.OldColor;
-			this.bgColorDialog.AlphaEnabled = false;
+			this.oldColorDialogColor = Color.FromArgb(64, 64, 64);
+			this.selectedColorDialogColor = this.oldColorDialogColor;
 			this.Text = Properties.CamViewRes.MenuItemName_CamView + " #" + runtimeId;
 			this.runtimeId = runtimeId;
 			this.toolbarCamera.Renderer = new Duality.Editor.Controls.ToolStrip.DualitorToolStripProfessionalRenderer();
@@ -301,7 +302,7 @@ namespace Duality.Editor.Plugins.CamView
 
 			// Update Camera values according to GUI (which carries loaded or default settings)
 			this.focusDist_ValueChanged(this.focusDist, null);
-			this.bgColorDialog_ValueChanged(this.bgColorDialog, null);
+			SetCamCompClearColor(this.selectedColorDialogColor);
 			if (this.loadTempPerspective != null)
 			{
 				foreach (var item in this.perspectiveDropDown.DropDownItems.OfType<ToolStripMenuItem>())
@@ -606,8 +607,8 @@ namespace Duality.Editor.Plugins.CamView
 				this.focusDist.Value = Math.Abs(tryParseDecimal);
 			if (int.TryParse(node.GetAttributeValue("bgColorArgb"), out tryParseInt))
 			{
-				this.bgColorDialog.OldColor = Color.FromArgb(tryParseInt);
-				this.bgColorDialog.SelectedColor = this.bgColorDialog.OldColor;
+				this.oldColorDialogColor = Color.FromArgb(tryParseInt);
+				this.selectedColorDialogColor = this.oldColorDialogColor;
 			}
 
 			this.loadTempPerspective = node.GetAttributeValue("perspective");
@@ -892,6 +893,17 @@ namespace Duality.Editor.Plugins.CamView
 		}
 		private void showBgColorDialog_Click(object sender, EventArgs e)
 		{
+			if (this.bgColorDialog == null)
+			{
+				this.bgColorDialog = new ColorPickerDialog
+				{
+					BackColor = Color.FromArgb(212, 212, 212),
+					OldColor = this.oldColorDialogColor,
+					SelectedColor = this.oldColorDialogColor,
+					AlphaEnabled = false
+				};
+			}
+
 			this.bgColorDialog.OldColor = Color.FromArgb(
 				255,
 				this.camComp.ClearColor.R,
@@ -916,14 +928,20 @@ namespace Duality.Editor.Plugins.CamView
 			}
 			else
 			{
-				this.camComp.ClearColor = new ColorRgba(
-					this.bgColorDialog.SelectedColor.R,
-					this.bgColorDialog.SelectedColor.G,
-					this.bgColorDialog.SelectedColor.B,
-					0);
+				SetCamCompClearColor(this.bgColorDialog.SelectedColor);
 			}
 			this.glControl.Invalidate();
 		}
+
+		private void SetCamCompClearColor(Color color)
+		{
+			this.camComp.ClearColor = new ColorRgba(
+				color.R,
+				color.G,
+				color.B,
+				0);
+		}
+
 		private void buttonResetZoom_Click(object sender, EventArgs e)
 		{
 			this.camObj.Transform.Pos = new Vector3(this.camObj.Transform.Pos.Xy, -MathF.Abs(this.camComp.FocusDist));
