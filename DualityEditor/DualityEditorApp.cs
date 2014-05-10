@@ -304,15 +304,6 @@ namespace Duality.Editor
 					else if (result == DialogResult.Cancel)
 						cancel = true;
 				}
-				else
-				{
-					DialogResult result = MessageBox.Show(
-						Properties.GeneralRes.Msg_ConfirmQuit_Desc, 
-						Properties.GeneralRes.Msg_ConfirmQuit_Caption, 
-						MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-					if (result == DialogResult.No)
-						cancel = true;
-				}
 			}
 
 			// Not cancelling? Then actually start terminating.
