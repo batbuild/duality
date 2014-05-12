@@ -150,6 +150,18 @@ namespace Duality.Components
 			}
 		}
 
+		/// <summary>
+		/// The event that will be raised when the camera has completed rendering all passes.
+		/// </summary>
+		[field:NonSerialized]
+		public event EventHandler<FrameCompleteEventArgs> FrameCompleted;
+
+		/// <summary>
+		/// The event that will be raised when the camera has completed rendering a single pass. This event is raised for every
+		/// pass.
+		/// </summary>
+		[field: NonSerialized]
+		public event EventHandler<PassCompleteEventArgs> PassCompleted;
 
 		private	float	nearZ					= 0.0f;
 		private	float	farZ					= 10000.0f;
@@ -293,7 +305,11 @@ namespace Duality.Components
 			foreach (Pass t in this.passes)
 			{
 				this.RenderSinglePass(viewportRect, t);
+				OnPassRendered(t);
 			}
+
+			OnFrameRendered();
+
 			RenderTarget.Bind(RenderTarget.None);
 			this.drawDevice.VisibilityMask = this.visibilityMask;
 			this.drawDevice.RenderMode = RenderMatrix.PerspectiveWorld;
@@ -302,6 +318,7 @@ namespace Duality.Components
 			Profile.TimeRender.EndMeasure();
 			Profile.EndMeasure(counterName);
 		}
+
 		/// <summary>
 		/// Renders a picking map of the current <see cref="Duality.Resources.Scene"/>.
 		/// If picking is required, this will be (automatically) done each frame a picking operation needs to
@@ -638,6 +655,22 @@ namespace Duality.Components
 					TextureMagFilter.Nearest, TextureMinFilter.Nearest);
 				this.pickingRT = new RenderTarget(AAQuality.Off, this.pickingTex);
 			}
+		}
+
+		private void OnFrameRendered()
+		{
+			var handler = FrameCompleted;
+
+			if (handler != null)
+				handler(this, new FrameCompleteEventArgs { DrawDevice = drawDevice });
+		}
+
+		public void OnPassRendered(Pass pass)
+		{
+			var handler = PassCompleted;
+
+			if (handler != null)
+				handler(this, new PassCompleteEventArgs { DrawDevice = drawDevice, Pass = pass});
 		}
 
 		internal void AddEditorRendererFilter(Predicate<ICmpRenderer> filter)
