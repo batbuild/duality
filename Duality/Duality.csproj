@@ -86,6 +86,8 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\FrameCompleteEventArgs.cs" />
+    <Compile Include="Components\PassCompleteEventArgs.cs" />
     <Compile Include="Drawing\IDrawBatch.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsStream.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsXml.cs" />
