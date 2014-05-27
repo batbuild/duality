@@ -59,7 +59,7 @@ namespace Duality.Components.Physics
 		private bool		isSensor		= false;
 		private	Category	colCat			= Category.Cat1;
 		private	Category	colWith			= Category.All;
-		private	List<ShapeInfo>	shapes		= null;
+		private	List<ShapeInfo>	shapes		= new List<ShapeInfo>();
 		private	List<JointInfo>	joints		= null;
 
 		[NonSerialized]	private	float			lastScale		= 1.0f;
@@ -1134,7 +1134,7 @@ namespace Duality.Components.Physics
 			c.revolutions = this.revolutions;
 
 			// Detach and copy Shapes
-			c.shapes = null;
+			c.shapes = new List<ShapeInfo>();
 			if (this.shapes != null) c.SetShapes(this.shapes.Select(s => provider.RequestObjectClone(s)));
 
 			// Detach and copy Joints
