@@ -850,6 +850,10 @@ namespace Duality.Resources
 			base.OnSaved(saveAsPath);
 			foreach (GameObject obj in this.objectManager.AllObjects)
 				obj.OnSaved();
+
+			// If this Scene is the current one, but it wasn't saved before, update the current Scenes internal ContentRef
+			if (this.IsCurrent && current.IsRuntimeResource)
+				current = new ContentRef<Scene>(this, saveAsPath);
 		}
 		protected override void OnLoaded()
 		{
