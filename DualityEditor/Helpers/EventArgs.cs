@@ -170,6 +170,13 @@ namespace Duality.Editor
 
 	public class ResourceRenamedEventArgs : ResourceEventArgs
 	{
+		public ResourceRenamedEventArgs(ContentRef<Resource> resource) : base(resource)
+		{
+		}
+
+		public ResourceRenamedEventArgs(IContentRef contentRef) : base(contentRef)
+		{
+		}
 		private	string	oldPath;
 
 		public string OldPath
