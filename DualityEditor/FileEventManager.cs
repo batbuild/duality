@@ -35,6 +35,7 @@ namespace Duality.Editor
 
 
 		public	static	event	EventHandler<ResourceEventArgs>				ResourceCreated		= null;
+		public	static	event	EventHandler<ResourceEventArgs>				ResourceDeleting	= null;
 		public	static	event	EventHandler<ResourceEventArgs>				ResourceDeleted		= null;
 		public	static	event	EventHandler<ResourceEventArgs>				ResourceModified	= null;
 		public	static	event	EventHandler<ResourceRenamedEventArgs>		ResourceRenamed		= null;
@@ -306,6 +307,8 @@ namespace Duality.Editor
 					ResourceEventArgs args = new ResourceEventArgs(e.FullPath);
 					if (Resource.IsResourceFile(e.FullPath) || args.IsDirectory)
 					{
+						if (ResourceDeleting != null)
+							ResourceDeleting(null, args);
 
 						// Unregister no-more existing resources
 						if (args.IsDirectory)	ContentProvider.RemoveContentTree(args.Path);
