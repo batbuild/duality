@@ -24,6 +24,7 @@ namespace Duality
 		private	static	Dictionary<MemberInfo,Attribute[]>	customAttributeCache	= new Dictionary<MemberInfo,Attribute[]>();
 		private	static	List<SerializeErrorHandler>			serializeHandlerCache	= new List<SerializeErrorHandler>();
 		private	static	Dictionary<KeyValuePair<Type,Type>,bool>	resRefCache	= new Dictionary<KeyValuePair<Type,Type>,bool>();
+		private static	List<Assembly>						exlucdeFromTypeSearch	= new List<Assembly>();  
 
 		/// <summary>
 		/// Equals <c>BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic</c>.
@@ -582,6 +583,20 @@ namespace Duality
 			customAttributeCache.Clear();
 		}
 		/// <summary>
+		/// Excludes an assembly from type searches in ResolveType and ResolveMember calls. Use this when you have large assemblies that you're sure you don't
+		/// want to be searchable and would otherwise slow down searches. Slow searches can really affect usability in case where the user has to wait for the
+		/// search to complete. 
+		/// </summary>
+		/// <param name="assemblies"></param>
+		public static void ExcludeFromTypeSearches(IEnumerable<Assembly> assemblies)
+		{
+			foreach (var assembly in assemblies)
+			{
+				if(exlucdeFromTypeSearch.Contains(assembly) == false)
+					exlucdeFromTypeSearch.Add(assembly);
+			}
+		}
+		/// <summary>
 		/// Resolves a Type based on its <see cref="GetTypeId">type id</see>.
 		/// </summary>
 		/// <param name="typeString">The type string to resolve.</param>
@@ -595,7 +610,7 @@ namespace Duality
 			Type result;
 			if (typeResolveCache.TryGetValue(typeString, out result)) return result;
 
-			Assembly[] searchAsm = AppDomain.CurrentDomain.GetAssemblies().Except(DualityApp.DisposedPlugins).ToArray();
+			Assembly[] searchAsm = AppDomain.CurrentDomain.GetAssemblies().Except(DualityApp.DisposedPlugins).Except(exlucdeFromTypeSearch).ToArray();
 			result = FindType(typeString, searchAsm, declaringMethod);
 			if (result != null && declaringMethod == null) typeResolveCache[typeString] = result;
 
@@ -613,7 +628,7 @@ namespace Duality
 			MemberInfo result;
 			if (memberResolveCache.TryGetValue(memberString, out result)) return result;
 
-			Assembly[] searchAsm = AppDomain.CurrentDomain.GetAssemblies().Except(DualityApp.DisposedPlugins).ToArray();
+			Assembly[] searchAsm = AppDomain.CurrentDomain.GetAssemblies().Except(DualityApp.DisposedPlugins).Except(exlucdeFromTypeSearch).ToArray();
 			result = FindMember(memberString, searchAsm);
 			if (result != null) memberResolveCache[memberString] = result;
 
