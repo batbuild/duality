@@ -36,9 +36,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AdamsLair.WinForms, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="AdamsLair.WinForms, Version=1.0.0.2, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.11\lib\net40\AdamsLair.WinForms.dll</HintPath>
+      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.13\lib\net40\AdamsLair.WinForms.dll</HintPath>
     </Reference>
     <Reference Include="Aga.Controls, Version=1.7.0.1, Culture=neutral, PublicKeyToken=fcc90fbf924463a3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -52,9 +52,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\OpenTK.GLControl.1.1.1550.5715\lib\net40\OpenTK.GLControl.dll</HintPath>
     </Reference>
-    <Reference Include="PopupControl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.11\lib\net40\PopupControl.dll</HintPath>
+    <Reference Include="PopupControl">
+      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.13\lib\net40\PopupControl.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
