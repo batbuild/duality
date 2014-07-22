@@ -60,6 +60,18 @@
     <Reference Include="FarseerDuality">
       <HintPath>..\packages\FarseerDuality.0.1.4\lib\net40\FarseerDuality.dll</HintPath>
     </Reference>
+    <Reference Include="ManagedSquish, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ManagedSquish.0.1.0.0\lib\net40\ManagedSquish.dll</HintPath>
+    </Reference>
+    <Reference Include="NativeSquish_x64, Version=2.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ManagedSquish.0.1.0.0\lib\net40\NativeSquish_x64.dll</HintPath>
+    </Reference>
+    <Reference Include="NativeSquish_x86, Version=2.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ManagedSquish.0.1.0.0\lib\net40\NativeSquish_x86.dll</HintPath>
+    </Reference>
     <Reference Include="NVorbis, Version=0.7.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NVorbis.0.7.4\lib\NVorbis.dll</HintPath>

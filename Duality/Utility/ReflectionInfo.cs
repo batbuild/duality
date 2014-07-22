@@ -115,6 +115,8 @@ namespace Duality
 		public static readonly PropertyInfo	Property_Texture_UVRatio;
 		public static readonly PropertyInfo	Property_Texture_Mipmaps;
 		public static readonly PropertyInfo	Property_Texture_NeedsReload;
+		public static readonly PropertyInfo	Property_Texture_Compressed;
+		public static readonly PropertyInfo	Property_Texture_PremultiplyAlpha;
 
 		public static readonly PropertyInfo	Property_RenderTarget_Targets;
 
@@ -268,14 +270,16 @@ namespace Duality
 			Property_Pixmap_Atlas				= pixmap.GetProperty("Atlas");
 
 			Type texture = typeof(Texture);
-			Property_Texture_PxWidth		= texture.GetProperty("PxWidth");
-			Property_Texture_PxHeight		= texture.GetProperty("PxHeight");
-			Property_Texture_PxDiameter		= texture.GetProperty("PxDiameter");
-			Property_Texture_OglWidth		= texture.GetProperty("OglWidth");
-			Property_Texture_OglHeight		= texture.GetProperty("OglHeight");
-			Property_Texture_UVRatio		= texture.GetProperty("UVRatio");
-			Property_Texture_Mipmaps		= texture.GetProperty("Mipmaps");
-			Property_Texture_NeedsReload	= texture.GetProperty("NeedsReload");
+			Property_Texture_PxWidth			= texture.GetProperty("PxWidth");
+			Property_Texture_PxHeight			= texture.GetProperty("PxHeight");
+			Property_Texture_PxDiameter			= texture.GetProperty("PxDiameter");
+			Property_Texture_OglWidth			= texture.GetProperty("OglWidth");
+			Property_Texture_OglHeight			= texture.GetProperty("OglHeight");
+			Property_Texture_UVRatio			= texture.GetProperty("UVRatio");
+			Property_Texture_Mipmaps			= texture.GetProperty("Mipmaps");
+			Property_Texture_NeedsReload		= texture.GetProperty("NeedsReload");
+			Property_Texture_Compressed			= texture.GetProperty("Compressed");
+			Property_Texture_PremultiplyAlpha	= texture.GetProperty("PremultiplyAlpha");
 
 			Type renderTarget = typeof(RenderTarget);
 			Property_RenderTarget_Targets	= renderTarget.GetProperty("Targets");

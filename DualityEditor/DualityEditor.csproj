@@ -78,7 +78,19 @@
     <Reference Include="Ionic.Zip">
       <HintPath>.\Ionic.Zip.dll</HintPath>
     </Reference>
+    <Reference Include="ManagedSquish, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ManagedSquish.0.1.0.0\lib\net40\ManagedSquish.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="NativeSquish_x64, Version=2.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ManagedSquish.0.1.0.0\lib\net40\NativeSquish_x64.dll</HintPath>
+    </Reference>
+    <Reference Include="NativeSquish_x86, Version=2.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ManagedSquish.0.1.0.0\lib\net40\NativeSquish_x86.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\OpenTK.1.1.1550.5715\lib\net40\OpenTK.dll</HintPath>
@@ -147,6 +159,7 @@
     <Compile Include="CorePluginInterface\DesignTimeObjectData.cs" />
     <Compile Include="CorePluginInterface\PreviewProvider.cs" />
     <Compile Include="DualityEditorApp.cs" />
+    <Compile Include="Helpers\EditorUtility.cs" />
     <Compile Include="Properties\GeneralResCache.cs" />
     <Compile Include="EditorUserData.cs" />
     <Compile Include="Forms\SaveLayoutDialog.cs">

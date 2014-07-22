@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO.Compression;
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
@@ -11,7 +12,7 @@ using Duality.Editor;
 using Duality.Serialization;
 using Duality.Cloning;
 using Duality.Properties;
-
+using ManagedSquish;
 using OpenTK;
 
 namespace Duality.Resources
@@ -47,6 +48,10 @@ namespace Duality.Resources
 		/// Represents the PNG-compressed layered Pixmap version.
 		/// </summary>
 		private const int ResFormat_Version_LayerPng	= 3;
+		/// <summary>
+		/// Represents a DXT-compressed layered Pixmap.
+		/// </summary>
+		private const int ResFormat_Version_DxtCompressed	= 4;
 		
 		/// <summary>
 		/// [GET] A Pixmap showing the Duality icon.
@@ -128,6 +133,7 @@ namespace Duality.Resources
 			private	int	width;
 			private	int height;
 			private	ColorRgba[]	data;
+			private byte[] compressedData;
 
 			/// <summary>
 			/// [GET] The layers width in pixels
@@ -150,6 +156,19 @@ namespace Duality.Resources
 			{
 				get { return this.data; }
 			}
+			/// <summary>
+			/// [GET] The layers pixel data when DXT compression is being used
+			/// </summary>
+			public byte[] CompressedData
+			{
+				get { return compressedData; }
+			}
+
+			public bool IsCompressed
+			{
+				get { return this.compressedData != null; }
+			}
+
 			/// <summary>
 			/// [GET / SET] A single pixels color.
 			/// </summary>
@@ -400,6 +419,11 @@ namespace Duality.Resources
 				{
 					Parallel.For(0, this.data.Length, i => this.data[i].SetIntArgb(pixelData[i]));
 				}
+			}
+
+			public void SetPixelDataDxtCompressed(byte[] pixelData)
+			{
+				this.compressedData = pixelData;
 			}
 
 			/// <summary>
@@ -1025,15 +1049,34 @@ namespace Duality.Resources
 				targetLayer.width = this.width;
 				targetLayer.height = this.height;
 				targetLayer.data = this.data == null ? null : this.data.Clone() as ColorRgba[];
+				targetLayer.compressedData = this.compressedData == null ? null : this.compressedData.Clone() as byte[];
 			}
 			void ISerializeExplicit.WriteData(IDataWriter writer)
 			{
-				writer.WriteValue("version", ResFormat_Version_LayerPng);
-
-				using (MemoryStream str = new MemoryStream(1024 * 64))
+				if (compressedData != null)
 				{
-					this.ToBitmap().Save(str, System.Drawing.Imaging.ImageFormat.Png);
-					writer.WriteValue("pixelData", str.ToArray());
+					writer.WriteValue("version", ResFormat_Version_DxtCompressed);
+
+					MemoryStream memoryStream = new MemoryStream();
+					using (var zipStream = new GZipStream(memoryStream, CompressionLevel.Optimal, true))
+					{
+						zipStream.Write(compressedData, 0, compressedData.Length);
+					}
+					writer.WriteValue("pixelData", memoryStream.ToArray());
+					memoryStream.Close();
+					
+					writer.WriteValue("width", width);
+					writer.WriteValue("height", height);
+				}
+				else
+				{
+					writer.WriteValue("version", ResFormat_Version_LayerPng);
+
+					using (MemoryStream str = new MemoryStream(1024 * 64))
+					{
+						this.ToBitmap().Save(str, System.Drawing.Imaging.ImageFormat.Png);
+						writer.WriteValue("pixelData", str.ToArray());
+					}
 				}
 			}
 			void ISerializeExplicit.ReadData(IDataReader reader)
@@ -1048,6 +1091,34 @@ namespace Duality.Resources
 					reader.ReadValue("pixelData", out dataBlock);
 					Bitmap bm = dataBlock != null ? new Bitmap(new MemoryStream(dataBlock)) : null;
 					if (bm != null) this.FromBitmap(bm);
+				}
+				else if(version == ResFormat_Version_DxtCompressed)
+				{
+					byte[] dataBlock;
+					int width, height;
+					reader.ReadValue("pixelData", out dataBlock);
+					reader.ReadValue("width", out width);
+					reader.ReadValue("height", out height);
+					this.width = width;
+					this.height = height;
+
+					using (var decompressedDataStream = new MemoryStream())
+					{
+						using(var compressedDataStream = new MemoryStream(dataBlock))
+						using (var zipStream = new GZipStream(compressedDataStream, CompressionMode.Decompress))
+						{
+							zipStream.CopyTo(decompressedDataStream);
+						}
+
+						decompressedDataStream.Seek(0, SeekOrigin.Begin);
+						var dxtData = decompressedDataStream.ToArray();
+
+						if (DualityApp.ExecContext == DualityApp.ExecutionContext.Editor)
+						{
+							SetPixelDataRgba(Squish.DecompressImage(dxtData, width, height, SquishFlags.Dxt5), width, height);
+						}
+						this.compressedData = dxtData;
+					}
 				}
 			}
 		}
@@ -1071,6 +1142,23 @@ namespace Duality.Resources
 				if (value == null) value = new Layer();
 				if (this.layers.Count > 0)
 					this.layers[0] = value;
+				else
+					this.layers.Add(value);
+			}
+		}
+		/// <summary>
+		/// [GET / SET] A layer for processed data. For standard alpha blended texture, this layer will hold data with
+		/// transparent pixels coloured. For premultiplied texture, this layer will hold premultiplied pixel data. In 
+		/// both cases, the layer may be DXT compressed or not.
+		/// </summary>
+		[EditorHintFlags(MemberFlags.Invisible)]
+		public Layer ProcessedLayer {
+			get { return this.layers.Count > 1 ? this.layers[1] : null; }
+			set
+			{
+				if (value == null) value = new Layer();
+				if (this.layers.Count > 1)
+					this.layers[1] = value;
 				else
 					this.layers.Add(value);
 			}
@@ -1168,6 +1256,7 @@ namespace Duality.Resources
 		public Pixmap(Bitmap image)
 		{
 			this.MainLayer = new Layer(image);
+			ColourTransparentPixels();
 		}
 		/// <summary>
 		/// Creates a new Pixmap from the specified <see cref="Duality.Resources.Pixmap.Layer"/>.
@@ -1176,6 +1265,7 @@ namespace Duality.Resources
 		public Pixmap(Layer image)
 		{
 			this.MainLayer = image;
+			ColourTransparentPixels();
 		}
 		/// <summary>
 		/// Creates a new Pixmap from the specified image file.
@@ -1184,6 +1274,7 @@ namespace Duality.Resources
 		public Pixmap(string imagePath)
 		{
 			this.LoadPixelData(imagePath);
+			ColourTransparentPixels();
 		}
 
 		/// <summary>
@@ -1215,7 +1306,10 @@ namespace Duality.Resources
 			if (String.IsNullOrEmpty(this.sourcePath) || !File.Exists(this.sourcePath))
 				this.MainLayer = null;
 			else
+			{
 				this.MainLayer = new Layer(imagePath);
+				ColourTransparentPixels();
+			}
 		}
 
 		/// <summary>
@@ -1298,6 +1392,33 @@ namespace Duality.Resources
 			Rect result;
 			this.LookupAtlas(index, out result);
 			return result;
+		}
+		/// <summary>
+		/// Premultiplies the main layer pixel data and stores the results in <see cref="ProcessedLayer"/>.
+		/// </summary>
+		public void PremultiplyPixelData()
+		{
+			Pixmap.Layer layer = new Pixmap.Layer(this.MainLayer.Width, this.MainLayer.Height);
+			this.MainLayer.DrawOnto(layer, BlendMode.PremultipliedAlpha, 0, 0);
+			this.ProcessedLayer = layer;
+		}
+		/// <summary>
+		/// Colours transparent pixels to remove blending artifacts when standard alpha blending is used. Stores
+		/// the results in the <see cref="ProcessedLayer"/> layer.
+		/// </summary>
+		public void ColourTransparentPixels()
+		{
+			Pixmap.Layer layer = new Pixmap.Layer(MainLayer.Width, MainLayer.Height);
+			this.MainLayer.DrawOnto(layer, BlendMode.Alpha, 0, 0);
+			layer.ColorTransparentPixels();
+			this.ProcessedLayer = layer;
+		}
+		/// <summary>
+		/// If the pixmap contains compressed data, delete it.
+		/// </summary>
+		public void DeleteCompressedPixelData()
+		{
+			this.ProcessedLayer.SetPixelDataDxtCompressed(null);
 		}
 
 		protected override void OnDisposing(bool manually)
