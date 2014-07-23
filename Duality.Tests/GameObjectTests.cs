@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Duality.Resources;
 using NUnit.Framework;
 
 namespace Duality.Tests

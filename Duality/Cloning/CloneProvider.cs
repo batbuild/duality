@@ -49,7 +49,7 @@ namespace Duality.Cloning
 		/// </summary>
 		/// <param name="baseObj"></param>
 		/// <returns></returns>
-		public T RequestObjectClone<T>(T baseObj)
+		public virtual T RequestObjectClone<T>(T baseObj)
 		{
 			if (baseObj == null) return default(T);
 
@@ -124,6 +124,7 @@ namespace Duality.Cloning
 			foreach (FieldInfo f in fields)
 				f.SetValue(targetObj, this.RequestObjectClone(f.GetValue(baseObj)));
 		}
+
 		/// <summary>
 		/// Registers a new base-clone mapping.
 		/// </summary>
@@ -135,7 +136,7 @@ namespace Duality.Cloning
 			if (clone == null) throw new ArgumentNullException("clone");
 			this.objToClone[baseObj] = clone;
 		}
-		
+
 		private bool DoesUnwrapType(Type type)
 		{
 			bool unwrap = !type.IsDeepByValueType();
@@ -146,7 +147,8 @@ namespace Duality.Cloning
 			}
 			return unwrap;
 		}
-		private object CloneObject(object baseObj)
+
+		protected virtual object CloneObject(object baseObj)
 		{
 			Type objType = baseObj.GetType();
 			if (!this.DoesUnwrapType(objType)) return baseObj;
@@ -237,9 +239,10 @@ namespace Duality.Cloning
 
 		public static T DeepClone<T>(T baseObj, CloneProviderContext context = null)
 		{
-			CloneProvider provider = new CloneProvider(context);
+			var provider = new CloneProvider(context);
 			return (T)provider.RequestObjectClone(baseObj);
 		}
+
 		public static void DeepCopyTo<T>(T baseObj, T targetObj, CloneProviderContext context = null)
 		{
 			Type objType = baseObj.GetType();
@@ -292,6 +295,10 @@ namespace Duality.Cloning
 
 	public static class ExtMethodsCloning
 	{
+		public static T DeepClone<T>(this T baseObj, CloneProvider cloneProvider)
+		{
+			return cloneProvider.RequestObjectClone(baseObj);
+		}
 		public static T DeepClone<T>(this T baseObj, CloneProviderContext context = null)
 		{
 			return CloneProvider.DeepClone<T>(baseObj, context);
