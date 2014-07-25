@@ -278,6 +278,7 @@ namespace Duality.Resources
 		[NonSerialized] private	bool	needsReload	= true;
 		[NonSerialized] private	Rect[]	atlas		= null;
 
+		private bool compressed;
 
 		/// <summary>
 		/// [GET] The Textures internal texel width
@@ -346,7 +347,15 @@ namespace Duality.Resources
 		public bool NeedsReload
 		{
 			get { return this.needsReload; }
-		}  //  G
+		} //  G
+		/// <summary>
+		/// Enable for DXT compression
+		/// </summary>
+		public bool Compressed
+		{
+			get { return compressed; }
+			set { compressed = value; }
+		}
 		/// <summary>
 		/// [GET / SET] The Textures size. Readonly, when created from a <see cref="BasePixmap"/>.
 		/// </summary>
@@ -450,8 +459,13 @@ namespace Duality.Resources
 			set
 			{
 				this.premultiplyAlpha = value;
-				
-				RemoveProcessedPixmap();
+				if (this.basePixmap.Res != null)
+				{
+					if(value)
+						this.basePixmap.Res.PremultiplyPixelData();
+					else
+						this.basePixmap.Res.ColourTransparentPixels();
+				}
 
 				this.needsReload = true;
 			}
@@ -521,7 +535,6 @@ namespace Duality.Resources
 		/// </summary>
 		public void ReloadData()
 		{
-			RemoveProcessedPixmap();
 			this.LoadData(this.basePixmap, this.texSizeMode);
 		}
 		/// <summary>
@@ -555,19 +568,7 @@ namespace Duality.Resources
 				Pixmap basePixmapRes = this.basePixmap.IsAvailable ? this.basePixmap.Res : null;
 				if (basePixmapRes != null)
 				{
-					if (NeedsPreprocessing())
-					{
-						if (this.premultiplyAlpha)
-						{
-							PremultiplyTextureAlpha();
-						}
-						else
-						{
-							ColorTransparentPixels();
-						}
-					}
-
-					pixelData = basePixmapRes.PixelData[ProcessedPixmapLayerIndex];
+					pixelData = basePixmapRes.ProcessedLayer;
 					this.atlas = basePixmapRes.Atlas != null ? basePixmapRes.Atlas.ToArray() : null;
 				}
 
@@ -592,11 +593,19 @@ namespace Duality.Resources
 				}
 
 				// Load pixel data to video memory
-				GL.TexImage2D(TextureTarget.Texture2D, 0, 
-					this.pixelformat, pixelData.Width, pixelData.Height, 0, 
-					GLPixelFormat.Rgba, PixelType.UnsignedByte, 
-					pixelData.Data);
-					
+				if (Compressed && pixelData.CompressedData != null)
+				{
+					GL.CompressedTexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.CompressedRgbaS3tcDxt5Ext, pixelData.Width, pixelData.Height, 0, 
+						pixelData.CompressedData.Length, pixelData.CompressedData);
+				}
+				else
+				{
+					GL.TexImage2D(TextureTarget.Texture2D, 0,
+						this.pixelformat, pixelData.Width, pixelData.Height, 0,
+						GLPixelFormat.Rgba, PixelType.UnsignedByte,
+						pixelData.Data);
+				}
+
 				// Adjust atlas to represent UV coordinates
 				if (this.atlas != null)
 				{
@@ -737,9 +746,17 @@ namespace Duality.Resources
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.GenerateMipmap, this.HasMipmaps ? 1 : 0);
 
 			// Setup pixel format
-			GL.TexImage2D(TextureTarget.Texture2D, 0,
-				this.pixelformat, this.texWidth, this.texHeight, 0,
-				GLPixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
+			if (Compressed)
+			{
+				GL.CompressedTexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.CompressedRgbaS3tcDxt5Ext, 
+					this.texWidth, this.texHeight, 0, 0, IntPtr.Zero);
+			}
+			else
+			{
+				GL.TexImage2D(TextureTarget.Texture2D, 0,
+					this.pixelformat, this.texWidth, this.texHeight, 0,
+					GLPixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
+			}
 
 			if (lastTexId != this.glTexId) GL.BindTexture(TextureTarget.Texture2D, lastTexId);
 		}
@@ -776,54 +793,9 @@ namespace Duality.Resources
 			c.wrapX = this.wrapX;
 			c.wrapY = this.wrapY;
 			c.pixelformat = this.pixelformat;
+			c.premultiplyAlpha = premultiplyAlpha;
+			c.compressed = compressed;
 			c.LoadData(this.basePixmap, this.texSizeMode);
-		}
-
-		private bool NeedsPreprocessing()
-		{
-			return this.basePixmap.Res.PixelData.Count == 1;
-		}
-
-		private void PremultiplyTextureAlpha()
-		{
-			ProcessPixmap(l => this.basePixmap.Res.MainLayer.DrawOnto(l, BlendMode.PremultipliedAlpha, 0, 0));
-		}
-
-		private void ColorTransparentPixels()
-		{
-			ProcessPixmap(l =>
-			{
-				this.basePixmap.Res.MainLayer.DrawOnto(l, BlendMode.Alpha, 0, 0);
-				l.ColorTransparentPixels();
-			});
-		}
-
-		private void ProcessPixmap(Action<Pixmap.Layer> process)
-		{
-			if (this.basePixmap == null)
-				return;
-
-			var mainLayer = this.basePixmap.Res.MainLayer;
-			Pixmap.Layer layer = new Pixmap.Layer(mainLayer.Width, mainLayer.Height);
-			if (this.basePixmap.Res.PixelData.Count == ProcessedPixmapLayerIndex)
-			{
-				this.basePixmap.Res.PixelData.Add(layer);
-			}
-			else
-			{
-				this.basePixmap.Res.PixelData[ProcessedPixmapLayerIndex] = layer;
-			}
-
-			process(layer);
-
-			if(!this.basePixmap.Res.IsDefaultContent && !this.basePixmap.Res.IsRuntimeResource)
-				this.basePixmap.Res.Save();
-		}
-
-		private void RemoveProcessedPixmap()
-		{
-			if (this.basePixmap.Res.PixelData.Count > 1)
-				this.basePixmap.Res.PixelData.RemoveAt(ProcessedPixmapLayerIndex);
 		}
 	}
 }

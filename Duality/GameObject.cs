@@ -59,6 +59,11 @@ namespace Duality
 			get { return this.parent; }
 			set
 			{
+				if (this == value)
+				{
+					Log.Game.WriteError("You just tried to set the parent of this gameObject{0} to itself, not a good idea.", this.name);
+					return;
+				}
 				if (this.parent != value)
 				{
 					GameObject oldParent = this.parent;

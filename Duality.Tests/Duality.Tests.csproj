@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Components\ComponentExecutionOrderTests.cs" />
     <Compile Include="Components\RigidBodyTests.cs" />
+    <Compile Include="GameObjectTests.cs" />
     <Compile Include="Helpers\GuardTests.cs" />
     <Compile Include="Input\JoystickInputTests.cs" />
     <Compile Include="Log\LogTests.cs" />
