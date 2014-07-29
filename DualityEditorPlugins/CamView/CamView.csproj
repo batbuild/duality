@@ -34,6 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AdamsLair.WinForms, Version=1.0.0.2, Culture=neutral, processorArchitecture=MSIL">
@@ -46,11 +47,11 @@
     </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\OpenTK.1.1.1550.5715\lib\net40\OpenTK.dll</HintPath>
+      <HintPath>..\..\packages\OpenTK.Duality.0.1.27\lib\net40\OpenTK.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\OpenTK.GLControl.1.1.1550.5715\lib\net40\OpenTK.GLControl.dll</HintPath>
+    <Reference Include="OpenTK.GLControl">
+      <HintPath>..\..\packages\OpenTK.GLControl.Duality.0.1.28\lib\net40\OpenTK.GLControl.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="PopupControl">
       <HintPath>..\..\packages\AdamsLair.WinForms.0.1.13\lib\net40\PopupControl.dll</HintPath>

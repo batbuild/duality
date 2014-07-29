@@ -41,7 +41,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="OpenTK">
-      <HintPath>..\..\packages\OpenTK.1.1.1550.5715\lib\net40\OpenTK.dll</HintPath>
+      <HintPath>..\..\packages\OpenTK.Duality.0.1.27\lib\net40\OpenTK.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
