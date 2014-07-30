@@ -67,12 +67,8 @@
     <Compile Include="PathHelperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Components\TransformTests.cs" />
-    <Compile Include="Resources\FontTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Anonymous Pro.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
