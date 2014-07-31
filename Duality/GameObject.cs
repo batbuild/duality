@@ -810,7 +810,7 @@ namespace Duality
 				target.PrefabLink.UpdateChanges();
 			}
 		}
-		private void PrepassCopyData(GameObject target, CloneProvider provider)
+		internal void PrepassCopyData(GameObject target, CloneProvider provider)
 		{
 			foreach (Component c in this.compList)
 			{
