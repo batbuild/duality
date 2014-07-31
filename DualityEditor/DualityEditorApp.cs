@@ -8,21 +8,17 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
-
-using Duality;
 using Duality.Components;
-using Duality.Serialization;
 using Duality.Resources;
 using Duality.Drawing;
 using Duality.Editor.Forms;
 using Duality.Editor.UndoRedoActions;
 
 using OpenTK;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Platform;
-using OpenTK.Platform.Windows;
 
 using Ionic.Zip;
-using WeifenLuo.WinFormsUI.Docking;
 
 namespace Duality.Editor
 {
@@ -524,6 +520,14 @@ namespace Duality.Editor
 			mainContextControl.VSync = false;
 			mainContextControl.MakeCurrent();
 			DualityApp.TargetMode = mainContextControl.Context.GraphicsMode;
+
+			Log.Core.Write("OpenGL initialized");
+			Log.Core.PushIndent();
+			Log.Editor.Write("Vendor: {0}", GL.GetString(StringName.Vendor));
+			Log.Editor.Write("Version: {0}", GL.GetString(StringName.Version));
+			Log.Editor.Write("Renderer: {0}", GL.GetString(StringName.Renderer));
+			Log.Editor.Write("Shading language version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
+			Log.Core.PopIndent();
 		}
 		public static void GLMakeCurrent(GLControl control)
 		{

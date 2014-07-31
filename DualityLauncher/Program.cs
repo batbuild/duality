@@ -8,6 +8,7 @@ using Duality;
 using Duality.Resources;
 
 using OpenTK;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using OpenTK.Graphics;
 using OpenTK.Platform.Windows;
@@ -131,6 +132,15 @@ namespace Duality.Launcher
 
 				// Initialize default content
 				launcherWindow.MakeCurrent();
+
+				Log.Core.Write("OpenGL initialized");
+				Log.Core.PushIndent();
+				Log.Editor.Write("Vendor: {0}", GL.GetString(StringName.Vendor));
+				Log.Editor.Write("Version: {0}", GL.GetString(StringName.Version));
+				Log.Editor.Write("Renderer: {0}", GL.GetString(StringName.Renderer));
+				Log.Editor.Write("Shading language version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
+				Log.Core.PopIndent();
+
 				DualityApp.TargetResolution = new Vector2(launcherWindow.ClientSize.Width, launcherWindow.ClientSize.Height);
 				DualityApp.TargetMode = launcherWindow.Context.GraphicsMode;
 				ContentProvider.InitDefaultContent();
