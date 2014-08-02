@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Duality.Cloning;
+using Duality.Utility;
 using FarseerPhysics;
 using OpenTK;
 using FarseerPhysics.Dynamics;
@@ -241,9 +242,10 @@ namespace Duality.Resources
 
 		private	Vector2			globalGravity	= Vector2.UnitY * 33.0f;
 		private	GameObject[]	serializeObj	= null;
-		[NonSerialized] private	GameObjectManager					objectManager		= new GameObjectManager();
-		[NonSerialized] private	List<Component>						renderers			= new List<Component>();
-		[NonSerialized] private Dictionary<Type,List<Component>>	componentyByType	= new Dictionary<Type,List<Component>>();
+		[NonSerialized] private	GameObjectManager					objectManager				= new GameObjectManager();
+		[NonSerialized] private	List<Component>						renderers					= new List<Component>();
+		[NonSerialized] private Dictionary<Type,List<Component>>	componentyByType			= new Dictionary<Type,List<Component>>();
+		[NonSerialized] private IRendererVisibilityStrategy			visibilityStrategy;
 
 
 		/// <summary>
@@ -324,6 +326,8 @@ namespace Duality.Resources
 		public Scene()
 		{
 			this.RegisterManagerEvents();
+
+			this.visibilityStrategy = new DefaultRendererVisibilityStrategy(renderers);
 		}
 
 		/// <summary>
@@ -411,6 +415,9 @@ namespace Duality.Resources
 				GameObject[] activeObj = this.objectManager.ActiveObjects.ToArray();
 				foreach (GameObject obj in activeObj)
 					obj.Update();
+
+				if(this.visibilityStrategy != null)
+					this.visibilityStrategy.Update();
 			}
 			Profile.TimeUpdateScene.EndMeasure();
 
@@ -561,7 +568,10 @@ namespace Duality.Resources
 		/// <returns></returns>
 		public IEnumerable<ICmpRenderer> QueryVisibleRenderers(IDrawDevice device)
 		{
-			return this.renderers.Where(r => r.Active && (r as ICmpRenderer).IsVisible(device)).OfType<ICmpRenderer>();
+			if(this.visibilityStrategy == null)
+				return this.renderers.Where(r => r.Active && (r as ICmpRenderer).IsVisible(device)).OfType<ICmpRenderer>();
+
+			return this.visibilityStrategy.QueryVisibleRenderers(device);
 		}
 
 		/// <summary>
@@ -885,6 +895,8 @@ namespace Duality.Resources
 			base.OnLoaded();
 
 			this.ApplyPrefabLinks();
+			this.visibilityStrategy = DualityApp.RendererVisibilityStrategy ?? new DefaultRendererVisibilityStrategy(this.renderers);
+			
 
 			foreach (GameObject obj in this.objectManager.AllObjects)
 				obj.OnLoaded();

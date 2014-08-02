@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.IO;
 using System.Threading;
-
+using Duality.Utility;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -98,6 +98,7 @@ namespace Duality
 		private static Dictionary<string, CorePlugin> plugins = new Dictionary<string, CorePlugin>();
 		private static List<Assembly> disposedPlugins = new List<Assembly>();
 		private static Dictionary<Type, List<Type>> availTypeDict = new Dictionary<Type, List<Type>>();
+		private static IRendererVisibilityStrategy _rendererVisibilityStrategy;
 
 		/// <summary>
 		/// Called when the games UserData changes
@@ -313,6 +314,13 @@ namespace Duality
 		{
 			get { return disposedPlugins; }
 		}
+		/// <summary>
+		/// [GET] Returns the spatial subdivision strategy that is currently active, if any.
+		/// </summary>
+		public static IRendererVisibilityStrategy RendererVisibilityStrategy
+		{
+			get { return _rendererVisibilityStrategy; }
+		}
 
 
 		/// <summary>
@@ -413,7 +421,7 @@ namespace Duality
 			Formatter.InitDefaultMethod();
 			joysticks.AddGlobalDevices();
 			gamepads.AddGlobalDevices();
-
+			
 			Log.Core.Write(
 				"DualityApp initialized" + Environment.NewLine +
 				"Debug Mode: {0}" + Environment.NewLine +
@@ -527,6 +535,11 @@ namespace Duality
 		public static void Render(Rect viewportRect, Predicate<Duality.Components.Camera> camPredicate = null)
 		{
 			Scene.Current.Render(viewportRect, camPredicate);
+		}
+
+		public static void SetSpatialSubdivisionStrategy(IRendererVisibilityStrategy strategy)
+		{
+			_rendererVisibilityStrategy = strategy;
 		}
 
 		/// <summary>

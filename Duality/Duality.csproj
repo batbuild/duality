@@ -100,9 +100,11 @@
     <Compile Include="Components\FrameCompleteEventArgs.cs" />
     <Compile Include="Components\PassCompleteEventArgs.cs" />
     <Compile Include="Drawing\IDrawBatch.cs" />
+    <Compile Include="Utility\DefaultRendererVisibilityStrategy.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsStream.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsXml.cs" />
     <Compile Include="Utility\Grid.cs" />
+    <Compile Include="Utility\IRendererVisibilityStrategy.cs" />
     <Compile Include="Utility\Streams\SubStreamWrapper.cs" />
     <Compile Include="Utility\Streams\StreamWrapper.cs" />
     <Compile Include="Utility\Streams\NonClosingStreamWrapper.cs" />
