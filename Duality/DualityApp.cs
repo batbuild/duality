@@ -98,7 +98,6 @@ namespace Duality
 		private static Dictionary<string, CorePlugin> plugins = new Dictionary<string, CorePlugin>();
 		private static List<Assembly> disposedPlugins = new List<Assembly>();
 		private static Dictionary<Type, List<Type>> availTypeDict = new Dictionary<Type, List<Type>>();
-		private static IRendererVisibilityStrategy _rendererVisibilityStrategy;
 
 		/// <summary>
 		/// Called when the games UserData changes
@@ -314,14 +313,6 @@ namespace Duality
 		{
 			get { return disposedPlugins; }
 		}
-		/// <summary>
-		/// [GET] Returns the spatial subdivision strategy that is currently active, if any.
-		/// </summary>
-		public static IRendererVisibilityStrategy RendererVisibilityStrategy
-		{
-			get { return _rendererVisibilityStrategy; }
-		}
-
 
 		/// <summary>
 		/// Initializes this DualityApp. Should be called before performing any operations withing Duality.
@@ -536,12 +527,6 @@ namespace Duality
 		{
 			Scene.Current.Render(viewportRect, camPredicate);
 		}
-
-		public static void SetSpatialSubdivisionStrategy(IRendererVisibilityStrategy strategy)
-		{
-			_rendererVisibilityStrategy = strategy;
-		}
-
 		/// <summary>
 		/// Schedules the specified object for disposal. It is guaranteed to be disposed by the end of the current update cycle.
 		/// </summary>

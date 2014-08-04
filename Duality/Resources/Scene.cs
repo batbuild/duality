@@ -726,6 +726,14 @@ namespace Duality.Resources
 			return null;
 		}
 		/// <summary>
+		/// Set a custom visibility strategy for more efficient renderer culling.
+		/// </summary>
+		/// <param name="strategy"></param>
+		public void SetRendererVisibilityStrategy(IRendererVisibilityStrategy strategy)
+		{
+			this.visibilityStrategy = strategy;
+		}
+		/// <summary>
 		/// Specifies the order in which update will be called for components attached to 
 		/// a game objects.
 		/// </summary>
@@ -895,9 +903,7 @@ namespace Duality.Resources
 			base.OnLoaded();
 
 			this.ApplyPrefabLinks();
-			this.visibilityStrategy = DualityApp.RendererVisibilityStrategy ?? new DefaultRendererVisibilityStrategy(this.renderers);
 			
-
 			foreach (GameObject obj in this.objectManager.AllObjects)
 				obj.OnLoaded();
 		}
