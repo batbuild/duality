@@ -1124,11 +1124,11 @@ namespace Duality.Resources
 		}
 
 
-		private	List<Layer>	layers			= new List<Layer>();
-		private	List<Rect>	atlas			= null;
-		private	int			animCols		= 0;
-		private	int			animRows		= 0;
-		private	int			animFrameBorder	= 0;
+		private	List<Layer>	layers				= new List<Layer>();
+		private	List<Rect>	atlas				= null;
+		private	int			animCols			= 0;
+		private	int			animRows			= 0;
+		private	int			animFrameBorder		= 0;
 		
 		/// <summary>
 		/// [GET / SET] The main pixel data <see cref="Duality.Resources.Pixmap.Layer"/>.
@@ -1244,7 +1244,11 @@ namespace Duality.Resources
 		{
 			get { return this.animRows * this.animCols; }
 		}					//	G
- 
+		/// <summary>
+		/// [GET / SET] Gets/sets a value indicating whether this texture should be premultiplied by it's alpha value.
+		/// </summary>
+		[EditorHintFlags(MemberFlags.Invisible)]
+		public bool ProcessedLayerIsPremultiplied { get; set; }
 		/// <summary>
 		/// Creates a new, empty Pixmap.
 		/// </summary>
@@ -1308,7 +1312,11 @@ namespace Duality.Resources
 			else
 			{
 				this.MainLayer = new Layer(imagePath);
-				ColourTransparentPixels();
+
+				if(ProcessedLayerIsPremultiplied)
+					PremultiplyPixelData();
+				else
+					ColourTransparentPixels();
 			}
 		}
 
@@ -1400,8 +1408,11 @@ namespace Duality.Resources
 		{
 			Pixmap.Layer layer = new Pixmap.Layer(this.MainLayer.Width, this.MainLayer.Height);
 			this.MainLayer.DrawOnto(layer, BlendMode.PremultipliedAlpha, 0, 0);
-			this.ProcessedLayer = layer;
+
+			this.ProcessedLayerIsPremultiplied = true;
+			RecompressIfWasPreviouslyCompressed(layer);
 		}
+
 		/// <summary>
 		/// Colours transparent pixels to remove blending artifacts when standard alpha blending is used. Stores
 		/// the results in the <see cref="ProcessedLayer"/> layer.
@@ -1411,8 +1422,22 @@ namespace Duality.Resources
 			Pixmap.Layer layer = new Pixmap.Layer(MainLayer.Width, MainLayer.Height);
 			this.MainLayer.DrawOnto(layer, BlendMode.Alpha, 0, 0);
 			layer.ColorTransparentPixels();
-			this.ProcessedLayer = layer;
+
+			this.ProcessedLayerIsPremultiplied = false;
+			RecompressIfWasPreviouslyCompressed(layer);
 		}
+
+		private void RecompressIfWasPreviouslyCompressed(Layer layer)
+		{
+			var wasCompressed = this.ProcessedLayer != null && this.ProcessedLayer.IsCompressed;
+			this.ProcessedLayer = layer;
+
+			if (wasCompressed)
+			{
+				this.ProcessedLayer.SetPixelDataDxtCompressed(Squish.CompressImage(layer.GetPixelDataByteRgba(), Width, Height, SquishFlags.Dxt5));
+			}
+		}
+
 		/// <summary>
 		/// If the pixmap contains compressed data, delete it.
 		/// </summary>
