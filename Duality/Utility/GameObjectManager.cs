@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Duality
 {
@@ -37,7 +38,7 @@ namespace Duality
 		{
 			get 
 			{
-				return this.allObj.Where(o => o.Active);
+				return this.allObj.AsParallel().Where(o => o.Active);
 			}
 		}
 		/// <summary>
