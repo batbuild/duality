@@ -6,11 +6,13 @@ namespace Duality.Helpers
 {
 	public static class Guard
 	{
+		[System.Diagnostics.Conditional("DEBUG")]
 		public static void NotNull(object value, string message = null)
 		{
 			NullException(value, message, new ArgumentNullException());
 		}
 
+		[System.Diagnostics.Conditional("DEBUG")]
 		private static void NullException(object value, string message, Exception exception)
 		{
 			if (value != null)
@@ -19,11 +21,13 @@ namespace Duality.Helpers
 			throw exception;
 		}
 
+		[System.Diagnostics.Conditional("DEBUG")]
 		public static void NotNullComponent(object value, string message = null)
 		{
 			NullException(value, message, new InvalidOperationException(message ?? "Missing component on script"));
 		}
 
+		[System.Diagnostics.Conditional("DEBUG")]
 		public static void StringNotNullEmpty(string value, string argument = null)
 		{
 			var condition = string.IsNullOrWhiteSpace(value);
@@ -34,6 +38,7 @@ namespace Duality.Helpers
 			//Debug.Assert(!condition);
 		}
 
+		[System.Diagnostics.Conditional("DEBUG")]
 		public static void NotEmpty(object value, string argument = null)
 		{
 			var condition = value == null || !((IEnumerable<object>)value).Any();
