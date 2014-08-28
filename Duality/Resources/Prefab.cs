@@ -436,6 +436,16 @@ namespace Duality.Resources
 				else
 					target = targetObj;
 
+				if (target == null)
+				{
+					Log.Core.WriteError("Error updating PrefabLink changes in {0}, property {1}, child index{2}:\n{3}",
+						this.obj.FullName,
+							this.changes[i].prop.Name,
+							this.changes[i].childIndex,
+							"Target object was null");
+					continue;
+				}
+
 				VarMod modTmp = this.changes[i];
 				modTmp.val = this.changes[i].prop.GetValue(target, null);
 				this.changes[i] = modTmp;
