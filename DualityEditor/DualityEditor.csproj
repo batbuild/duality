@@ -160,6 +160,8 @@
     <Compile Include="CorePluginInterface\PreviewProvider.cs" />
     <Compile Include="DualityEditorApp.cs" />
     <Compile Include="Helpers\EditorUtility.cs" />
+    <Compile Include="Helpers\HierarchicalContextMenuBuilder.cs" />
+    <Compile Include="Helpers\IEditorCategoryProvider.cs" />
     <Compile Include="Properties\GeneralResCache.cs" />
     <Compile Include="EditorUserData.cs" />
     <Compile Include="Forms\SaveLayoutDialog.cs">
