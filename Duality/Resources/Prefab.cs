@@ -79,7 +79,6 @@ namespace Duality.Resources
 					this.objTree = obj.Clone();
 				obj.OnSaved(true);
 
-				this.objTree.Parent = null;
 				this.objTree.BreakPrefabLink();
 
 				// Prevent recursion
@@ -436,6 +435,16 @@ namespace Duality.Resources
 					target = targetObj.GetComponent(this.changes[i].componentType);
 				else
 					target = targetObj;
+
+				if (target == null)
+				{
+					Log.Core.WriteError("Error updating PrefabLink changes in {0}, property {1}, child index{2}:\n{3}",
+						this.obj.FullName,
+							this.changes[i].prop.Name,
+							this.changes[i].childIndex,
+							"Target object was null");
+					continue;
+				}
 
 				VarMod modTmp = this.changes[i];
 				modTmp.val = this.changes[i].prop.GetValue(target, null);

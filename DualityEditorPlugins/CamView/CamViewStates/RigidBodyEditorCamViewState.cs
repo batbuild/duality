@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Duality;
 using Duality.Components;
 using Duality.Components.Physics;
+using Duality.Editor.Controls.ToolStrip;
 using Duality.Resources;
 using Duality.Drawing;
 using Duality.Editor;
@@ -47,6 +48,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		private	ToolStripButton		toolCreatePoly		= null;
 	//	private	ToolStripButton		toolCreateEdge		= null;
 		private	ToolStripButton		toolCreateLoop		= null;
+		private ToolStripCheckBox	toolToggleRenderAll = null;
+		private bool				renderAll			= false;
 
 		public override string StateName
 		{
@@ -92,6 +95,15 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.toolCreateLoop.DisplayStyle = ToolStripItemDisplayStyle.Image;
 			this.toolCreateLoop.AutoToolTip = true;
 			this.toolstrip.Items.Add(this.toolCreateLoop);
+
+			this.toolToggleRenderAll = new ToolStripCheckBox();
+			this.toolToggleRenderAll.DisplayStyle = ToolStripItemDisplayStyle.Text;
+			this.toolToggleRenderAll.Text = "Render All";
+			this.toolToggleRenderAll.AutoToolTip = true;
+			this.toolToggleRenderAll.ToolTipText = "Show game objects that don't have rigid bodies";
+			this.toolToggleRenderAll.Checked = this.renderAll;
+			this.toolToggleRenderAll.CheckedChanged += (sender, args) => this.renderAll = this.toolToggleRenderAll.Checked;
+			this.toolstrip.Items.Add(this.toolToggleRenderAll);
 
 			this.toolstrip.Renderer = new Duality.Editor.Controls.ToolStrip.DualitorToolStripProfessionalRenderer();
 			this.toolstrip.BackColor = Color.FromArgb(212, 212, 212);
@@ -508,7 +520,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		protected bool RendererFilter(ICmpRenderer r)
 		{
 			GameObject obj = (r as Component).GameObj;
-			if (obj.RigidBody == null || !(r as Component).Active) return false;
+			if (this.renderAll == false || !(r as Component).Active) return false;
 
 			DesignTimeObjectData data = DesignTimeObjectData.Get(obj);
 			return !data.IsHidden;
