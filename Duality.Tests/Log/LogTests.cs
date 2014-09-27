@@ -27,13 +27,14 @@ namespace Duality.Tests.Log
 		[Test]
 		public void When_params_contains_a_game_object_Then_sets_log_entry_game_object_reference()
 		{
+			var dataLogOutput = Duality.Log.Game.Outputs.FirstOrDefault(l => l is DataLogOutput) as DataLogOutput;
+			var logEntryCount = dataLogOutput.Data.Count();
 			var gameObject = new GameObject();
 			
 			Duality.Log.Game.Write("Test", gameObject);
 			
-			var dataLogOutput = Duality.Log.Game.Outputs.FirstOrDefault(l => l is DataLogOutput) as DataLogOutput;
-			Assert.AreEqual(1, dataLogOutput.Data.Count());
-			Assert.AreSame(gameObject, dataLogOutput.Data.First().GameObject);
+			Assert.AreEqual(logEntryCount + 1, dataLogOutput.Data.Count());
+			Assert.AreSame(gameObject, dataLogOutput.Data.Last().GameObject);
 		}
 	}
 }
