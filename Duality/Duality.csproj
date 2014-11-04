@@ -100,6 +100,7 @@
     <Compile Include="Components\FrameCompleteEventArgs.cs" />
     <Compile Include="Components\PassCompleteEventArgs.cs" />
     <Compile Include="Drawing\IDrawBatch.cs" />
+    <Compile Include="Drawing\Resolution.cs" />
     <Compile Include="Utility\DefaultRendererVisibilityStrategy.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsStream.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsXml.cs" />
