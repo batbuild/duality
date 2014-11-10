@@ -77,7 +77,14 @@ namespace Duality.Launcher
 			Profile.TimeSwapBuffers.EndMeasure();
 			Profile.TimeRender.EndMeasure();
 		}
-		
+
+		protected override void OnFocusedChanged(EventArgs e)
+		{
+			base.OnFocusedChanged(e);
+
+			DualityApp.OnFocusChanged(this.Focused);
+		}
+
 		private void SetMouseDeviceX(int x)
 		{
 			if (!this.Focused) return;
