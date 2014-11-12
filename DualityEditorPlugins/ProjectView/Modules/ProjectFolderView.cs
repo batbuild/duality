@@ -877,7 +877,7 @@ namespace Duality.Editor.Plugins.ProjectView
 			// Load their Resource data, if not loaded yet
 			Resource[] selRes = (
 				from rn in selResNode
-				where rn.ResLink.IsAvailable
+				where rn.ResType != typeof(Scene) && rn.ResLink.IsAvailable
 				select rn.ResLink.Res
 				).ToArray();
 
