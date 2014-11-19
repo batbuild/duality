@@ -614,7 +614,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					this.createAction = true;
 					this.LeaveCursorState();
 					this.SelectObjects(new[] { SelShape.Create(newShape) });
-					this.BeginAction(ObjectAction.Scale);
+					this.BeginAction(new ScaleObjectAction());
 				}
 				else if (e.Button == MouseButtons.Right)
 				{
@@ -900,20 +900,20 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			base.OnLostFocus();
 			this.LeaveCursorState();
 		}
-		protected override void OnBeginAction(CamViewState.ObjectAction action)
+		protected override void OnBeginAction(IObjectAction action)
 		{
 			base.OnBeginAction(action);
 			bool shapeAction = 
-				action != ObjectAction.RectSelect && 
-				action != ObjectAction.None;
+				!(action is RectSelectObjectAction) && 
+				!(action is NullObjectAction);
 			if (this.selectedBody != null && shapeAction) this.selectedBody.BeginUpdateBodyShape();
 		}
-		protected override void OnEndAction(CamViewState.ObjectAction action)
+		protected override void OnEndAction(IObjectAction action)
 		{
 			base.OnEndAction(action);
 			bool shapeAction = 
-				action != ObjectAction.RectSelect && 
-				action != ObjectAction.None;
+				!(action is RectSelectObjectAction) && 
+				!(action is NullObjectAction);
 			if (this.selectedBody != null && shapeAction)
 			{
 				this.selectedBody.EndUpdateBodyShape();
@@ -924,7 +924,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				UndoRedoManager.EndMacro(UndoRedoManager.MacroDeriveName.FromFirst);
 			}
 		}
-		protected override void PostPerformAction(IEnumerable<CamViewState.SelObj> selObjEnum, CamViewState.ObjectAction action)
+		protected override void PostPerformAction(IEnumerable<CamViewState.SelObj> selObjEnum, IObjectAction action)
 		{
 			base.PostPerformAction(selObjEnum, action);
 			SelShape[] selShapeArray = selObjEnum.OfType<SelShape>().ToArray();
