@@ -157,7 +157,8 @@ namespace Duality.Drawing
 
 		~DrawDevice()
 		{
-			this.Dispose(false);
+			// We require finalization in the main thread due to graphics / handle Resources
+			DualityApp.DisposeLater(this);
 		}
 		/// <summary>
 		/// Disposes the DrawDevice.
