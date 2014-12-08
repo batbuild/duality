@@ -218,10 +218,30 @@ namespace Duality
 				// log message, so the user can retrieve all necessary information for
 				// fixing his log call.
 				msg = format + Environment.NewLine;
-				if (obj != null) msg += obj.ToString(", ") + Environment.NewLine;
+				if (obj != null)
+				{
+					try
+					{
+						msg += obj.ToString(", ") + Environment.NewLine;
+					}
+					catch (Exception)
+					{
+						msg += "(Error in ToString call)" + Environment.NewLine;
+					}
+				}
 				msg += Log.Exception(e);
 			}
 			return msg;
+		}
+		private object FindContext(object[] obj)
+		{
+			if (obj == null || obj.Length == 0) return null;
+			for (int i = 0; i < obj.Length; i++)
+			{
+				if (obj[i] is GameObject || obj[i] is Component || obj[i] is Resource || obj[i] is IContentRef)
+					return obj[i];
+			}
+			return obj[0];
 		}
 
 		/// <summary>
@@ -231,7 +251,7 @@ namespace Duality
 		/// <param name="obj"></param>
 		public void Write(string format, params object[] obj)
 		{
-			this.Write(LogMessageType.Message, this.FormatMessage(format, obj), obj.FirstOrDefault(o => o is GameObject));
+			this.Write(LogMessageType.Message, this.FormatMessage(format, obj), this.FindContext(obj));
 		}
 		/// <summary>
 		/// Writes a new warning log entry.
@@ -240,7 +260,7 @@ namespace Duality
 		/// <param name="obj"></param>
 		public void WriteWarning(string format, params object[] obj)
 		{
-			this.Write(LogMessageType.Warning, this.FormatMessage(format, obj), obj.FirstOrDefault(o => o is GameObject));
+			this.Write(LogMessageType.Warning, this.FormatMessage(format, obj), this.FindContext(obj));
 		}
 		/// <summary>
 		/// Writes a new error log entry.
@@ -249,7 +269,7 @@ namespace Duality
 		/// <param name="obj"></param>
 		public void WriteError(string format, params object[] obj)
 		{
-			this.Write(LogMessageType.Error, this.FormatMessage(format, obj), obj.FirstOrDefault(o => o is GameObject));
+			this.Write(LogMessageType.Error, this.FormatMessage(format, obj), this.FindContext(obj));
 		}
 
 		/// <summary>
@@ -483,7 +503,7 @@ namespace Duality
 		/// <param name="source">The <see cref="Log"/> from which the message originates.</param>
 		/// <param name="type">The type of the log message.</param>
 		/// <param name="msg">The message to write.</param>
-		/// <param name="context1"></param>
+		/// <param name="context">The context in which this log was written. Usually the primary object the log entry is associated with.</param>
 		void Write(Log source, LogMessageType type, string msg, object context);
 	}
 }

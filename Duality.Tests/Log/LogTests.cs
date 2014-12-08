@@ -34,7 +34,7 @@ namespace Duality.Tests.Log
 			Duality.Log.Game.Write("Test", gameObject);
 			
 			Assert.AreEqual(logEntryCount + 1, dataLogOutput.Data.Count());
-			Assert.AreSame(gameObject, dataLogOutput.Data.Last().GameObject);
+			Assert.AreSame(gameObject, dataLogOutput.Data.Last().Context);
 		}
 	}
 }

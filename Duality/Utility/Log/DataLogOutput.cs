@@ -34,10 +34,10 @@ namespace Duality
 			private	Log				source;
 			private	LogMessageType	type;
 			private	string			msg;
+			private	object			context;
 			private	int				indent;
 			private	DateTime		timestamp;
 			private	int				frameIndex;
-			private GameObject		gameObject;
 
 			/// <summary>
 			/// [GET] The <see cref="Log"/> from which this entry originates.
@@ -61,6 +61,13 @@ namespace Duality
 				get { return this.msg; }
 			}
 			/// <summary>
+			/// The context in which this log was written. Usually the primary object the log entry is associated with.
+			/// </summary>
+			public object Context
+			{
+				get { return this.context; }
+			}
+			/// <summary>
 			/// [GET] The message's indent value.
 			/// </summary>
 			public int Indent
@@ -81,20 +88,13 @@ namespace Duality
 			{
 				get { return this.frameIndex; }
 			}
-			/// <summary>
-			/// [GET] The GameObject that is relevant to this log message, if any.
-			/// </summary>
-			public GameObject GameObject
-			{
-				get { return this.gameObject; }
-			}
-
-			public LogEntry(Log source, LogMessageType type, string msg, GameObject gameObject = null)
+			
+			public LogEntry(Log source, LogMessageType type, string msg, object context)
 			{
 				this.source = source;
 				this.type = type;
 				this.msg = msg;
-				this.gameObject = gameObject;
+				this.context = context;
 				this.indent = source.Indent;
 				this.timestamp = DateTime.Now;
 				this.frameIndex = Time.FrameCount;
@@ -119,10 +119,11 @@ namespace Duality
 		/// <param name="source">The <see cref="Log"/> from which the message originates.</param>
 		/// <param name="type">The type of the log message.</param>
 		/// <param name="msg">The message to write.</param>
+		/// <param name="context">The context in which this log was written. Usually the primary object the log entry is associated with.</param>
 		public void Write(Log source, LogMessageType type, string msg, object context)
 		{
 			LogEntry entry;
-			entry = new LogEntry(source, type, msg, context as GameObject);
+			entry = new LogEntry(source, type, msg, context);
 			data.Add(entry);
 			this.OnNewEntry(entry);
 		}
