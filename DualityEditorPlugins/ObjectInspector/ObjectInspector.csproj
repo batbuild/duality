@@ -38,11 +38,12 @@
   <ItemGroup>
     <Reference Include="AdamsLair.WinForms, Version=1.0.0.2, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.13\lib\net40\AdamsLair.WinForms.dll</HintPath>
+      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.14\lib\net40\AdamsLair.WinForms.dll</HintPath>
     </Reference>
     <Reference Include="PopupControl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.13\lib\net40\PopupControl.dll</HintPath>
+      <HintPath>..\..\packages\AdamsLair.WinForms.0.1.14\lib\net40\PopupControl.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
