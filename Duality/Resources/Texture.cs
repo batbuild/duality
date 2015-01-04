@@ -266,6 +266,7 @@ namespace Duality.Resources
 		private	TextureWrapMode			wrapX		= TextureWrapMode.ClampToEdge;
 		private	TextureWrapMode			wrapY		= TextureWrapMode.ClampToEdge;
 		private	PixelInternalFormat		pixelformat	= PixelInternalFormat.Rgba;
+		private	PixelType				pixelType	= PixelType.UnsignedByte;
 		private	bool					anisoFilter		= false;
 		private bool					premultiplyAlpha = false;
 		[NonSerialized]	private	int		pxWidth		= 0;
@@ -491,13 +492,15 @@ namespace Duality.Resources
 			TextureMinFilter filterMin	= TextureMinFilter.LinearMipmapLinear,
 			TextureWrapMode wrapX		= TextureWrapMode.ClampToEdge,
 			TextureWrapMode wrapY		= TextureWrapMode.ClampToEdge,
-			PixelInternalFormat format	= PixelInternalFormat.Rgba)
+			PixelInternalFormat format	= PixelInternalFormat.Rgba,
+			PixelType pixelType			= PixelType.UnsignedByte)
 		{
 			this.filterMag = filterMag;
 			this.filterMin = filterMin;
 			this.wrapX = wrapX;
 			this.wrapY = wrapY;
 			this.pixelformat = format;
+			this.pixelType = pixelType;
 			this.LoadData(basePixmap, sizeMode);
 		}
 		/// <summary>
@@ -517,13 +520,15 @@ namespace Duality.Resources
 			TextureMinFilter filterMin	= TextureMinFilter.LinearMipmapLinear,
 			TextureWrapMode wrapX		= TextureWrapMode.ClampToEdge,
 			TextureWrapMode wrapY		= TextureWrapMode.ClampToEdge,
-			PixelInternalFormat format	= PixelInternalFormat.Rgba)
+			PixelInternalFormat format	= PixelInternalFormat.Rgba,
+			PixelType pixelType			= PixelType.UnsignedByte)
 		{
 			this.filterMag = filterMag;
 			this.filterMin = filterMin;
 			this.wrapX = wrapX;
 			this.wrapY = wrapY;
 			this.pixelformat = format;
+			this.pixelType = pixelType;
 			this.texSizeMode = sizeMode;
 			this.AdjustSize(width, height);
 			this.SetupOpenGLRes();
@@ -751,7 +756,7 @@ namespace Duality.Resources
 
 			GL.TexImage2D(TextureTarget.Texture2D, 0,
 				this.pixelformat, this.texWidth, this.texHeight, 0,
-				GLPixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
+				GLPixelFormat.Bgra, this.pixelType, IntPtr.Zero);
 			
 			if (lastTexId != this.glTexId) GL.BindTexture(TextureTarget.Texture2D, lastTexId);
 		}
