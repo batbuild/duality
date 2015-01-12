@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO.Compression;
 using System.Linq;
 using System.IO;
 using System.Reflection;
@@ -9,7 +10,7 @@ using Duality.Serialization;
 using Duality.Editor;
 using Duality.Cloning;
 using Duality.Properties;
-
+using LZ4;
 using ICloneable = Duality.Cloning.ICloneExplicit;
 
 namespace Duality
@@ -42,6 +43,8 @@ namespace Duality
 		/// load recursively, and this flag is useful in those situations.
 		/// </summary>
 		public static bool BlockAllInits { get; set; }
+
+		public static bool CompressOnSave { get; set; }
 
 		/// <summary>
 		/// The path of the file from which the Resource has been originally imported or initialized.
@@ -162,9 +165,31 @@ namespace Duality
 			string streamName;
 			string dirName = System.IO.Path.GetDirectoryName(saveAsPath);
 			if (!string.IsNullOrEmpty(dirName) && !Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
+
 			using (FileStream str = File.Open(saveAsPath, FileMode.Create))
 			{
-				this.WriteToStream(str, out streamName);
+				if (CompressOnSave)
+				{
+					str.Write(BitConverter.GetBytes('L'), 0, 1);
+					str.Write(BitConverter.GetBytes('Z'), 0, 1);
+					str.Write(BitConverter.GetBytes('4'), 0, 1);
+					str.Write(BitConverter.GetBytes(' '), 0, 1);
+
+					using (var memoryStream = new MemoryStream())
+					{
+						this.WriteToStream(memoryStream, out streamName);
+						
+						using (var compressionStream = new LZ4Stream(str, CompressionMode.Compress))
+						{
+							memoryStream.Seek(0, SeekOrigin.Begin);
+							compressionStream.Write(memoryStream.ToArray(), 0, (int) memoryStream.Length);
+						}
+					}
+				}
+				else
+				{
+					this.WriteToStream(str, out streamName);
+				}
 			}
 			this.CheckedOnSaved(saveAsPath);
 		}
@@ -351,10 +376,25 @@ namespace Duality
 			T newContent;
 			using (FileStream str = File.OpenRead(path))
 			{
-				newContent = Load<T>(str, path, loadCallback, initResource);
+				if (IsCompressedResource(str))
+				{
+					using (var memoryStream = new MemoryStream())
+					using (var stream = new LZ4Stream(str, CompressionMode.Decompress))
+					{
+						stream.CopyTo(memoryStream);
+						memoryStream.Seek(0, SeekOrigin.Begin);
+						newContent = Load<T>(memoryStream, path, loadCallback, initResource);
+					}
+				}
+				else
+				{
+					str.Seek(0, SeekOrigin.Begin);
+					newContent = Load<T>(str, path, loadCallback, initResource);
+				}
 			}
 			return newContent;
 		}
+
 		/// <summary>
 		/// Loads the Resource from the specified <see cref="Stream"/>. You shouldn't need this method in almost all cases.
 		/// Only use it when you know exactly what you're doing. Consider requesting the Resource from the <see cref="ContentProvider"/> instead.
@@ -516,6 +556,25 @@ namespace Duality
 				{
 					res.Dispose(false);
 				}
+			}
+		}
+
+		/// <summary>
+		/// Checks for the presence of the four byte LZ4 marker at the start of a file stream.
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <returns></returns>
+		private static bool IsCompressedResource(FileStream stream)
+		{
+			var magic = new byte[4];
+			try
+			{
+				stream.Read(magic, 0, 4);
+				return magic[0] == 'L' && magic[1] == 'Z' && magic[2] == '4' && magic[3] == ' ';
+			}
+			catch
+			{
+				return false;
 			}
 		}
 	}
