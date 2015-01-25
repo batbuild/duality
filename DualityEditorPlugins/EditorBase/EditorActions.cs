@@ -141,7 +141,7 @@ namespace Duality.Editor.Plugins.Base
 			AbstractShader	shader		= obj as AbstractShader;
 			if (pixmap		!= null)		FileImportProvider.OpenSourceFile(pixmap, ".png", pixmap.SavePixelData);
 			else if (audioData	!= null)	FileImportProvider.OpenSourceFile(audioData, ".ogg", audioData.SaveOggVorbisData);
-			else if (shader		!= null)	FileImportProvider.OpenSourceFile(shader, shader is FragmentShader ? ".frag" : ".vert", shader.SaveSource);
+			else if (shader		!= null)	FileImportProvider.OpenSourceFile(shader, shader is FragmentShader ? ".frag" : shader is VertexShader ? ".vert" : ".geom", shader.SaveSource);
 		}
 		public override bool CanPerformOn(Resource obj)
 		{

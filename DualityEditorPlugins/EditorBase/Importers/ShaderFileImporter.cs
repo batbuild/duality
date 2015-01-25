@@ -11,7 +11,7 @@ namespace Duality.Editor.Plugins.Base
 		public bool CanImportFile(string srcFile)
 		{
 			string ext = Path.GetExtension(srcFile).ToLower();
-			return ext == ".vert" || ext == ".frag";
+			return ext == ".vert" || ext == ".frag" || ext == ".geom";
 		}
 		public void ImportFile(string srcFile, string targetName, string targetDir)
 		{
@@ -24,9 +24,16 @@ namespace Duality.Editor.Plugins.Base
 				res.Compile();
 				res.Save(output[0]);
 			}
-			else
+			else if(ext == ".frag")
 			{
 				FragmentShader res = new FragmentShader();
+				res.LoadSource(srcFile);
+				res.Compile();
+				res.Save(output[0]);
+			}
+			else
+			{
+				GeometryShader res = new GeometryShader();
 				res.LoadSource(srcFile);
 				res.Compile();
 				res.Save(output[0]);
@@ -38,8 +45,11 @@ namespace Duality.Editor.Plugins.Base
 			string targetResPath;
 			if (ext == ".vert")
 				targetResPath = PathHelper.GetFreePath(Path.Combine(targetDir, targetName), VertexShader.FileExt);
-			else
+			else if(ext == ".frag")
 				targetResPath = PathHelper.GetFreePath(Path.Combine(targetDir, targetName), FragmentShader.FileExt);
+			else
+				targetResPath = PathHelper.GetFreePath(Path.Combine(targetDir, targetName), GeometryShader.FileExt);
+
 			return new string[] { targetResPath };
 		}
 

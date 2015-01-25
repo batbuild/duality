@@ -111,6 +111,7 @@ namespace Duality.Resources
 
 		private	ContentRef<VertexShader>	vert	= VertexShader.Minimal;
 		private	ContentRef<FragmentShader>	frag	= FragmentShader.Minimal;
+		private	ContentRef<GeometryShader>	geom	= null;
 		[NonSerialized] private	int				glProgramId	= 0;
 		[NonSerialized] private bool			compiled	= false;
 		[NonSerialized] private	ShaderVarInfo[]	varInfo		= null;
@@ -164,6 +165,14 @@ namespace Duality.Resources
 			get { return this.frag; }
 			set { this.AttachShaders(this.vert, value); this.Compile(); }
 		}
+		/// <summary>
+		/// [GET / SET] The <see cref="GeometryShader"/> that is used by this ShaderProgram.
+		/// </summary>
+		[EditorHintFlags(MemberFlags.AffectsOthers)]
+		public ContentRef<GeometryShader> Geometry { 
+			get { return this.geom; }
+			set { this.AttachShaders(this.vert, this.frag, value); this.Compile();}
+		}
 
 		/// <summary>
 		/// Creates a new, empty ShaderProgram.
@@ -185,14 +194,14 @@ namespace Duality.Resources
 		/// </summary>
 		public void AttachShaders()
 		{
-			this.AttachShaders(this.vert, this.frag);
+			this.AttachShaders(this.vert, this.frag, this.geom);
 		}
 		/// <summary>
 		/// Attaches the specified <see cref="VertexShader">Vertex-</see> and <see cref="FragmentShader"/> to this ShaderProgram.
 		/// </summary>
 		/// <param name="v"></param>
 		/// <param name="f"></param>
-		public void AttachShaders(ContentRef<VertexShader> v, ContentRef<FragmentShader> f)
+		public void AttachShaders(ContentRef<VertexShader> v, ContentRef<FragmentShader> f, ContentRef<GeometryShader> g = new ContentRef<GeometryShader>())
 		{
 			DualityApp.GuardSingleThreadState();
 
@@ -202,14 +211,17 @@ namespace Duality.Resources
 			this.compiled = false;
 			this.vert = v;
 			this.frag = f;
+			this.geom = g;
 
-			// Assure both shaders are compiled
+			// Assure all shaders are compiled
 			if (this.vert.IsAvailable) this.vert.Res.Compile();
 			if (this.frag.IsAvailable) this.frag.Res.Compile();
+			if (this.geom.IsAvailable) this.geom.Res.Compile();
 			
-			// Attach both shaders
+			// Attach all shaders
 			if (this.vert.IsAvailable) GL.AttachShader(this.glProgramId, this.vert.Res.OglShaderId);
 			if (this.frag.IsAvailable) GL.AttachShader(this.glProgramId, this.frag.Res.OglShaderId);
+			if (this.geom.IsAvailable) GL.AttachShader(this.glProgramId, this.geom.Res.OglShaderId);
 		}
 		/// <summary>
 		/// Detaches <see cref="VertexShader">Vertex-</see> and <see cref="FragmentShader"/> from the ShaderProgram.
@@ -255,14 +267,16 @@ namespace Duality.Resources
 			this.compiled = true;
 
 			// Collect variable infos from sub programs
+			ShaderVarInfo[] geomVarArray = this.geom.IsAvailable ? this.geom.Res.VarInfo : null;
 			ShaderVarInfo[] fragVarArray = this.frag.IsAvailable ? this.frag.Res.VarInfo : null;
 			ShaderVarInfo[] vertVarArray = this.vert.IsAvailable ? this.vert.Res.VarInfo : null;
-			if (fragVarArray != null && vertVarArray != null)
-				this.varInfo = vertVarArray.Union(fragVarArray).ToArray();
-			else if (vertVarArray != null)
-				this.varInfo = vertVarArray.ToArray();
-			else
-				this.varInfo = fragVarArray.ToArray();
+
+			var emptyShaderInfo = new ShaderVarInfo[0];
+			this.varInfo = (vertVarArray ?? emptyShaderInfo)
+				.Union(fragVarArray ?? emptyShaderInfo)
+				.Union(geomVarArray ?? emptyShaderInfo)
+				.ToArray();
+
 			// Determine actual variable locations
 			for (int i = 0; i < this.varInfo.Length; i++)
 			{
