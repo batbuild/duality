@@ -98,6 +98,7 @@ namespace Duality
 
 		private static Dictionary<string, CorePlugin> plugins = new Dictionary<string, CorePlugin>();
 		private static List<Assembly> disposedPlugins = new List<Assembly>();
+		private static List<string> blockRecursiveAssemblyResolvesList = new List<string>();
 		private static Dictionary<Type, List<Type>> availTypeDict = new Dictionary<Type, List<Type>>();
 
 		/// <summary>
@@ -1160,14 +1161,21 @@ namespace Duality
 			Log.Core.WriteError(Log.Exception(e.ExceptionObject as Exception));
 			if (e.IsTerminating) Terminate(true);
 		}
+
 		private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
 		{
 			string assemblyNameStub = ReflectionHelper.GetShortAssemblyName(args.Name);
+
+			if (blockRecursiveAssemblyResolvesList.Contains(assemblyNameStub))
+				return null;
+
+			blockRecursiveAssemblyResolvesList.Add(assemblyNameStub);
 
 			// First assume we are searching for a dynamically loaded plugin assembly
 			CorePlugin plugin;
 			if (plugins.TryGetValue(assemblyNameStub, out plugin))
 			{
+				blockRecursiveAssemblyResolvesList.Remove(assemblyNameStub);
 				return plugin.PluginAssembly;
 			}
 			// Not there? Search for other libraries in the Plugins folder
@@ -1184,6 +1192,7 @@ namespace Duality
 						{
 							// It's a plugin that hasn't been loaded yet? Load it now.
 							plugin = LoadPlugin(libFile);
+							blockRecursiveAssemblyResolvesList.Remove(assemblyNameStub);
 							if (plugin != null) return plugin.PluginAssembly;
 						}
 						else
@@ -1192,6 +1201,7 @@ namespace Duality
 							try
 							{
 								Assembly library = Assembly.LoadFrom(libFile);
+								blockRecursiveAssemblyResolvesList.Remove(assemblyNameStub);
 								return library;
 							}
 							catch (Exception e)
@@ -1204,6 +1214,7 @@ namespace Duality
 			}
 
 			// Admit that we didn't find anything.
+			blockRecursiveAssemblyResolvesList.Remove(assemblyNameStub);
 			return null;
 		}
 		private static void CurrentDomain_AssemblyLoad(object sender, AssemblyLoadEventArgs args)
