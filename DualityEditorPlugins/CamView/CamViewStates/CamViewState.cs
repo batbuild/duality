@@ -17,6 +17,7 @@ using Duality.Editor.Plugins.CamView.UndoRedoActions;
 
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using KeyPressEventArgs = System.Windows.Forms.KeyPressEventArgs;
 
 namespace Duality.Editor.Plugins.CamView.CamViewStates
 {
@@ -375,6 +376,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.LocalGLControl.MouseLeave	+= this.LocalGLControl_MouseLeave;
 			this.LocalGLControl.KeyDown		+= this.LocalGLControl_KeyDown;
 			this.LocalGLControl.KeyUp		+= this.LocalGLControl_KeyUp;
+			this.LocalGLControl.KeyPress	+= this.LocalGLControl_KeyPress;
 			this.LocalGLControl.GotFocus	+= this.LocalGLControl_GotFocus;
 			this.LocalGLControl.LostFocus	+= this.LocalGLControl_LostFocus;
 			this.LocalGLControl.DragDrop	+= this.LocalGLControl_DragDrop;
@@ -401,6 +403,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.OnCurrentCameraChanged(new CamView.CameraChangedEventArgs(null, this.CameraComponent));
 			this.UpdateFormattedTextRenderers();
 		}
+
 		internal protected virtual void OnLeaveState() 
 		{
 			this.Cursor = CursorHelper.Arrow;
@@ -820,6 +823,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		protected virtual void OnDragLeave(EventArgs e) {}
 
 		protected virtual void OnKeyDown(KeyEventArgs e) {}
+		protected virtual void OnKeyPress(KeyPressEventArgs e) {}
 		protected virtual void OnKeyUp(KeyEventArgs e) {}
 		protected virtual void OnMouseDown(MouseEventArgs e) {}
 		protected virtual void OnMouseUp(MouseEventArgs e) {}
@@ -1547,6 +1551,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			}
 
 			this.OnKeyDown(e);
+		}
+		private void LocalGLControl_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			this.OnKeyPress(e);
 		}
 		private void LocalGLControl_KeyUp(object sender, KeyEventArgs e)
 		{
