@@ -416,6 +416,9 @@ namespace Duality.Resources
 				foreach (GameObject obj in activeObj)
 					obj.Update();
 
+				foreach (GameObject obj in activeObj)
+					obj.LateUpdate();
+
 				if(this.visibilityStrategy != null)
 					this.visibilityStrategy.Update();
 			}
