@@ -835,6 +835,13 @@ namespace Duality
 				l => l.OnUpdate(),
 				l => (l as Component).Active);
 		}
+
+		internal void LateUpdate()
+		{
+			this.IterateComponents<ICmpLateUpdatable>(
+				l => l.OnUpdate(),
+				l => (l as Component).Active);
+		}
 		internal void EditorUpdate()
 		{
 			// Update Components

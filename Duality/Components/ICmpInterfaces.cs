@@ -22,6 +22,15 @@ namespace Duality
 		void OnUpdate();
 	}
 	/// <summary>
+	/// Implement this interface in <see cref="Component">Components</see> that require per-frame updates after all other components
+	/// have been updated. Useful for sequencing component execution order. Example usages include any component that uses the results
+	/// of other components or game objects that might have moved in the current frame.
+	/// </summary>
+	public interface ICmpLateUpdatable
+	{
+		void OnUpdate();
+	}
+	/// <summary>
 	/// Implement this interface in C<see cref="Component">Components</see> that require per-frame updates in the editor.
 	/// </summary>
 	public interface ICmpEditorUpdatable
