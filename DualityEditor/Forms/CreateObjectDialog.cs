@@ -54,17 +54,16 @@ namespace Duality.Editor.Forms
 
 		private void buttonOk_Click(object sender, EventArgs e)
 		{
-			TypeItem item = (this.objectTypeView.SelectedNode != null ? this.objectTypeView.SelectedNode.Tag as TypeItem : null);
-			this.selectedType = item.TypeInfo;
-			this.DialogResult = DialogResult.OK;
-			this.Close();
+			SelectItem();
 		}
+
 		private void buttonCancel_Click(object sender, EventArgs e)
 		{
 			this.selectedType = null;
 			this.DialogResult = DialogResult.Cancel;
 			this.Close();
 		}
+
 		private void treeNodeName_DrawText(object sender, DrawTextEventArgs e)
 		{
 			TypeItem item = e.Node.Tag as TypeItem;
@@ -77,10 +76,24 @@ namespace Duality.Editor.Forms
 				e.TextColor = Color.FromArgb(128, this.objectTypeView.ForeColor);
 			}
 		}
+
 		private void objectTypeView_SelectionChanged(object sender, EventArgs e)
 		{
 			TypeItem item = (this.objectTypeView.SelectedNode != null ? this.objectTypeView.SelectedNode.Tag as TypeItem : null);
 			this.buttonOk.Enabled = (item != null ? this.CanInstantiateType(item.TypeInfo) : false);
+		}
+
+		private void objectTypeView_DoubleClick(object sender, EventArgs e)
+		{
+			SelectItem();
+		}
+
+		private void SelectItem()
+		{
+			TypeItem item = (this.objectTypeView.SelectedNode != null ? this.objectTypeView.SelectedNode.Tag as TypeItem : null);
+			this.selectedType = item.TypeInfo;
+			this.DialogResult = DialogResult.OK;
+			this.Close();
 		}
 
 		HelpInfo IHelpProvider.ProvideHoverHelp(Point localPos, ref bool captured)

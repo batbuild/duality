@@ -38,11 +38,12 @@
 			// 
 			// objectTypeView
 			// 
-			this.objectTypeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.objectTypeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.objectTypeView.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
 			this.objectTypeView.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.objectTypeView.ColumnHeaderHeight = 0;
 			this.objectTypeView.DefaultToolTipProvider = null;
 			this.objectTypeView.DragDropMarkColor = System.Drawing.Color.Black;
 			this.objectTypeView.FullRowSelect = true;
@@ -57,9 +58,10 @@
 			this.objectTypeView.NodeControls.Add(this.treeNodeName);
 			this.objectTypeView.NodeFilter = null;
 			this.objectTypeView.SelectedNode = null;
-			this.objectTypeView.Size = new System.Drawing.Size(268, 101);
+			this.objectTypeView.Size = new System.Drawing.Size(431, 559);
 			this.objectTypeView.TabIndex = 0;
 			this.objectTypeView.SelectionChanged += new System.EventHandler(this.objectTypeView_SelectionChanged);
+			this.objectTypeView.DoubleClick += new System.EventHandler(this.objectTypeView_DoubleClick);
 			// 
 			// treeNodeIcon
 			// 
@@ -79,7 +81,7 @@
 			// 
 			this.buttonOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.buttonOk.Enabled = false;
-			this.buttonOk.Location = new System.Drawing.Point(124, 162);
+			this.buttonOk.Location = new System.Drawing.Point(287, 620);
 			this.buttonOk.Name = "buttonOk";
 			this.buttonOk.Size = new System.Drawing.Size(75, 23);
 			this.buttonOk.TabIndex = 1;
@@ -91,7 +93,7 @@
 			// 
 			this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.buttonCancel.Location = new System.Drawing.Point(205, 162);
+			this.buttonCancel.Location = new System.Drawing.Point(368, 620);
 			this.buttonCancel.Name = "buttonCancel";
 			this.buttonCancel.Size = new System.Drawing.Size(75, 23);
 			this.buttonCancel.TabIndex = 2;
@@ -101,11 +103,11 @@
 			// 
 			// labelInfo
 			// 
-			this.labelInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.labelInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.labelInfo.Location = new System.Drawing.Point(12, 9);
 			this.labelInfo.Name = "labelInfo";
-			this.labelInfo.Size = new System.Drawing.Size(268, 34);
+			this.labelInfo.Size = new System.Drawing.Size(431, 34);
 			this.labelInfo.TabIndex = 3;
 			this.labelInfo.Text = "Please select the Type of object you want to create.";
 			// 
@@ -116,7 +118,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(212)))), ((int)(((byte)(212)))), ((int)(((byte)(212)))));
 			this.CancelButton = this.buttonCancel;
-			this.ClientSize = new System.Drawing.Size(292, 197);
+			this.ClientSize = new System.Drawing.Size(455, 655);
 			this.Controls.Add(this.labelInfo);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOk);
