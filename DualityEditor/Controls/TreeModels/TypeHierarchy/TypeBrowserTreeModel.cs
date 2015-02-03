@@ -124,6 +124,7 @@ namespace Duality.Editor.Controls.TreeModels.TypeHierarchy
 				}
 			}
 
+			items.Sort((nodeOne, nodeTwo) => String.Compare(nodeOne.Name, nodeTwo.Name, StringComparison.Ordinal));
 			return items;
 		}
 		public bool IsLeaf(TreePath treePath)
