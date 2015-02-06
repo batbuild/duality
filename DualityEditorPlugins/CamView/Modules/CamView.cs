@@ -860,10 +860,11 @@ namespace Duality.Editor.Plugins.CamView
 				this.inputKeyPressed = this.inputKeyPressed.And(e.KeyCode.ToOpenTK().Not());
 			}
 
-			if (e.KeyCode >= Keys.D1 && e.KeyCode <= Keys.D9)
+			if (e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9)
 			{
-				if (this.stateSelector.Items.Count > e.KeyCode - Keys.D1)
-					this.stateSelector.SelectedIndex = e.KeyCode - Keys.D1;
+				bool consumedByGame = this.activeState.EngineUserInput && Sandbox.IsActive;
+				if (!consumedByGame && this.stateSelector.Items.Count > e.KeyCode - Keys.D0)
+					this.stateSelector.SelectedIndex = e.KeyCode - Keys.D0;
 			}
 		}
 		private void glControl_Resize(object sender, EventArgs e)
