@@ -24,7 +24,7 @@ namespace Duality
 		private	static	Dictionary<MemberInfo,Attribute[]>	customAttributeCache	= new Dictionary<MemberInfo,Attribute[]>();
 		private	static	List<SerializeErrorHandler>			serializeHandlerCache	= new List<SerializeErrorHandler>();
 		private	static	Dictionary<KeyValuePair<Type,Type>,bool>	resRefCache	= new Dictionary<KeyValuePair<Type,Type>,bool>();
-		private static	List<Assembly>						exlucdeFromTypeSearch	= new List<Assembly>();  
+		private static	List<string>						exlucdeFromTypeSearch	= new List<string>();  
 
 		/// <summary>
 		/// Equals <c>BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic</c>.
@@ -588,7 +588,7 @@ namespace Duality
 		/// search to complete. 
 		/// </summary>
 		/// <param name="assemblies"></param>
-		public static void ExcludeFromTypeSearches(IEnumerable<Assembly> assemblies)
+		public static void ExcludeFromTypeSearches(IEnumerable<string> assemblies)
 		{
 			foreach (var assembly in assemblies)
 			{
@@ -610,8 +610,7 @@ namespace Duality
 			Type result;
 			if (typeResolveCache.TryGetValue(typeString, out result)) return result;
 
-			Assembly[] searchAsm = AppDomain.CurrentDomain.GetAssemblies().Except(DualityApp.DisposedPlugins).Except(exlucdeFromTypeSearch).ToArray();
-			result = FindType(typeString, searchAsm, declaringMethod);
+			result = FindType(typeString, GetSearchAssemblies(), declaringMethod);
 			if (result != null && declaringMethod == null) typeResolveCache[typeString] = result;
 
 			if (result == null && throwOnError) throw new ApplicationException(string.Format("Can't resolve Type '{0}'. Type not found", typeString));
@@ -628,8 +627,7 @@ namespace Duality
 			MemberInfo result;
 			if (memberResolveCache.TryGetValue(memberString, out result)) return result;
 
-			Assembly[] searchAsm = AppDomain.CurrentDomain.GetAssemblies().Except(DualityApp.DisposedPlugins).Except(exlucdeFromTypeSearch).ToArray();
-			result = FindMember(memberString, searchAsm);
+			result = FindMember(memberString, GetSearchAssemblies());
 			if (result != null) memberResolveCache[memberString] = result;
 
 			if (result == null && throwOnError) throw new ApplicationException(string.Format("Can't resolve MemberInfo '{0}'. Member not found", memberString));
@@ -1322,6 +1320,18 @@ namespace Duality
 			}
 
 			return true;
+		}
+		/// <summary>
+		/// Returns the list of assemblies that we should look in when searching for a type by name
+		/// </summary>
+		/// <returns></returns>
+		private static Assembly[] GetSearchAssemblies()
+		{
+			Assembly[] searchAsm = AppDomain.CurrentDomain.GetAssemblies()
+				.Except(DualityApp.DisposedPlugins)
+				.Where(a => !exlucdeFromTypeSearch.Contains(a.GetName().Name))
+				.ToArray();
+			return searchAsm;
 		}
 
 		/// <summary>
