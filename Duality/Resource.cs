@@ -169,27 +169,9 @@ namespace Duality
 			using (FileStream str = File.Open(saveAsPath, FileMode.Create))
 			{
 				if (CompressOnSave)
-				{
-					str.Write(BitConverter.GetBytes('L'), 0, 1);
-					str.Write(BitConverter.GetBytes('Z'), 0, 1);
-					str.Write(BitConverter.GetBytes('4'), 0, 1);
-					str.Write(BitConverter.GetBytes(' '), 0, 1);
-
-					using (var memoryStream = new MemoryStream())
-					{
-						this.WriteToStream(memoryStream, out streamName);
-						
-						using (var compressionStream = new LZ4Stream(str, CompressionMode.Compress))
-						{
-							memoryStream.Seek(0, SeekOrigin.Begin);
-							compressionStream.Write(memoryStream.ToArray(), 0, (int) memoryStream.Length);
-						}
-					}
-				}
+					SaveCompressed(str);
 				else
-				{
 					this.WriteToStream(str, out streamName);
-				}
 			}
 			this.CheckedOnSaved(saveAsPath);
 		}
@@ -206,6 +188,25 @@ namespace Duality
 			this.CheckedOnSaving(null);
 			this.WriteToStream(str, out streamName);
 			this.CheckedOnSaved(null);
+		}
+		private void SaveCompressed(Stream str)
+		{
+			str.Write(BitConverter.GetBytes('L'), 0, 1);
+			str.Write(BitConverter.GetBytes('Z'), 0, 1);
+			str.Write(BitConverter.GetBytes('4'), 0, 1);
+			str.Write(BitConverter.GetBytes(' '), 0, 1);
+
+			using (var memoryStream = new MemoryStream())
+			{
+				string streamName;
+				this.WriteToStream(memoryStream, out streamName);
+
+				using (var compressionStream = new LZ4Stream(str, CompressionMode.Compress))
+				{
+					memoryStream.Seek(0, SeekOrigin.Begin);
+					compressionStream.Write(memoryStream.ToArray(), 0, (int)memoryStream.Length);
+				}
+			}
 		}
 		private void WriteToStream(Stream str, out string streamName)
 		{

@@ -32,6 +32,7 @@ namespace Duality.Editor
 		private	static List<string>					editorJustSavedRes		= new List<string>();
 		private	static List<FileSystemEventArgs>	dataDirEventBuffer		= new List<FileSystemEventArgs>();
 		private	static List<FileSystemEventArgs>	sourceDirEventBuffer	= new List<FileSystemEventArgs>();
+		private static List<IFileSystemEventPattern> fileSystemEventPatterns = new List<IFileSystemEventPattern>();
 
 
 		public	static	event	EventHandler<ResourceEventArgs>				ResourceCreated		= null;
@@ -93,6 +94,14 @@ namespace Duality.Editor
 			sourceDirWatcher.Renamed += fileSystemWatcher_ForwardSource;
 			sourceDirWatcher.EnableRaisingEvents = true;
 
+			// Register file event patterns
+			foreach (var fileSystemEventPatternType in DualityEditorApp.GetAvailDualityEditorTypes(typeof(IFileSystemEventPattern)))
+			{
+				if (fileSystemEventPatternType.IsAbstract) continue;
+				IFileSystemEventPattern fileSystemEventPattern = fileSystemEventPatternType.CreateInstanceOf() as IFileSystemEventPattern;
+				if (fileSystemEventPattern != null) fileSystemEventPatterns.Add(fileSystemEventPattern);
+			}
+
 			// Register events
 			DualityEditorApp.MainForm.Activated += mainForm_Activated;
 			DualityEditorApp.EditorIdling += DualityEditorApp_EditorIdling;
@@ -132,7 +141,6 @@ namespace Duality.Editor
 			sourceDirWatcher = null;
 		}
 
-
 		private static bool IsResPathIgnored(string filePath)
 		{
 			return IsPathIgnored(filePath);
@@ -152,6 +160,10 @@ namespace Duality.Editor
 		private static FileSystemEventArgs FetchFileSystemEvent(List<FileSystemEventArgs> dirEventList, string basePath)
 		{
 			if (dirEventList.Count == 0) return null;
+
+			FileSystemEventArgs result = FilterFileSystemEvents(dirEventList, basePath);
+			if (result != null)
+				return result;
 
 			FileSystemEventArgs	current	= dirEventList[0];
 			dirEventList.RemoveAt(0);
@@ -205,6 +217,15 @@ namespace Duality.Editor
 			}
 			
 			return current;
+		}
+		private static FileSystemEventArgs FilterFileSystemEvents(List<FileSystemEventArgs> dirEventList, string basePath)
+		{
+			FileSystemEventArgs fileSystemEventArgs = null;
+			if (fileSystemEventPatterns.Any(pattern => pattern.Match(dirEventList, basePath, out fileSystemEventArgs)))
+			{
+				return fileSystemEventArgs;
+			}
+			return null;
 		}
 		private static void PushDataDirEvent(FileSystemEventArgs e)
 		{
@@ -599,4 +620,4 @@ namespace Duality.Editor
 			return counter;
 		}
 	}
-}
+} 

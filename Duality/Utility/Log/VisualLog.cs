@@ -242,6 +242,22 @@ namespace Duality
 			return entry;
 		}
 		/// <summary>
+		/// Draws a vector in world space. A vector can be thought of as an arrow pointing in a certain direction.
+		/// It is useful for displaying velocities or directions.
+		/// </summary>
+		/// <param name="worldPos">The vectors world origin.</param>
+		/// <param name="vector">The vector to display.</param>
+		/// <returns></returns>
+		public VisualLogVectorEntry DrawVector(Vector3 worldPos, Vector2 vector)
+		{
+			VisualLogVectorEntry entry = new VisualLogVectorEntry();
+			entry.Origin = new Vector3(worldPos.X, worldPos.Y, worldPos.Z);
+			entry.Anchor = VisualLogAnchor.World;
+			entry.Vector = new Vector2(vector.X, vector.Y);
+			this.Draw(entry);
+			return entry;
+		}
+		/// <summary>
 		/// Draws a connection between two screen space points.
 		/// </summary>
 		/// <param name="screenX1"></param>
