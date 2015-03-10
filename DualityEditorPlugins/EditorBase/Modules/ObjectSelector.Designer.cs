@@ -42,6 +42,7 @@
 			// PreviewImage
 			// 
 			this.PreviewImage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.PreviewImage.BackColor = System.Drawing.SystemColors.ControlDarkDark;
 			this.PreviewImage.Location = new System.Drawing.Point(6, 391);
 			this.PreviewImage.Name = "PreviewImage";
 			this.PreviewImage.Size = new System.Drawing.Size(110, 108);
@@ -65,6 +66,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.SelectableObjectsTreeView.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
 			this.SelectableObjectsTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
+			this.SelectableObjectsTreeView.ColumnHeaderHeight = 0;
 			this.SelectableObjectsTreeView.DefaultToolTipProvider = null;
 			this.SelectableObjectsTreeView.DisplayDraggingNodes = true;
 			this.SelectableObjectsTreeView.DragDropMarkColor = System.Drawing.Color.Black;
@@ -137,6 +139,7 @@
 			this.Controls.Add(this.SelectableObjectsTreeView);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
 			this.Name = "ObjectSelector";
+			this.ShowInTaskbar = false;
 			this.Text = "Select ";
 			((System.ComponentModel.ISupportInitialize)(this.PreviewImage)).EndInit();
 			this.panelBottom.ResumeLayout(false);
