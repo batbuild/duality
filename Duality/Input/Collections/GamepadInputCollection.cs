@@ -13,6 +13,8 @@ namespace Duality
 	/// </summary>
 	public sealed class GamepadInputCollection : UserInputCollection<GamepadInput,IGamepadInputSource>
 	{
+		private const int MaxSupportedDevices = 4;
+
 		protected override GamepadInput CreateInput(IGamepadInputSource source)
 		{
 			GamepadInput input = new GamepadInput();
@@ -26,15 +28,13 @@ namespace Duality
 
 		public void AddGlobalDevices()
 		{
-			int deviceIndex = 0;
-			while (true)
+			for (var i = 0; i < MaxSupportedDevices; i++)
 			{
-				GlobalGamepadInputSource gamepad = new GlobalGamepadInputSource(deviceIndex);
+				GlobalGamepadInputSource gamepad = new GlobalGamepadInputSource(i);
 				gamepad.UpdateState();
-				if (!gamepad.IsAvailable) break;
+				if (!gamepad.IsAvailable) continue;
 
 				this.AddSource(gamepad);
-				deviceIndex++;
 			}
 		}
 	}
