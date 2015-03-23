@@ -61,6 +61,7 @@ namespace Duality
 		private	string		userName			= "Unknown";
 		private	int			gfxWidth			= 800;
 		private	int			gfxHeight			= 600;
+		private int			gfxRefreshRate		= 60;
 		private	ScreenMode	gfxMode				= ScreenMode.Window;
 		private	AAQuality	gfxAAQuality		= AAQuality.High;
 		private	bool		gfxVSync			= true;
@@ -94,6 +95,14 @@ namespace Duality
 		{
 			get { return this.gfxHeight; }
 			set { this.gfxHeight = value; }
+		}
+		/// <summary>
+		/// [GET / SET] Specifies the refresh rate of the current resolution
+		/// </summary>
+		public int GfxRefreshRate
+		{
+			get { return gfxRefreshRate; }
+			set { gfxRefreshRate = value; }
 		}
 		/// <summary>
 		/// [GET / SET] Describes the way the game window is set up.
