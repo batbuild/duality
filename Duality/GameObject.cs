@@ -116,8 +116,8 @@ namespace Duality
 		{
 			get { return this.active && this.initState.IsActive(); }
 			set 
-			{ 
-				if (this.active != value)
+			{
+				if (this.active != value && this.scene != null && this.scene.IsCurrent)
 				{
 					if (value)
 					{
