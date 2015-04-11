@@ -93,9 +93,10 @@ namespace Duality.Tests.Messaging
 
 		private static Component RegisterInactiveObject()
 		{
-			var gameObject = new GameObject {Active = false};
+			var gameObject = new GameObject();
 			var component = gameObject.AddComponent<TestComponent>();
 			Scene.Current.AddObject(gameObject);
+			gameObject.Active = false;
 			return component;
 		}
 
