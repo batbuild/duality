@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Xml.Linq;
@@ -84,6 +85,7 @@ namespace Duality.Editor
 		private	static string						launcherApp			= null;
 		private static Workspace					workspaceManager	= null;
 		private static EditorUserData				editorUserData		= new EditorUserData();
+		private static object						genSourceSyncLock	= new object();
 
 
 		public	static	event	EventHandler	Terminating			= null;
@@ -717,88 +719,91 @@ namespace Duality.Editor
 				Log.Editor.WriteError("Backup of file '{0}' failed: {1}", path, Log.Exception(e));
 			}
 		}
-		
+
 		public static void UpdatePluginSourceCode()
 		{
-			// Initially generate source code, if not existing yet
-			if (!File.Exists(EditorHelper.SourceCodeSolutionFile)) InitPluginSourceCode();
-			
-			// Replace exec path in user files, since VS doesn't support relative paths there..
+			lock (genSourceSyncLock)
 			{
-				XDocument userDoc;
-				const string userFileCore = EditorHelper.SourceCodeProjectCorePluginFile + ".user";
-				const string userFileEditor = EditorHelper.SourceCodeProjectEditorPluginFile + ".user";
-				ZipFile gamePluginZip = null;
+				// Initially generate source code, if not existing yet
+				if (!File.Exists(EditorHelper.SourceCodeSolutionFile)) InitPluginSourceCode();
 
-				if (!File.Exists(userFileCore))
+				// Replace exec path in user files, since VS doesn't support relative paths there..
 				{
-					if (gamePluginZip == null)
-						gamePluginZip = ZipFile.Read(Properties.GeneralRes.GamePluginTemplate);
-					foreach (var e in gamePluginZip.Entries)
+					XDocument userDoc;
+					const string userFileCore = EditorHelper.SourceCodeProjectCorePluginFile + ".user";
+					const string userFileEditor = EditorHelper.SourceCodeProjectEditorPluginFile + ".user";
+					ZipFile gamePluginZip = null;
+
+					if (!File.Exists(userFileCore))
 					{
+						if (gamePluginZip == null)
+							gamePluginZip = ZipFile.Read(Properties.GeneralRes.GamePluginTemplate);
+						foreach (var e in gamePluginZip.Entries)
+						{
 						if (string.Equals(Path.GetFileName(e.FileName), Path.GetFileName(userFileCore), StringComparison.InvariantCultureIgnoreCase))
-						{
-							e.Extract(EditorHelper.SourceCodeDirectory);
-							break;
+							{
+								e.Extract(EditorHelper.SourceCodeDirectory);
+								break;
+							}
 						}
 					}
-				}
-				if (File.Exists(userFileCore))
-				{
-					try
+					if (File.Exists(userFileCore))
 					{
-						userDoc = XDocument.Load(userFileCore);
-						foreach (XElement element in userDoc.Descendants("StartProgram", true))
-							element.Value = Path.GetFullPath(DualityEditorApp.LauncherAppPath);
-						foreach (XElement element in userDoc.Descendants("StartWorkingDirectory", true))
-							element.Value = Path.GetFullPath(".");
-						userDoc.Save(userFileCore);
+						try
+						{
+							userDoc = XDocument.Load(userFileCore);
+							foreach (XElement element in userDoc.Descendants("StartProgram", true))
+								element.Value = Path.GetFullPath(DualityEditorApp.LauncherAppPath);
+							foreach (XElement element in userDoc.Descendants("StartWorkingDirectory", true))
+								element.Value = Path.GetFullPath(".");
+							userDoc.Save(userFileCore);
+						}
+						catch (Exception e)
+						{
+							Log.Editor.WriteError("An error occured while updating the core plugin file {0}: {1}", userFileCore, e.Message);
+						}
 					}
-					catch (Exception e)
+
+					if (!File.Exists(userFileEditor))
 					{
-						Log.Editor.WriteError("An error occured while updating the core plugin file {0}: {1}", userFileCore, e.Message);
-					}
-				}
-				
-				if (!File.Exists(userFileEditor))
-				{
-					if (gamePluginZip == null)
-						gamePluginZip = ZipFile.Read(Properties.GeneralRes.GamePluginTemplate);
-					foreach (var e in gamePluginZip.Entries)
-					{
+						if (gamePluginZip == null)
+							gamePluginZip = ZipFile.Read(Properties.GeneralRes.GamePluginTemplate);
+						foreach (var e in gamePluginZip.Entries)
+						{
 						if (string.Equals(Path.GetFileName(e.FileName), Path.GetFileName(userFileEditor), StringComparison.InvariantCultureIgnoreCase))
-						{
-							e.Extract(EditorHelper.SourceCodeDirectory);
-							break;
+							{
+								e.Extract(EditorHelper.SourceCodeDirectory);
+								break;
+							}
 						}
 					}
-				}
-				if (File.Exists(userFileEditor))
-				{
-					try
+					if (File.Exists(userFileEditor))
 					{
-						userDoc = XDocument.Load(userFileEditor);
-						foreach (XElement element in userDoc.Descendants("StartProgram", true))
-							element.Value = Path.GetFullPath("DualityEditor.exe");
-						foreach (XElement element in userDoc.Descendants("StartWorkingDirectory", true))
-							element.Value = Path.GetFullPath(".");
-						userDoc.Save(userFileEditor);
-					}
-					catch (Exception e)
-					{
+						try
+						{
+							userDoc = XDocument.Load(userFileEditor);
+							foreach (XElement element in userDoc.Descendants("StartProgram", true))
+								element.Value = Path.GetFullPath("DualityEditor.exe");
+							foreach (XElement element in userDoc.Descendants("StartWorkingDirectory", true))
+								element.Value = Path.GetFullPath(".");
+							userDoc.Save(userFileEditor);
+						}
+						catch (Exception e)
+						{
 						Log.Editor.WriteError("An error occured while updating the editor plugin file {0}: {1}", userFileEditor, e.Message);
+						}
+					}
+
+					if (gamePluginZip != null)
+					{
+						gamePluginZip.Dispose();
+						gamePluginZip = null;
 					}
 				}
 
-				if (gamePluginZip != null)
-				{
-					gamePluginZip.Dispose();
-					gamePluginZip = null;
-				}
+				// Keep auto-generated files up-to-date
+				File.WriteAllText(EditorHelper.SourceCodeGameResFile, EditorHelper.GenerateGameResSrcFile());
 			}
-
-			// Keep auto-generated files up-to-date
-			File.WriteAllText(EditorHelper.SourceCodeGameResFile, EditorHelper.GenerateGameResSrcFile());
 		}
 		public static void ReadPluginSourceCodeContentData(out string rootNamespace, out string desiredRootNamespace)
 		{
@@ -1355,7 +1360,9 @@ namespace Duality.Editor
 		{
 			// Update source code, in case the user is switching to his IDE without hitting the "open source code" button again
 			if (DualityApp.ExecContext != DualityApp.ExecutionContext.Terminated)
-				DualityEditorApp.UpdatePluginSourceCode();
+			{
+				Task.Factory.StartNew(DualityEditorApp.UpdatePluginSourceCode);
+			}
 		}
 
 		private static void editorObjects_Registered(object sender, GameObjectEventArgs e)
