@@ -117,22 +117,25 @@ namespace Duality
 			get { return this.active && this.initState.IsActive(); }
 			set 
 			{
-				if (this.active != value && this.scene != null && this.scene.IsCurrent)
+				if (this.active != value)
 				{
-					if (value)
+					if (this.scene != null && this.scene.IsCurrent)
 					{
-						this.OnActivate();
-						foreach (GameObject child in this.ChildrenDeep)
+						if (value)
 						{
-							if (!child.Active) child.OnActivate();
+							this.OnActivate();
+							foreach (GameObject child in this.ChildrenDeep)
+							{
+								if (!child.Active) child.OnActivate();
+							}
 						}
-					}
-					else
-					{
-						this.OnDeactivate();
-						foreach (GameObject child in this.ChildrenDeep)
+						else
 						{
-							if (child.Active) child.OnDeactivate();
+							this.OnDeactivate();
+							foreach (GameObject child in this.ChildrenDeep)
+							{
+								if (child.Active) child.OnDeactivate();
+							}
 						}
 					}
 
