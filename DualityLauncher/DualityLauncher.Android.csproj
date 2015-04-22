@@ -4,8 +4,6 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{422FE1A6-425A-4458-8535-317944C41797}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>DualityLauncher.Android</RootNamespace>
@@ -13,7 +11,7 @@
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <AndroidResgenClass>Resource</AndroidResgenClass>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
-    <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>    
+    <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
     <AssemblyName>DualityLauncher.Android</AssemblyName>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <TargetFrameworkVersion>v4.4</TargetFrameworkVersion>
@@ -44,6 +42,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
+    <Reference Include="FarseerDuality">
+      <HintPath>..\..\farseerduality\bin\Debug\Android\FarseerDuality.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK.Android">
       <HintPath>..\..\opentk\Binaries\OpenTK\Debug\OpenTK.Android.dll</HintPath>
     </Reference>
