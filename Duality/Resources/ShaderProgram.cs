@@ -16,8 +16,10 @@ namespace Duality.Resources
 	/// <seealso cref="Duality.Resources.FragmentShader"/>
 	[Serializable]
 	[ExplicitResourceReference(typeof(AbstractShader))]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageShaderProgram)]
+#endif
 	public class ShaderProgram : Resource
 	{
 		/// <summary>

@@ -20,8 +20,10 @@ namespace Duality.Resources
 	/// <seealso cref="BatchInfo"/>
 	[Serializable]
 	[ExplicitResourceReference(typeof(Texture))]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageMaterial)]
+#endif
 	public class Material : Resource
 	{
 		/// <summary>

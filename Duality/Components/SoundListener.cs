@@ -10,8 +10,10 @@ namespace Duality.Components
 	/// </summary>
 	[Serializable]
 	[RequiredComponent(typeof(Transform))]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategorySound)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageSoundListener)]
+#endif
 	public sealed class SoundListener : Component, ICmpInitializable
 	{
 		protected override void OnCopyTo(Component target, Duality.Cloning.CloneProvider provider)

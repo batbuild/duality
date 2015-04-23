@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+#if ! __ANDROID__
 using System.Drawing;
-
+#endif
+#if ANDROID
+using Android.Graphics;
+#endif
 namespace Duality.Cloning.Surrogates
 {
 	public class BitmapSurrogate : Surrogate<Bitmap>
 	{
+#if ! __ANDROID__
 		public override Bitmap CreateTargetObject(CloneProvider provider)
 		{
 			return new Bitmap(this.RealObject.Width, this.RealObject.Height);
@@ -17,5 +22,13 @@ namespace Duality.Cloning.Surrogates
 			Bitmap target = targetObj as Bitmap;
 			target.SetPixelDataIntArgb(this.RealObject.GetPixelDataIntArgb());
 		}
+#endif
+
+#if ANDROID
+		public override void CopyDataTo(Bitmap targetObj, CloneProvider provider)
+		{
+			throw new NotImplementedException();
+		}
+#endif
 	}
 }

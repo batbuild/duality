@@ -17,8 +17,10 @@ namespace Duality.Resources
 	/// </summary>
 	[Serializable]
 	[ExplicitResourceReference()]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryNone)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImagePrefab)]
+#endif
 	public class Prefab : Resource
 	{
 		/// <summary>

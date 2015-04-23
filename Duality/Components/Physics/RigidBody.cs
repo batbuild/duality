@@ -18,8 +18,10 @@ namespace Duality.Components.Physics
 	/// </summary>
 	[Serializable]
 	[RequiredComponent(typeof(Transform))]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryPhysics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageRigidBody)]
+#endif
 	public partial class RigidBody : Component, ICmpInitializable, ICmpUpdatable, ICmpEditorUpdatable
 	{
 		private struct ColEvent

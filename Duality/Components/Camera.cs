@@ -18,8 +18,10 @@ namespace Duality.Components
 	/// </summary>
 	[Serializable]
 	[RequiredComponent(typeof(Transform))]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageCamera)]
+#endif
 	public sealed class Camera : Component, ICmpInitializable
 	{
 		/// <summary>

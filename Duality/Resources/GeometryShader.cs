@@ -6,8 +6,10 @@ using OpenTK.Graphics.OpenGL;
 namespace Duality.Resources
 {
 	[Serializable]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof (CoreRes), CoreResNames.ImageShaderProgram)]
+#endif
 	public class GeometryShader : AbstractShader
 	{
 		/// <summary>

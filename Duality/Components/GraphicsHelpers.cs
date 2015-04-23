@@ -1,4 +1,4 @@
-﻿#if PC
+﻿#if ! __ANDROID__
 using System.Drawing;
 using System.Drawing.Imaging;
 using Duality.Drawing;

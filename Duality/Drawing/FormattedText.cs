@@ -1313,7 +1313,7 @@ namespace Duality.Drawing
 				this.metricsCache = new Metrics(size, lineBounds, elementBounds);
 			}
 		}
-		
+#if ! __ANDROID__		
 		/// <summary>
 		/// Renders a text to the specified target Image.
 		/// </summary>
@@ -1370,6 +1370,7 @@ namespace Duality.Drawing
 				}
 			}
 		}
+#endif
 		/// <summary>
 		/// Renders a text to the specified target Image.
 		/// </summary>

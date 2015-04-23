@@ -10,7 +10,9 @@ using Duality.Serialization;
 using Duality.Editor;
 using Duality.Cloning;
 using Duality.Properties;
+#if !__ANDROID__
 using LZ4;
+#endif
 using ICloneable = Duality.Cloning.ICloneExplicit;
 
 namespace Duality
@@ -22,7 +24,9 @@ namespace Duality
 	/// <seealso cref="ContentRef{T}"/>
 	/// <seealso cref="ContentProvider"/>
 	[Serializable]
+#if ! __ANDROID__
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageResource)]
+#endif
 	public abstract class Resource : IManageableObject, IDisposable, ICloneable
 	{
 		/// <summary>
@@ -200,14 +204,17 @@ namespace Duality
 			{
 				string streamName;
 				this.WriteToStream(memoryStream, out streamName);
-
+				
+#if ! __ANDROID__
 				using (var compressionStream = new LZ4Stream(str, CompressionMode.Compress))
 				{
 					memoryStream.Seek(0, SeekOrigin.Begin);
 					compressionStream.Write(memoryStream.ToArray(), 0, (int)memoryStream.Length);
 				}
+#endif
 			}
 		}
+
 		private void WriteToStream(Stream str, out string streamName)
 		{
 			if (str is FileStream)
@@ -379,6 +386,7 @@ namespace Duality
 			{
 				if (IsCompressedResource(str))
 				{
+#if ! __ANDROID__
 					using (var memoryStream = new MemoryStream())
 					using (var stream = new LZ4Stream(str, CompressionMode.Decompress))
 					{
@@ -386,6 +394,10 @@ namespace Duality
 						memoryStream.Seek(0, SeekOrigin.Begin);
 						newContent = Load<T>(memoryStream, path, loadCallback, initResource);
 					}
+#else
+					Log.Core.WriteWarning("Resource marked as compressed however not compressed because not on PC {0}. Error from Duality.Resource", FileExt);
+#endif
+
 				}
 				else
 				{

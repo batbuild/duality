@@ -25,8 +25,10 @@ namespace Duality.Resources
 	/// on you own design.
 	/// </summary>
 	[Serializable]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryNone)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageScene)]
+#endif
 	public sealed class Scene : Resource
 	{
 		/// <summary>

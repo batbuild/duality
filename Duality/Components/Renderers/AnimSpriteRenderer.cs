@@ -16,8 +16,10 @@ namespace Duality.Components.Renderers
 	/// Renders an animated sprite to represent the <see cref="GameObject"/>.
 	/// </summary>
 	[Serializable]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageAnimSpriteRenderer)]
+#endif
 	public class AnimSpriteRenderer : SpriteRenderer, ICmpUpdatable, ICmpInitializable
 	{
 		/// <summary>

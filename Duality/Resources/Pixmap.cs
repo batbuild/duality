@@ -4,7 +4,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -14,7 +13,10 @@ using Duality.Editor;
 using Duality.Serialization;
 using Duality.Cloning;
 using Duality.Properties;
+#if ! __ANDROID__
+using System.Drawing.Imaging;
 using ManagedSquish;
+#endif
 using OpenTK;
 
 namespace Duality.Resources
@@ -25,8 +27,10 @@ namespace Duality.Resources
 	/// <seealso cref="Duality.Resources.Texture"/>
 	[Serializable]
 	[ExplicitResourceReference()]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImagePixmap)]
+#endif
 	public class Pixmap : Resource
 	{
 		/// <summary>
@@ -94,7 +98,7 @@ namespace Duality.Resources
 			const string ContentPath_DualityLogoSmall	= VirtualContentPath + "DualityLogoSmall";
 			const string ContentPath_White				= VirtualContentPath + "White";
 			const string ContentPath_Checkerboard		= VirtualContentPath + "Checkerboard";
-
+#if ! __ANDROID__
 			ContentProvider.AddContent(ContentPath_DualityIcon,		new Pixmap(DefaultContent.DualityIcon));
 			ContentProvider.AddContent(ContentPath_DualityIconB,		new Pixmap(DefaultContent.DualityIconB));
 			ContentProvider.AddContent(ContentPath_DualityLogoBig,		new Pixmap(DefaultContent.DualityLogoBig));
@@ -110,6 +114,7 @@ namespace Duality.Resources
 			DualityLogoSmall	= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityLogoSmall);
 			White				= ContentProvider.RequestContent<Pixmap>(ContentPath_White);
 			Checkerboard		= ContentProvider.RequestContent<Pixmap>(ContentPath_Checkerboard);
+#endif
 		}
 
 		
@@ -1129,6 +1134,7 @@ namespace Duality.Resources
 						decompressedDataStream.Seek(0, SeekOrigin.Begin);
 						var dxtData = decompressedDataStream.ToArray();
 
+#if ! __ANDROID__
 						if (DualityApp.ExecContext == DualityApp.ExecutionContext.Editor)
 						{
 							Squish.DecompressImage(dxtData, width, height, SquishFlags.Dxt5).AsColourArray(arr =>
@@ -1136,6 +1142,7 @@ namespace Duality.Resources
 								this.data = arr;
 							});
 						}
+#endif
 						this.compressedData = dxtData;
 					}
 				}
@@ -1452,7 +1459,9 @@ namespace Duality.Resources
 
 			if (wasCompressed)
 			{
+#if ! __ANDROID__
 				this.ProcessedLayer.SetPixelDataDxtCompressed(Squish.CompressImage(layer.GetPixelDataByteRgba(), Width, Height, SquishFlags.Dxt5));
+#endif
 			}
 		}
 
