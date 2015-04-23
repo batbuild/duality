@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿#if PC
+using System.Drawing;
 using System.Drawing.Imaging;
 using Duality.Drawing;
 using OpenTK.Graphics;
@@ -7,6 +8,7 @@ using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
 
 namespace Duality.Components
 {
+
 	static class GraphicsHelpers
 	{
 		public static Bitmap GrabScreenshot(IDrawDevice device)
@@ -24,3 +26,4 @@ namespace Duality.Components
 		}
 	}
 }
+#endif

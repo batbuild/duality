@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using GLPixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
+#if PC
 using BitmapPixelFormat = System.Drawing.Imaging.PixelFormat;
-
+#endif
 using Duality.Editor;
 using Duality.Properties;
 using Duality.Drawing;
