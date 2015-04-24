@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ANDROID</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -111,11 +111,6 @@
     <Compile Include="ContentRef.cs" />
     <Compile Include="CorePlugin.cs" />
     <Compile Include="Drawing\DrawBatch.cs" />
-    <Compile Include="Properties\CoreRes.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>CoreRes.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\CoreResNames.cs" />
     <Compile Include="Drawing\DrawDevice.cs" />
     <Compile Include="Drawing\IDrawDevice.cs" />
@@ -219,11 +214,6 @@
     <Compile Include="Resource.cs" />
     <Compile Include="Resources\AbstractShader.cs" />
     <Compile Include="Resources\AudioData.cs" />
-    <Compile Include="Resources\DefaultContent.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>DefaultContent.resx</DependentUpon>
-    </Compile>
     <Compile Include="Resources\DrawTechnique.cs" />
     <Compile Include="Resources\FragmentShader.cs" />
     <Compile Include="Resources\Font.cs" />

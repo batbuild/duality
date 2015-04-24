@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Drawing;
-using System.Drawing.Text;
 using System.IO;
 using System.Runtime.InteropServices;
+#if ! __ANDROID__
+using System.Drawing.Text;
 using SysDrawFont = System.Drawing.Font;
-
+#endif
 using Duality.Drawing;
 using Duality.Editor;
 using Duality.Properties;
@@ -23,10 +24,15 @@ namespace Duality.Resources
 	/// </summary>
 	[Serializable]
 	[ExplicitResourceReference()]
+#if ! __ANDROID__
+
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageFont)]
+#endif
 	public class Font : Resource
 	{
+#if ! __ANDROID__
+
 		/// <summary>
 		/// A Font resources file extension.
 		/// </summary>
@@ -52,7 +58,7 @@ namespace Duality.Resources
 		/// This is usually "Arial".
 		/// </summary>
 		public static ContentRef<Font> GenericSansSerif12	{ get; private set; }
-
+#if ! __ANDROID__
 		internal static void InitDefaultContent()
 		{
 			const string VirtualContentPath				= ContentProvider.VirtualContentPath + "Font:";
@@ -105,7 +111,7 @@ namespace Duality.Resources
 			GenericSansSerif12	= ContentProvider.RequestContent<Font>(ContentPath_GenericSansSerif12);
 		}
 
-		
+#endif
 		/// <summary>
 		/// Refers to a null reference Font.
 		/// </summary>
@@ -1330,5 +1336,7 @@ namespace Duality.Resources
 			loadedFontRegistry[result.Name] = result;
 			return result;
 		}
+#endif
 	}
+
 }

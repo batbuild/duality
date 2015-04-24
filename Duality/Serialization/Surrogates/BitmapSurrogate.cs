@@ -1,8 +1,7 @@
 ﻿using System;
 #if ! __ANDROID__
 using System.Drawing;
-#endif
-#if ANDROID
+#else
 using Android.Graphics;
 #endif
 
@@ -15,7 +14,7 @@ namespace Duality.Serialization.Surrogates
 			writer.WriteValue("width", this.RealObject.Width);
 			writer.WriteValue("height", this.RealObject.Height);
 		}
-#if ANDROID
+#if __ANDROID__
 		public override void WriteData(IDataWriter writer)
 		{
 			throw new NotImplementedException();

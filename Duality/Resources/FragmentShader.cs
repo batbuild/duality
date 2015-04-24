@@ -67,8 +67,11 @@ namespace Duality.Resources
 		{
 			get { return ShaderType.FragmentShader; }
 		}
-		
-		public FragmentShader() : base(DefaultContent.MinimalFrag) {}
+
+#if !__ANDROID__
+public FragmentShader() : base(DefaultContent.MinimalFrag) {}
+#endif
+
 		public FragmentShader(string sourceCode) : base(sourceCode) {}
 	}
 }

@@ -41,8 +41,11 @@ namespace Duality.Resources
 			const string ContentPath_Minimal		= VirtualContentPath + "Minimal";
 			const string ContentPath_SmoothAnim		= VirtualContentPath + "SmoothAnim";
 
-			ContentProvider.AddContent(ContentPath_Minimal, new VertexShader(DefaultContent.MinimalVert));
+#if !__ANDROID__
+ContentProvider.AddContent(ContentPath_Minimal, new VertexShader(DefaultContent.MinimalVert));
 			ContentProvider.AddContent(ContentPath_SmoothAnim, new VertexShader(DefaultContent.SmoothAnimVert));
+#endif
+
 
 			Minimal		= ContentProvider.RequestContent<VertexShader>(ContentPath_Minimal);
 			SmoothAnim	= ContentProvider.RequestContent<VertexShader>(ContentPath_SmoothAnim);
@@ -54,7 +57,10 @@ namespace Duality.Resources
 			get { return ShaderType.VertexShader; }
 		}
 
-		public VertexShader() : base(DefaultContent.MinimalVert) {}
+#if ! __ANDROID__
+public VertexShader() : base(DefaultContent.MinimalVert) {}
+#endif
+
 		public VertexShader(string sourceCode) : base(sourceCode) {}
 	}
 }

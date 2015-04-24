@@ -6,7 +6,7 @@ using System.IO;
 #if ! __ANDROID__
 using System.Drawing;
 #endif
-#if ANDROID
+#if __ANDROID__
 using Android.Media;
 #endif
 namespace Duality.Editor

@@ -381,7 +381,7 @@ namespace Duality
 		{
 			if (!File.Exists(path)) return null;
 
-			T newContent;
+			T newContent = null;
 			using (FileStream str = File.OpenRead(path))
 			{
 				if (IsCompressedResource(str))
@@ -579,11 +579,18 @@ namespace Duality
 		/// <returns></returns>
 		private static bool IsCompressedResource(FileStream stream)
 		{
+
 			var magic = new byte[4];
 			try
 			{
 				stream.Read(magic, 0, 4);
+
+#if !__ANDROID__
 				return magic[0] == 'L' && magic[1] == 'Z' && magic[2] == '4' && magic[3] == ' ';
+#else
+				return false;
+#endif
+
 			}
 			catch
 			{

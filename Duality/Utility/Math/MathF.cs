@@ -85,17 +85,21 @@ namespace Duality
 		/// </summary>
 		/// <param name="v"></param>
 		/// <returns></returns>
+
 		public static decimal SafeToDecimal(float v)
 		{
 			if (float.IsNaN(v))
 				return decimal.Zero;
-			else if (v <= (float)decimal.MinValue || float.IsNegativeInfinity(v))
-				return decimal.MinValue;
-			else if (v >= (float)decimal.MaxValue || float.IsPositiveInfinity(v))
-				return decimal.MaxValue;
+			/* DEBT: strange xamarin (aparently ) error, don't like the fix but...
+			 */
+			else if (v <= -79228162514264337593543950335F || float.IsNegativeInfinity(v))
+				return Decimal.MinValue;
+			else if (v >= (float)Decimal.MaxValue || float.IsPositiveInfinity(v))
+				return Decimal.MaxValue;
 			else
 				return (decimal)v;
-		}
+		} 
+
 
 		/// <summary>
 		/// Returns the absolute value of a <see cref="System.Single"/>.

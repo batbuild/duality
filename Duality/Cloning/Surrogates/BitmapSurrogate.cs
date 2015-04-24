@@ -4,8 +4,7 @@ using System.Linq;
 using System.Reflection;
 #if ! __ANDROID__
 using System.Drawing;
-#endif
-#if ANDROID
+#else
 using Android.Graphics;
 #endif
 namespace Duality.Cloning.Surrogates
@@ -24,7 +23,7 @@ namespace Duality.Cloning.Surrogates
 		}
 #endif
 
-#if ANDROID
+#if __ANDROID__
 		public override void CopyDataTo(Bitmap targetObj, CloneProvider provider)
 		{
 			throw new NotImplementedException();
