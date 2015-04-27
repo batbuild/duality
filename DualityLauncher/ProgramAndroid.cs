@@ -77,7 +77,7 @@ namespace DualityLauncher.Android
 				}
 				_frameLimiterWatch.Restart();
 			}
-
+			DualityApp.Update();
 		}
 
 		
@@ -88,10 +88,16 @@ namespace DualityLauncher.Android
 			// registered that you want to have called
 			base.OnRenderFrame (e);
 
-			GL.ClearColor ((float)r.NextDouble (), 0f, 0f, 0f);
-			GL.Clear (ClearBufferMask.ColorBufferBit);
-
-			SwapBuffers ();
+			if (DualityApp.ExecContext == DualityApp.ExecutionContext.Terminated) 
+				return;
+			
+			DualityApp.Render(new Rect(this.MinimumWidth, MinimumHeight));
+			Profile.TimeRender.BeginMeasure();
+			Profile.TimeSwapBuffers.BeginMeasure();
+			SwapBuffers();
+			Profile.TimeSwapBuffers.EndMeasure();
+			Profile.TimeRender.EndMeasure();
+			
 		}
 
 	}

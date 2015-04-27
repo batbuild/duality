@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.IO;
 using Android.App;
 using Android.Runtime;
 using Android.Views;
@@ -10,6 +10,7 @@ using Duality;
 using Duality.Resources;
 using OpenTK;
 using OpenTK.Graphics.ES20;
+using Environment = System.Environment;
 
 
 namespace DualityLauncher.Android
@@ -43,6 +44,8 @@ namespace DualityLauncher.Android
 				SetContentView(view);
 				view.Run();
 
+				var logfile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "logfile.txt");
+				DualityApp.Init(DualityApp.ExecutionEnvironment.Launcher, DualityApp.ExecutionContext.Game, new[] { "logfile", logfile});
 				//DualityApp.UserDataChanged += launcherWindow.OnUserDataChanged;
 
 
@@ -70,6 +73,7 @@ namespace DualityLauncher.Android
 				//					DualityApp.Keyboard.Source = new GameWindowKeyboardInputSource(launcherWindow.Keyboard);
 
 				// Load the starting Scene
+				DualityApp.AppData = new DualityAppData(){StartScene = Scene.Load<Scene>(@"Data\SceneTest.Scene.res")};
 				Scene.SwitchTo(DualityApp.AppData.StartScene);
 
 				// Run the DualityApp
@@ -80,8 +84,6 @@ namespace DualityLauncher.Android
  */			
 				// Shut down the DualityApp
 				//DualityApp.Terminate();		
-
-
 
 			}
 			catch (Exception exception)

@@ -297,12 +297,14 @@ namespace Duality
 			Property_Material_Textures	= material.GetProperty("Textures");
 			Property_Material_Uniforms	= material.GetProperty("Uniforms");
 
+#if !__ANDROID__
 			Type sound = typeof(Sound);
 			Property_Sound_AlBuffer			= sound.GetProperty("AlBuffer");
 			Property_Sound_MinDist			= sound.GetProperty("MinDist");
 			Property_Sound_MinDistFactor	= sound.GetProperty("MinDistFactor");
 			Property_Sound_MaxDist			= sound.GetProperty("MaxDist");
 			Property_Sound_MaxDistFactor	= sound.GetProperty("MaxDistFactor");
+#endif
 
 			Type font = typeof(Font);
 			Property_Font_NeedsReload		= font.GetProperty("NeedsReload");
@@ -318,6 +320,7 @@ namespace Duality
 			Property_FormattedText_FlowAreas		= formattedText.GetProperty("FlowAreas");
 			Property_FormattedText_Fonts			= formattedText.GetProperty("Fonts");
 
+#if !__ANDROID__
 			Type soundEmitter = typeof(SoundEmitter);
 			Property_SoundEmitter_Sources	= soundEmitter.GetProperty("Sources");
 
@@ -327,6 +330,7 @@ namespace Duality
 			Property_SoundEmitter_Source_Sound		= soundEmitterSource.GetProperty("Sound");
 			Property_SoundEmitter_Source_Volume		= soundEmitterSource.GetProperty("Volume");
 			Property_SoundEmitter_Source_Pitch		= soundEmitterSource.GetProperty("Pitch");
+#endif
 
 			// Retrieve FieldInfo data
 			const BindingFlags fieldFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;

@@ -38,7 +38,12 @@ namespace Duality
 		{
 			get 
 			{
+#if __ANDROID__
+				return this.allObj.Where(o => o.Active);
+#else
 				return this.allObj.AsParallel().Where(o => o.Active);
+#endif
+
 			}
 		}
 		/// <summary>
