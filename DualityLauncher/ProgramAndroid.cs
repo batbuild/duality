@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Drawing;
+using Duality;
+using Duality.Resources;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.ES20;
@@ -30,12 +32,7 @@ namespace DualityLauncher.Android
 		protected override void OnLoad (EventArgs e)
 		{
 			base.OnLoad (e);
-/* DEBT: waiting for Duality x 3
- */			
-			_isDebugging = System.Diagnostics.Debugger.IsAttached ;// || args.Contains(DualityApp.CmdArgDebug);
-//			isRunFromEditor = args.Contains(DualityApp.CmdArgEditor);
-//			isProfiling = args.Contains(DualityApp.CmdArgProfiling);
-			if (_isDebugging || _isRunFromEditor) ShowConsole();
+
 		}
 
 		private static bool hasConsole = false;
@@ -66,18 +63,18 @@ namespace DualityLauncher.Android
 				//}
 
 				// Give the processor a rest if we have the time, don't use 100% CPU even without VSync
-				/* DEBT: waiting for Duality time is defined in duality, not sure what to do about VSync,
-				 * is it available on android?
+	
+				/* DEBT: waiting for VSync no control for VSync on android
  */			
-//				if (_frameLimiterWatch.IsRunning && this.VSync == VSyncMode.Off)
-//				{
-//					while (_frameLimiterWatch.Elapsed.TotalMilliseconds < Time.MsPFMult)
-//					{
-//						// Enough leftover time? Risk a millisecond sleep.
-//						if (_frameLimiterWatch.Elapsed.TotalMilliseconds < Time.MsPFMult * 0.75f)
-//							System.Threading.Thread.Sleep(1);
-//					}
-//				}
+				if (_frameLimiterWatch.IsRunning) // && this.VSync == VSyncMode.Off)
+				{
+					while (_frameLimiterWatch.Elapsed.TotalMilliseconds < Time.MsPFMult)
+					{
+						// Enough leftover time? Risk a millisecond sleep.
+						if (_frameLimiterWatch.Elapsed.TotalMilliseconds < Time.MsPFMult * 0.75f)
+							System.Threading.Thread.Sleep(1);
+					}
+				}
 				_frameLimiterWatch.Restart();
 			}
 

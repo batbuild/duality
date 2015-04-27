@@ -68,6 +68,12 @@
     <AndroidResource Include="Resources\drawable-xxhdpi\Icon.png" />
     <AndroidResource Include="Resources\drawable-xxxhdpi\Icon.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Duality\Duality.Android.csproj">
+      <Project>{39ff8c9a-a220-4b45-afe4-7cbc5e034c1c}</Project>
+      <Name>Duality.Android</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

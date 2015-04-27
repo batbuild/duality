@@ -26,6 +26,9 @@ namespace DualityLauncher.Android
 		
 		public static void UpdateIdValues()
 		{
+			global::Duality.Android.Resource.String.ApplicationName = global::DualityLauncher.Android.Resource.String.ApplicationName;
+			global::Duality.Android.Resource.String.Hello = global::DualityLauncher.Android.Resource.String.Hello;
+			global::Duality.Android.Resource.String.library_name = global::DualityLauncher.Android.Resource.String.library_name;
 		}
 		
 		public partial class Attribute
@@ -60,27 +63,20 @@ namespace DualityLauncher.Android
 			}
 		}
 		
-		public partial class Layout
-		{
-			
-			// aapt resource value: 0x7f030000
-			public const int Main = 2130903040;
-			
-			static Layout()
-			{
-				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
-			}
-			
-			private Layout()
-			{
-			}
-		}
-		
 		public partial class String
 		{
 			
-			// aapt resource value: 0x7f040000
-			public const int app_name = 2130968576;
+			// aapt resource value: 0x7f030002
+			public const int ApplicationName = 2130903042;
+			
+			// aapt resource value: 0x7f030001
+			public const int Hello = 2130903041;
+			
+			// aapt resource value: 0x7f030003
+			public const int app_name = 2130903043;
+			
+			// aapt resource value: 0x7f030000
+			public const int library_name = 2130903040;
 			
 			static String()
 			{
@@ -95,8 +91,8 @@ namespace DualityLauncher.Android
 		public partial class Style
 		{
 			
-			// aapt resource value: 0x7f050000
-			public const int Mono_Android_Theme_Splash = 2131034112;
+			// aapt resource value: 0x7f040000
+			public const int Mono_Android_Theme_Splash = 2130968576;
 			
 			static Style()
 			{
