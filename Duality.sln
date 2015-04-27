@@ -54,6 +54,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{1F9C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DualityLauncher.Android", "DualityLauncher\DualityLauncher.Android.csproj", "{422FE1A6-425A-4458-8535-317944C41797}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duality.Android", "Duality\Duality.Android.csproj", "{39FF8C9A-A220-4B45-AFE4-7CBC5E034C1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -132,6 +134,10 @@ Global
 		{422FE1A6-425A-4458-8535-317944C41797}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{422FE1A6-425A-4458-8535-317944C41797}.Release|Any CPU.Build.0 = Release|Any CPU
 		{422FE1A6-425A-4458-8535-317944C41797}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{39FF8C9A-A220-4B45-AFE4-7CBC5E034C1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39FF8C9A-A220-4B45-AFE4-7CBC5E034C1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39FF8C9A-A220-4B45-AFE4-7CBC5E034C1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39FF8C9A-A220-4B45-AFE4-7CBC5E034C1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
