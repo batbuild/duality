@@ -212,7 +212,6 @@
     <Compile Include="Resources\ShaderProgram.cs" />
     <Compile Include="Resources\Material.cs" />
     <Compile Include="Resources\RenderTarget.cs" />
-    <Compile Include="Resources\Sound.cs" />
     <Compile Include="Resources\Texture.cs" />
     <Compile Include="Resources\Pixmap.cs" />
     <Compile Include="Resources\Prefab.cs" />
