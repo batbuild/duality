@@ -23,6 +23,7 @@ namespace Duality
 		/// <param name="context">The context in which this log was written. Usually the primary object the log entry is associated with.</param>
 		public override void Write(Log source, LogMessageType type, string msg, object context)
 		{
+#if ! __ANDROID__
 			ConsoleColor clrBg = Console.BackgroundColor;
 			ConsoleColor clrFg = Console.ForegroundColor;
 
@@ -30,11 +31,13 @@ namespace Duality
 			if (type == LogMessageType.Warning)		Console.ForegroundColor = ConsoleColor.Yellow;
 			else if (type == LogMessageType.Error)	Console.ForegroundColor = ConsoleColor.Red;
 			else									Console.ForegroundColor = ConsoleColor.Gray;
-
+#endif
 			base.Write(source, type, msg, context);
 
+#if ! __ANDROID__
 			Console.ForegroundColor = clrFg;
 			Console.BackgroundColor = clrBg;
+#endif
 		}
 	}
 }

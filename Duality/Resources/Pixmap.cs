@@ -4,7 +4,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -14,7 +13,10 @@ using Duality.Editor;
 using Duality.Serialization;
 using Duality.Cloning;
 using Duality.Properties;
+#if ! __ANDROID__
+using System.Drawing.Imaging;
 using ManagedSquish;
+#endif
 using OpenTK;
 
 namespace Duality.Resources
@@ -25,8 +27,10 @@ namespace Duality.Resources
 	/// <seealso cref="Duality.Resources.Texture"/>
 	[Serializable]
 	[ExplicitResourceReference()]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImagePixmap)]
+#endif
 	public class Pixmap : Resource
 	{
 		/// <summary>
@@ -94,7 +98,7 @@ namespace Duality.Resources
 			const string ContentPath_DualityLogoSmall	= VirtualContentPath + "DualityLogoSmall";
 			const string ContentPath_White				= VirtualContentPath + "White";
 			const string ContentPath_Checkerboard		= VirtualContentPath + "Checkerboard";
-
+#if ! __ANDROID__
 			ContentProvider.AddContent(ContentPath_DualityIcon,		new Pixmap(DefaultContent.DualityIcon));
 			ContentProvider.AddContent(ContentPath_DualityIconB,		new Pixmap(DefaultContent.DualityIconB));
 			ContentProvider.AddContent(ContentPath_DualityLogoBig,		new Pixmap(DefaultContent.DualityLogoBig));
@@ -110,6 +114,7 @@ namespace Duality.Resources
 			DualityLogoSmall	= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityLogoSmall);
 			White				= ContentProvider.RequestContent<Pixmap>(ContentPath_White);
 			Checkerboard		= ContentProvider.RequestContent<Pixmap>(ContentPath_Checkerboard);
+#endif
 		}
 
 		
@@ -217,15 +222,24 @@ namespace Duality.Resources
 			public Layer(Bitmap image)
 			{
 				if (image == null) throw new ArgumentNullException("image");
-				this.FromBitmap(image);
+#if !__ANDROID__
+this.FromBitmap(image);
+#endif
+
 			}
 			public Layer(string imagePath)
 			{
 				if (string.IsNullOrEmpty(imagePath)) throw new ArgumentNullException("imagePath");
 				
 				byte[] buffer = File.ReadAllBytes(imagePath);
+#if !__ANDROID__
 				Bitmap bm = new Bitmap(new MemoryStream(buffer));
 				this.FromBitmap(bm);
+#else				
+				Log.Core.WriteWarning("Pixmap should have loaded image from path: {0}");
+#endif
+				
+				
 			}
 			public Layer(Layer baseLayer)
 			{
@@ -251,14 +265,18 @@ namespace Duality.Resources
 				Duality.Cloning.CloneProvider.DeepCopyTo(this, target);
 			}
 
-			/// <summary>
-			/// Saves the pixel data contained in this layer to the specified file.
-			/// </summary>
-			/// <param name="imagePath"></param>
+#if !__ANDROID__
+	/// <summary>
+	/// Saves the pixel data contained in this layer to the specified file.
+	/// </summary>
+	/// <param name="imagePath"></param>
 			public void SavePixelData(string imagePath)
 			{
 				this.ToBitmap().Save(imagePath);
 			}
+#endif
+
+#if !__ANDROID__
 			/// <summary>
 			/// Loads the pixel data in this layer from the specified file.
 			/// </summary>
@@ -267,6 +285,8 @@ namespace Duality.Resources
 			{
 				this.FromBitmap(new Bitmap(imagePath));
 			}
+#endif
+
 			/// <summary>
 			/// Discards all pixel data in this Layer.
 			/// </summary>
@@ -276,11 +296,12 @@ namespace Duality.Resources
 				this.width = 0;
 				this.height = 0;
 			}
-			
-			/// <summary>
-			/// Creates a <see cref="System.Drawing.Bitmap"/> out of this Layer.
-			/// </summary>
-			/// <returns></returns>
+
+#if !__ANDROID__
+	/// <summary>
+	/// Creates a <see cref="System.Drawing.Bitmap"/> out of this Layer.
+	/// </summary>
+	/// <returns></returns>
 			public Bitmap ToBitmap()
 			{
 				if (this.width == 0 || this.height == 0)
@@ -299,6 +320,8 @@ namespace Duality.Resources
 				bm.UnlockBits(data);
 				return bm;
 			}
+#endif
+
 			/// <summary>
 			/// Gets the Layers pixel data in the ColorRgba format. Note that this data is a clone and thus modifying it won't
 			/// affect the Layer it has been retrieved from.
@@ -339,6 +362,7 @@ namespace Duality.Resources
 				return argbValues;
 			}
 
+#if !__ANDROID__
 			/// <summary>
 			/// Sets this Layers pixel data to the one contained in the specified <see cref="System.Drawing.Bitmap"/>
 			/// </summary>
@@ -358,6 +382,8 @@ namespace Duality.Resources
 				
 				this.SetPixelDataArgb(argbValues, bm.Width, bm.Height);
 			}
+#endif
+
 			/// <summary>
 			/// Sets the layers pixel data in the ColorRgba format. Note that the specified data will be copied and thus modifying it
 			/// outside won't affect the Layer it has been inserted into.
@@ -1069,6 +1095,7 @@ namespace Duality.Resources
 			}
 			void ISerializeExplicit.WriteData(IDataWriter writer)
 			{
+#if !__ANDROID__
 				if (compressedData != null)
 				{
 					writer.WriteValue("version", ResFormat_Version_DxtCompressed);
@@ -1094,6 +1121,10 @@ namespace Duality.Resources
 						writer.WriteValue("pixelData", str.ToArray());
 					}
 				}
+#else
+				Log.Core.WriteWarning("SHould have writtend data from {0} to bitmap but this is not available on android", writer);
+#endif
+
 			}
 			void ISerializeExplicit.ReadData(IDataReader reader)
 			{
@@ -1105,8 +1136,12 @@ namespace Duality.Resources
 				{
 					byte[] dataBlock;
 					reader.ReadValue("pixelData", out dataBlock);
+#if !__ANDROID__
 					Bitmap bm = dataBlock != null ? new Bitmap(new MemoryStream(dataBlock)) : null;
 					if (bm != null) this.FromBitmap(bm);
+					//how do you load images from a reader to Android
+#endif
+
 				}
 				else if(version == ResFormat_Version_DxtCompressed)
 				{
@@ -1129,6 +1164,7 @@ namespace Duality.Resources
 						decompressedDataStream.Seek(0, SeekOrigin.Begin);
 						var dxtData = decompressedDataStream.ToArray();
 
+#if ! __ANDROID__
 						if (DualityApp.ExecContext == DualityApp.ExecutionContext.Editor)
 						{
 							Squish.DecompressImage(dxtData, width, height, SquishFlags.Dxt5).AsColourArray(arr =>
@@ -1136,6 +1172,7 @@ namespace Duality.Resources
 								this.data = arr;
 							});
 						}
+#endif
 						this.compressedData = dxtData;
 					}
 				}
@@ -1303,6 +1340,7 @@ namespace Duality.Resources
 		/// Saves the Pixmaps pixel data as image file. Its image format is determined by the file extension.
 		/// </summary>
 		/// <param name="imagePath">The path of the file to which the pixel data is written.</param>
+#if !__ANDROID__
 		public void SavePixelData(string imagePath = null)
 		{
 			if (imagePath == null) imagePath = this.sourcePath;
@@ -1315,6 +1353,8 @@ namespace Duality.Resources
 			else
 				Checkerboard.Res.MainLayer.SavePixelData(imagePath);
 		}
+#endif
+
 		/// <summary>
 		/// Replaces the Pixmaps pixel data with a new dataset that has been retrieved from file.
 		/// </summary>
@@ -1452,7 +1492,9 @@ namespace Duality.Resources
 
 			if (wasCompressed)
 			{
+#if ! __ANDROID__
 				this.ProcessedLayer.SetPixelDataDxtCompressed(Squish.CompressImage(layer.GetPixelDataByteRgba(), Width, Height, SquishFlags.Dxt5));
+#endif
 			}
 		}
 

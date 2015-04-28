@@ -3,53 +3,52 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{750A1229-F1C8-4C26-B7EA-648D928A09DD}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Duality.Android</RootNamespace>
-    <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
-    <AndroidResgenClass>Resource</AndroidResgenClass>
-    <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
-    <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
-    <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
-    <AssemblyName>Duality</AssemblyName>
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{39FF8C9A-A220-4B45-AFE4-7CBC5E034C1C}</ProjectGuid>
+    <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Duality.Android</RootNamespace>
+    <AssemblyName>Duality.Android</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
+    <DevInstrumentationEnabled>True</DevInstrumentationEnabled>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\Android</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
-    <DocumentationFile>Duality.xml</DocumentationFile>
-    <NoWarn>1591,1592,1573,1571,1570,1572,0419</NoWarn>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>full</DebugType>
-    <Prefer32Bit>false</Prefer32Bit>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AndroidLinkMode>None</AndroidLinkMode>
-    <WarningLevel>4</WarningLevel>
     <Optimize>false</Optimize>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <OutputPath>bin\Release\Android</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-    <NoWarn>1591,1592,1573,1571,1570,1572</NoWarn>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-    <Prefer32Bit>false</Prefer32Bit>
-    <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FarseerDuality, Version=3.3.5203.39568, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\farseerduality\bin\Debug\Android\FarseerDuality.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Android" />
+    <Reference Include="mscorlib" />
+    <Reference Include="OpenTK.Android">
+      <HintPath>..\..\opentk\Binaries\OpenTK\Debug\Android\OpenTK.Android.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
-    <Reference Include="Mono.Android" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\FrameCompleteEventArgs.cs" />
@@ -58,6 +57,9 @@
     <Compile Include="Drawing\Resolution.cs" />
     <Compile Include="Resources\GeometryShader.cs" />
     <Compile Include="Utility\DefaultRendererVisibilityStrategy.cs" />
+    <Compile Include="Utility\EditorHint.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Utility\Extensions\ExtMethodsStream.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsXml.cs" />
     <Compile Include="Utility\Grid.cs" />
@@ -66,7 +68,6 @@
     <Compile Include="Utility\Streams\StreamWrapper.cs" />
     <Compile Include="Utility\Streams\NonClosingStreamWrapper.cs" />
     <Compile Include="Utility\Animation\AnimationGroup.cs" />
-    <Compile Include="Audio\AudioLibraryLoader.cs" />
     <Compile Include="Cloning\CloneProvider.cs" />
     <Compile Include="Cloning\CloneProviderContext.cs" />
     <Compile Include="Cloning\ICloneExplicit.cs" />
@@ -106,11 +107,6 @@
     <Compile Include="ContentRef.cs" />
     <Compile Include="CorePlugin.cs" />
     <Compile Include="Drawing\DrawBatch.cs" />
-    <Compile Include="Properties\CoreRes.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>CoreRes.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\CoreResNames.cs" />
     <Compile Include="Drawing\DrawDevice.cs" />
     <Compile Include="Drawing\IDrawDevice.cs" />
@@ -128,13 +124,10 @@
     <Compile Include="Drawing\ColorFormat\ColorHsva.cs" />
     <Compile Include="Components\Renderers\AnimSpriteRenderer.cs" />
     <Compile Include="Components\Renderers\TextRenderer.cs" />
-    <Compile Include="Components\SoundEmitter.cs" />
-    <Compile Include="Components\SoundListener.cs" />
     <Compile Include="Drawing\Canvas.cs" />
     <Compile Include="Utility\DualityAppData.cs" />
     <Compile Include="Utility\DualityMetaData.cs" />
     <Compile Include="Utility\DualityUserData.cs" />
-    <Compile Include="Utility\Extensions\ExtMethodsBitmap.cs" />
     <Compile Include="Helpers\ExtMethodsGameObject.cs" />
     <Compile Include="Helpers\Guard.cs" />
     <Compile Include="Utility\IManageableObject.cs" />
@@ -145,7 +138,6 @@
     <Compile Include="Utility\Animation\IAnimationKeyFrame.cs" />
     <Compile Include="Utility\Animation\IAnimationTrack.cs" />
     <Compile Include="Utility\Math\PhysicsConvert.cs" />
-    <Compile Include="Utility\EditorHint.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsIEnumerable.cs" />
     <Compile Include="Utility\Math\Range.cs" />
     <Compile Include="Utility\RawList.cs" />
@@ -195,7 +187,6 @@
     <Compile Include="Utility\Extensions\ExtMethodsString.cs" />
     <Compile Include="Drawing\GraphicsModeComparer.cs" />
     <Compile Include="Utility\ReflectionInfo.cs" />
-    <Compile Include="Audio\OggVorbis\OggVorbis.cs" />
     <Compile Include="Utility\PathHelper.cs" />
     <Compile Include="Utility\ReflectionHelper.cs" />
     <Compile Include="Drawing\ColorFormat\ColorRgba.cs" />
@@ -215,27 +206,17 @@
     <Compile Include="Utility\Math\Rect.cs" />
     <Compile Include="Resource.cs" />
     <Compile Include="Resources\AbstractShader.cs" />
-    <Compile Include="Resources\AudioData.cs" />
-    <Compile Include="Resources\DefaultContent.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>DefaultContent.resx</DependentUpon>
-    </Compile>
     <Compile Include="Resources\DrawTechnique.cs" />
     <Compile Include="Resources\FragmentShader.cs" />
     <Compile Include="Resources\Font.cs" />
     <Compile Include="Resources\ShaderProgram.cs" />
     <Compile Include="Resources\Material.cs" />
     <Compile Include="Resources\RenderTarget.cs" />
-    <Compile Include="Resources\Sound.cs" />
     <Compile Include="Resources\Texture.cs" />
     <Compile Include="Resources\Pixmap.cs" />
     <Compile Include="Resources\Prefab.cs" />
     <Compile Include="Resources\VertexShader.cs" />
     <Compile Include="Resources\Scene.cs" />
-    <Compile Include="Audio\SoundBudgetPad.cs" />
-    <Compile Include="Audio\SoundDevice.cs" />
-    <Compile Include="Audio\SoundInstance.cs" />
     <Compile Include="Drawing\FormattedText.cs" />
     <Compile Include="Utility\Log\TextWriterLogOutput.cs" />
     <Compile Include="Serialization\BinaryFormatter.cs" />
@@ -259,36 +240,13 @@
     <Compile Include="Drawing\VertexFormat\VertexC1P3T4A1.cs" />
     <Compile Include="Drawing\VertexFormat\VertexC1P3T2.cs" />
     <Compile Include="Drawing\VertexFormat\VertexC1P3.cs" />
+    <Compile Include="Resources\Resource.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="EmbeddedResources\Checkerboard.png" />
-    <EmbeddedResource Include="Properties\CoreRes.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>CoreRes.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="EmbeddedResources\DualityLogoBig.png" />
-    <EmbeddedResource Include="EmbeddedResources\DualityLogoMedium.png" />
-    <EmbeddedResource Include="EmbeddedResources\DualityLogoSmall.png" />
-    <EmbeddedResource Include="Resources\DefaultContent.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-      <LastGenOutput>DefaultContent.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="EmbeddedResources\DualityIcon.png" />
-    <EmbeddedResource Include="EmbeddedResources\DualityIconB.png" />
-    <EmbeddedResource Include="EmbeddedResources\SharpAlpha.frag" />
-    <None Include="packages.config" />
+    <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="EmbeddedResources\Beep.ogg" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="EmbeddedResources\SmoothAnim.vert" />
-    <EmbeddedResource Include="EmbeddedResources\SmoothAnim.frag" />
-    <EmbeddedResource Include="EmbeddedResources\Picking.frag" />
-    <EmbeddedResource Include="EmbeddedResources\Minimal.frag" />
-    <EmbeddedResource Include="EmbeddedResources\Minimal.vert" />
+    <AndroidResource Include="Resources\Values\Strings.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -298,14 +256,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <ProjectReference Include="..\..\farseerduality\FarseerDuality.Android.csproj">
-      <Project>{3C3C50F2-0509-42F1-93F0-E38929A9E3F9}</Project>
-      <Name>FarseerDuality.Android</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\opentk\Source\OpenTK\OpenTK.Android.csproj">
-      <Project>{1648ACE1-E7D0-41CB-9A0E-C2A9D76C13A9}</Project>
-      <Name>OpenTK.Android</Name>
-    </ProjectReference>
-  </ItemGroup>
 </Project>

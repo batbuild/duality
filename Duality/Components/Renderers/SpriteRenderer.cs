@@ -14,8 +14,10 @@ namespace Duality.Components.Renderers
 	/// Renders a sprite to represent the <see cref="GameObject"/>.
 	/// </summary>
 	[Serializable]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageSpriteRenderer)]
+#endif
 	public class SpriteRenderer : Renderer
 	{
 		/// <summary>

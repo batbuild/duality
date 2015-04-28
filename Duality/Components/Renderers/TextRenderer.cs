@@ -15,8 +15,11 @@ namespace Duality.Components.Renderers
 	/// Renders a text to represent the <see cref="GameObject"/>.
 	/// </summary>
 	[Serializable]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageFont)]
+#endif
+
 	public class TextRenderer : Renderer, ICmpInitializable
 	{
 		protected	Alignment				blockAlign	= Alignment.Center;

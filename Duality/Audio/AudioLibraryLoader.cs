@@ -27,7 +27,9 @@ namespace Duality
 			if (!File.Exists(SourceFileName64) && !File.Exists(SourceFileName32)) return;
 
 			bool openALInstalled = 
+#if ! __ANDROID__
 				CheckOpenALDriverPath(Path.Combine(Environment.SystemDirectory, TargetFileName)) ||
+#endif
 				CheckOpenALDriverPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), TargetFileName)) ||
 				CheckOpenALDriverPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), TargetFileName)) ||
 				CheckOpenALDriverPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), TargetFileName));

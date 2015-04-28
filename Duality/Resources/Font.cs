@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Drawing;
-using System.Drawing.Text;
 using System.IO;
 using System.Runtime.InteropServices;
+#if ! __ANDROID__
+using System.Drawing.Text;
 using SysDrawFont = System.Drawing.Font;
-
+#else
+using FontStyle = Duality.Resources.FontStyleA;
+#endif
 using Duality.Drawing;
 using Duality.Editor;
 using Duality.Properties;
@@ -17,16 +20,27 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Duality.Resources
 {
+
+	public enum FontStyleA
+	{
+		Regular,
+		Bold,
+		Italic,
+	}
+
 	/// <summary>
 	/// Represents a font. While any system font or imported TrueType font can be used, they are internally
 	/// pre-rasterized and stored in a <see cref="Duality.Resources.Texture"/> with an <see cref="Duality.Resources.Pixmap.Atlas"/>.
 	/// </summary>
 	[Serializable]
 	[ExplicitResourceReference()]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageFont)]
+#endif
 	public class Font : Resource
 	{
+		
 		/// <summary>
 		/// A Font resources file extension.
 		/// </summary>
@@ -56,6 +70,10 @@ namespace Duality.Resources
 		internal static void InitDefaultContent()
 		{
 			const string VirtualContentPath				= ContentProvider.VirtualContentPath + "Font:";
+			/* DEBT: Thiese are needed
+			 * 
+			 */
+#if !__ANDROID__
 			const string ContentPath_GenericMonospace10	= VirtualContentPath + "GenericMonospace10";
 			const string ContentPath_GenericMonospace8	= VirtualContentPath + "GenericMonospace8";
 			const string ContentPath_GenericSerif12		= VirtualContentPath + "GenericSerif12";
@@ -103,9 +121,10 @@ namespace Duality.Resources
 			GenericMonospace10	= ContentProvider.RequestContent<Font>(ContentPath_GenericMonospace10);
 			GenericSerif12		= ContentProvider.RequestContent<Font>(ContentPath_GenericSerif12);
 			GenericSansSerif12	= ContentProvider.RequestContent<Font>(ContentPath_GenericSansSerif12);
+#endif
 		}
 
-		
+
 		/// <summary>
 		/// Refers to a null reference Font.
 		/// </summary>
@@ -115,13 +134,19 @@ namespace Duality.Resources
 		/// A string containing all characters that are supported by Duality.
 		/// </summary>
 		public static readonly string			SupportedChars	= "? abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890,;.:-_<>|#'+*~@^°!\"§$%&/()=`²³{[]}\\´öäüÖÄÜß";
+		/* DEBT : only european char supported?? 
+		 */
+		
 		private const string					BodyAscentRef = "acehmnorsuvwxz";
 		private const string					FontAssetPath = "pre-generated-fonts";
 		private static readonly int[]			CharLookup;
 
+#if !__ANDROID__
 		private	static	PrivateFontCollection			fontManager			= new PrivateFontCollection();
-		private	static	Dictionary<string,FontFamily>	loadedFontRegistry	= new Dictionary<string,FontFamily>();
 
+
+		private	static	Dictionary<string,FontFamily>	loadedFontRegistry	= new Dictionary<string,FontFamily>();
+#endif
 		static Font()
 		{
 			int maxCharVal = 0;
@@ -216,10 +241,18 @@ namespace Duality.Resources
 			public	int[]	kerningSamplesRight;
 		}
 
-		
-		private	string		familyName			= FontFamily.GenericMonospace.Name;
-		private	float		size				= 8.0f;
+
+
+		private	string		familyName			= 
+#if !__ANDROID__
+			FontFamily.GenericMonospace.Name;
+#else
+			"Generic Monospace";
+#endif
+		private float size = 8.0f;
 		private	FontStyle	style				= FontStyle.Regular;
+
+
 		private	RenderMode	renderMode			= RenderMode.SharpBitmap;
 		private	float		spacing				= 0.0f;
 		private	float		lineHeightFactor	= 1.0f;
@@ -229,7 +262,10 @@ namespace Duality.Resources
 		// Embedded custom font family
 		private	byte[]		customFamilyData	= null;
 		// Data that is automatically acquired while loading the font
+#if !__ANDROID__
 		[NonSerialized]	private SysDrawFont	internalFont	= null;
+#endif
+
 		[NonSerialized]	private	GlyphData[]	glyphs			= null;
 		[NonSerialized]	private	Material	mat				= null;
 		[NonSerialized]	private	Pixmap		pixelData		= null;
@@ -258,9 +294,11 @@ namespace Duality.Resources
 				this.needsReload = true;
 			}
 		}
-		/// <summary>
-		/// [GET / SET] The size of the Font.
-		/// </summary>
+
+#if !__ANDROID__
+	/// <summary>
+	/// [GET / SET] The size of the Font.
+	/// </summary>
 		[EditorHintFlags(MemberFlags.AffectsOthers)]
 		[EditorHintRange(1, 150)]
 		[EditorHintIncrement(1)]
@@ -280,9 +318,13 @@ namespace Duality.Resources
 				}
 			}
 		}
-		/// <summary>
-		/// [GET / SET] The style of the font.
-		/// </summary>
+
+#endif
+
+
+	/// <summary>
+	/// [GET / SET] The style of the font.
+	/// </summary>
 		public FontStyle Style
 		{
 			get { return this.style; }
@@ -292,6 +334,8 @@ namespace Duality.Resources
 				this.needsReload = true;
 			}
 		}
+
+#if !__ANDROID__
 		/// <summary>
 		/// [GET / SET] Specifies how a Font is rendered. This affects both internal glyph rasterization and rendering.
 		/// </summary>
@@ -306,6 +350,7 @@ namespace Duality.Resources
 				this.needsReload = true;
 			}
 		}
+#endif
 		/// <summary>
 		/// [GET] The <see cref="Duality.Resources.Material"/> to use when rendering text of this Font.
 		/// </summary>
@@ -455,11 +500,12 @@ namespace Duality.Resources
 			this.style = style;
 			this.ReloadData();
 		}
-		
-		/// <summary>
-		/// Replaces the Fonts custom font family with a new dataset that has been retrieved from file.
-		/// </summary>
-		/// <param name="path">The path of the file from which to retrieve the new font family data.</param>
+
+#if !__ANDROID__
+	/// <summary>
+	/// Replaces the Fonts custom font family with a new dataset that has been retrieved from file.
+	/// </summary>
+	/// <param name="path">The path of the file from which to retrieve the new font family data.</param>
 		public void LoadCustomFamilyData(string path = null)
 		{
 			if (path == null) path = this.sourcePath;
@@ -474,6 +520,8 @@ namespace Duality.Resources
 				this.familyName = LoadFontFamilyFromMemory(this.customFamilyData).Name;
 			}
 		}
+#endif
+
 		/// <summary>
 		/// Saves the Fonts custom font family to file.
 		/// </summary>
@@ -495,7 +543,10 @@ namespace Duality.Resources
 		public void ReloadData()
 		{
 			this.ReleaseResources();
+#if !__ANDROID__
 			this.UpdateInternalFont();
+#endif
+
 
 			this.needsReload = false;
 			this.maxGlyphWidth = 0;
@@ -610,6 +661,8 @@ namespace Duality.Resources
 				}
 			}
 		}
+#if !__ANDROID__
+
 		private void UpdateInternalFont()
 		{
 			if (this.internalFont != null) this.internalFont.Dispose();
@@ -632,6 +685,7 @@ namespace Duality.Resources
 				this.internalFont = new SysDrawFont(FontFamily.GenericMonospace, this.size, this.style);
 			}
 		}
+#endif
 		private void ReleaseResources()
 		{
 			if (this.mat != null) this.mat.Dispose();
@@ -646,6 +700,7 @@ namespace Duality.Resources
 		}
 		private void GenerateResources()
 		{
+#if !__ANDROID__
 			if (this.mat != null || this.texture != null || this.pixelData != null)
 				this.ReleaseResources();
 
@@ -692,8 +747,9 @@ namespace Duality.Resources
 				matInfo.SetUniform("smoothness", this.size * 3.0f);
 			}
 			this.mat = new Material(matInfo);
+#endif
 		}
-
+#if !__ANDROID__
 		private void LoadOrCreatePixelData(int cols, int rows, TextRenderingHint textRenderingHint)
 		{
 			if (this.characters == CharacterSet.PreRendered)
@@ -804,7 +860,7 @@ namespace Duality.Resources
 			if(this.characters == CharacterSet.PreRendered)
 				this.pixelData.Save(GetPreGeneratedAssetPath());
 		}
-
+#endif
 		/// <summary>
 		/// Retrieves information about a single glyph.
 		/// </summary>
@@ -988,6 +1044,7 @@ namespace Duality.Resources
 		/// <param name="clr"></param>
 		public void RenderToBitmap(string text, Image target, float x, float y, ColorRgba clr)
 		{
+#if !__ANDROID__
 			Bitmap pixelData = this.pixelData.MainLayer.ToBitmap();
 			using (Graphics g = Graphics.FromImage(target))
 			{
@@ -1031,6 +1088,8 @@ namespace Duality.Resources
 					curOffset += glyphXAdv;
 				}
 			}
+#endif
+
 		}
 		/// <summary>
 		/// Renders a text to the specified target <see cref="Duality.Resources.Pixmap"/> <see cref="Duality.Resources.Pixmap.Layer"/>.
@@ -1241,10 +1300,11 @@ namespace Duality.Resources
 
 		protected override void OnLoaded()
 		{
+#if !__ANDROID__
 			// Load custom font, if not available yet
 			if (GetFontFamily(this.familyName) == null && this.customFamilyData != null)
 				LoadFontFamilyFromMemory(this.customFamilyData);
-
+#endif
 			this.ReloadData();
 			base.OnLoaded();
 		}
@@ -1281,7 +1341,7 @@ namespace Duality.Resources
 		{
 			return System.IO.Path.Combine(System.IO.Path.GetDirectoryName(this.Path), FontAssetPath, this.Name + Pixmap.FileExt);
 		}
-
+#if !__ANDROID__
 		/// <summary>
 		/// Retrieves a <see cref="System.Drawing.FontFamily"/> by its name.
 		/// </summary>
@@ -1305,11 +1365,13 @@ namespace Duality.Resources
 			}
 			return result;
 		}
-		/// <summary>
-		/// Loads a <see cref="System.Drawing.FontFamily"/> from memory.
-		/// </summary>
-		/// <param name="memory">The memory chunk to load the FontFamily from.</param>
-		/// <returns>The FontFamily that has been loaded.</returns>
+
+
+	/// <summary>
+	/// Loads a <see cref="System.Drawing.FontFamily"/> from memory.
+	/// </summary>
+	/// <param name="memory">The memory chunk to load the FontFamily from.</param>
+	/// <returns>The FontFamily that has been loaded.</returns>
 		private static FontFamily LoadFontFamilyFromMemory(byte[] memory)
 		{
 			FontFamily result = null;
@@ -1330,5 +1392,8 @@ namespace Duality.Resources
 			loadedFontRegistry[result.Name] = result;
 			return result;
 		}
+
+#endif
 	}
+
 }

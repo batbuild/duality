@@ -12,8 +12,10 @@ namespace Duality.Resources
 	/// Represents an OpenGL FragmentShader.
 	/// </summary>
 	[Serializable]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageFragmentShader)]
+#endif
 	public class FragmentShader : AbstractShader
 	{
 		/// <summary>
@@ -48,12 +50,12 @@ namespace Duality.Resources
 			const string ContentPath_Picking	= VirtualContentPath + "Picking";
 			const string ContentPath_SmoothAnim	= VirtualContentPath + "SmoothAnim";
 			const string ContentPath_SharpMask	= VirtualContentPath + "SharpAlpha";
-
+#if ! __ANDROID__
 			ContentProvider.AddContent(ContentPath_Minimal,	new FragmentShader(DefaultContent.MinimalFrag));
 			ContentProvider.AddContent(ContentPath_Picking,	new FragmentShader(DefaultContent.PickingFrag));
 			ContentProvider.AddContent(ContentPath_SmoothAnim,	new FragmentShader(DefaultContent.SmoothAnimFrag));
 			ContentProvider.AddContent(ContentPath_SharpMask,	new FragmentShader(DefaultContent.SharpAlphaFrag));
-
+#endif
 			Minimal		= ContentProvider.RequestContent<FragmentShader>(ContentPath_Minimal);
 			Picking		= ContentProvider.RequestContent<FragmentShader>(ContentPath_Picking);
 			SmoothAnim	= ContentProvider.RequestContent<FragmentShader>(ContentPath_SmoothAnim);
@@ -65,8 +67,11 @@ namespace Duality.Resources
 		{
 			get { return ShaderType.FragmentShader; }
 		}
-		
-		public FragmentShader() : base(DefaultContent.MinimalFrag) {}
+
+#if !__ANDROID__
+public FragmentShader() : base(DefaultContent.MinimalFrag) {}
+#endif
+
 		public FragmentShader(string sourceCode) : base(sourceCode) {}
 	}
 }

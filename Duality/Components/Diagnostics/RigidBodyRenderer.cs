@@ -19,8 +19,10 @@ namespace Duality.Components.Diagnostics
 	/// </summary>
 	[Serializable]
 	[RequiredComponent(typeof(RigidBody))]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryDiagnostics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageRigidBodyRenderer)]
+#endif
 	public class RigidBodyRenderer : Renderer
 	{
 		private	ContentRef<Material>	areaMaterial			= Material.Checkerboard;

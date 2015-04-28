@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using GLPixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
+#if ! __ANDROID__
 using BitmapPixelFormat = System.Drawing.Imaging.PixelFormat;
-
+#endif
 using Duality.Editor;
 using Duality.Properties;
 using Duality.Drawing;
@@ -21,8 +19,11 @@ namespace Duality.Resources
 	/// <seealso cref="Duality.Resources.RenderTarget"/>
 	[Serializable]
 	[ExplicitResourceReference(typeof(Pixmap))]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategoryGraphics)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageTexture)]
+
+#endif
 	public class Texture : Resource
 	{
 		/// <summary>

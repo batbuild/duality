@@ -74,7 +74,9 @@ namespace Duality
 			bool hasConsole = true;
 			try
 			{
+#if ! __ANDROID__
 				int doesThisThrow = Console.WindowHeight;
+#endif
 			}
 			catch (Exception)
 			{

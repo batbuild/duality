@@ -20,8 +20,10 @@ namespace Duality.Resources
 	/// <seealso cref="Duality.Resources.AudioData"/>
 	[Serializable]
 	[ExplicitResourceReference(typeof(AudioData))]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategorySound)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageSound)]
+#endif
 	public class Sound : Resource
 	{
 		/// <summary>

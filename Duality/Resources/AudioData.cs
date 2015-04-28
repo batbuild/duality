@@ -19,8 +19,10 @@ namespace Duality.Resources
 	/// <seealso cref="Duality.Resources.Sound"/>
 	[Serializable]
 	[ExplicitResourceReference()]
+#if ! __ANDROID__
 	[EditorHintCategory(typeof(CoreRes), CoreResNames.CategorySound)]
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageAudioData)]
+#endif
 	public class AudioData : Resource
 	{
 		/// <summary>
@@ -37,9 +39,9 @@ namespace Duality.Resources
 		{
 			const string VirtualContentPath		= ContentProvider.VirtualContentPath + "AudioData:";
 			const string ContentPath_Beep		= VirtualContentPath + "Beep";
-
+#if ! __ANDROID__
 			ContentProvider.AddContent(ContentPath_Beep, new AudioData(DefaultContent.Beep));
-
+#endif
 			Beep = ContentProvider.RequestContent<AudioData>(ContentPath_Beep);
 		}
 		

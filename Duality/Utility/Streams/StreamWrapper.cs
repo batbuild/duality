@@ -51,12 +51,14 @@ namespace Duality
 			get { return this.baseStream.WriteTimeout; }
 			set { this.baseStream.WriteTimeout = value; }
 		}
+#if ! __ANDROID__
+
 		public override ObjRef CreateObjRef(Type requestedType)
 		{
 			throw new NotSupportedException();
 		}
 
-
+#endif
 		public StreamWrapper(Stream stream)
 		{
 			if (stream == null) throw new ArgumentNullException("stream");
