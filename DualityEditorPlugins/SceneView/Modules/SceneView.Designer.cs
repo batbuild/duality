@@ -39,6 +39,7 @@
 			this.contextMenuNode = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.toolStripSeparatorCustomActions = new System.Windows.Forms.ToolStripSeparator();
 			this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.findComponentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.gameObjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.newGameObjectSeparator = new System.Windows.Forms.ToolStripSeparator();
 			this.toolStripSeparatorNew = new System.Windows.Forms.ToolStripSeparator();
@@ -141,49 +142,57 @@
             this.toolStripSeparatorGameObject,
             this.lockedToolStripMenuItem});
 			this.contextMenuNode.Name = "contextMenuNode";
-			this.contextMenuNode.Size = new System.Drawing.Size(153, 154);
+			this.contextMenuNode.Size = new System.Drawing.Size(148, 132);
 			this.contextMenuNode.Closing += new System.Windows.Forms.ToolStripDropDownClosingEventHandler(this.contextMenuNode_Closing);
 			this.contextMenuNode.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuNode_Opening);
 			// 
 			// toolStripSeparatorCustomActions
 			// 
 			this.toolStripSeparatorCustomActions.Name = "toolStripSeparatorCustomActions";
-			this.toolStripSeparatorCustomActions.Size = new System.Drawing.Size(149, 6);
+			this.toolStripSeparatorCustomActions.Size = new System.Drawing.Size(144, 6);
 			this.toolStripSeparatorCustomActions.Visible = false;
 			// 
 			// newToolStripMenuItem
 			// 
 			this.newToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.findComponentsToolStripMenuItem,
             this.gameObjectToolStripMenuItem,
             this.newGameObjectSeparator});
 			this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-			this.newToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.newToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
 			this.newToolStripMenuItem.Text = "New";
 			this.newToolStripMenuItem.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.newToolStripMenuItem_DropDownItemClicked);
+			// 
+			// findComponentsToolStripMenuItem
+			// 
+			this.findComponentsToolStripMenuItem.Name = "findComponentsToolStripMenuItem";
+			this.findComponentsToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+			this.findComponentsToolStripMenuItem.Text = "Add component";
+			this.findComponentsToolStripMenuItem.Click += new System.EventHandler(this.findComponentsToolStripMenuItem_Click);
 			// 
 			// gameObjectToolStripMenuItem
 			// 
 			this.gameObjectToolStripMenuItem.Name = "gameObjectToolStripMenuItem";
-			this.gameObjectToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+			this.gameObjectToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
 			this.gameObjectToolStripMenuItem.Text = "GameObject";
 			this.gameObjectToolStripMenuItem.Click += new System.EventHandler(this.gameObjectToolStripMenuItem_Click);
 			// 
 			// newGameObjectSeparator
 			// 
 			this.newGameObjectSeparator.Name = "newGameObjectSeparator";
-			this.newGameObjectSeparator.Size = new System.Drawing.Size(137, 6);
+			this.newGameObjectSeparator.Size = new System.Drawing.Size(158, 6);
 			// 
 			// toolStripSeparatorNew
 			// 
 			this.toolStripSeparatorNew.Name = "toolStripSeparatorNew";
-			this.toolStripSeparatorNew.Size = new System.Drawing.Size(149, 6);
+			this.toolStripSeparatorNew.Size = new System.Drawing.Size(144, 6);
 			// 
 			// cloneToolStripMenuItem
 			// 
 			this.cloneToolStripMenuItem.Image = global::Duality.Editor.Plugins.SceneView.Properties.Resources.page_copy;
 			this.cloneToolStripMenuItem.Name = "cloneToolStripMenuItem";
 			this.cloneToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-			this.cloneToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.cloneToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
 			this.cloneToolStripMenuItem.Text = "Clone";
 			this.cloneToolStripMenuItem.Click += new System.EventHandler(this.cloneToolStripMenuItem_Click);
 			// 
@@ -192,26 +201,26 @@
 			this.deleteToolStripMenuItem.Image = global::Duality.Editor.Plugins.SceneView.Properties.Resources.cross;
 			this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
 			this.deleteToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-			this.deleteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.deleteToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
 			this.deleteToolStripMenuItem.Text = "Delete";
 			this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
 			// 
 			// renameToolStripMenuItem
 			// 
 			this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
-			this.renameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.renameToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
 			this.renameToolStripMenuItem.Text = "Rename";
 			this.renameToolStripMenuItem.Click += new System.EventHandler(this.renameToolStripMenuItem_Click);
 			// 
 			// toolStripSeparatorGameObject
 			// 
 			this.toolStripSeparatorGameObject.Name = "toolStripSeparatorGameObject";
-			this.toolStripSeparatorGameObject.Size = new System.Drawing.Size(149, 6);
+			this.toolStripSeparatorGameObject.Size = new System.Drawing.Size(144, 6);
 			// 
 			// lockedToolStripMenuItem
 			// 
 			this.lockedToolStripMenuItem.Name = "lockedToolStripMenuItem";
-			this.lockedToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.lockedToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
 			this.lockedToolStripMenuItem.Text = "Lock / Hide";
 			this.lockedToolStripMenuItem.ToolTipText = "Locks or hides the object in the editor";
 			this.lockedToolStripMenuItem.Click += new System.EventHandler(this.lockedToolStripMenuItem_Click);
@@ -298,6 +307,7 @@
 			this.objectView.AllowDrop = true;
 			this.objectView.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
 			this.objectView.BorderStyle = System.Windows.Forms.BorderStyle.None;
+			this.objectView.ColumnHeaderHeight = 0;
 			this.objectView.ContextMenuStrip = this.contextMenuNode;
 			this.objectView.DefaultToolTipProvider = null;
 			this.objectView.DisplayDraggingNodes = true;
@@ -352,10 +362,10 @@
 			this.Controls.Add(this.objectView);
 			this.Controls.Add(this.panelBottom);
 			this.Controls.Add(this.toolStrip);
-			this.DockAreas = ((WeifenLuo.WinFormsUI.Docking.DockAreas)(((((WeifenLuo.WinFormsUI.Docking.DockAreas.Float | WeifenLuo.WinFormsUI.Docking.DockAreas.DockLeft)
-						| WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight)
-						| WeifenLuo.WinFormsUI.Docking.DockAreas.DockTop)
-						| WeifenLuo.WinFormsUI.Docking.DockAreas.DockBottom)));
+			this.DockAreas = ((WeifenLuo.WinFormsUI.Docking.DockAreas)(((((WeifenLuo.WinFormsUI.Docking.DockAreas.Float | WeifenLuo.WinFormsUI.Docking.DockAreas.DockLeft) 
+            | WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight) 
+            | WeifenLuo.WinFormsUI.Docking.DockAreas.DockTop) 
+            | WeifenLuo.WinFormsUI.Docking.DockAreas.DockBottom)));
 			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -404,5 +414,6 @@
 		private System.Windows.Forms.ToolStripMenuItem lockedToolStripMenuItem;
 		private System.Windows.Forms.ToolStripButton buttonShowComponents;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+		private System.Windows.Forms.ToolStripMenuItem findComponentsToolStripMenuItem;
 	}
 }
