@@ -1,31 +1,28 @@
 ﻿using System;
-using System.Drawing;
+using System.IO;
 using Duality;
 using Duality.Resources;
 using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Graphics.ES20;
-using OpenTK.Platform;
 using OpenTK.Android;
-
-using Android.Views;
 using Android.Content;
-using Android.Util;
 using System.Diagnostics;
+using OpenTK.Graphics.ES20;
 
 
 namespace DualityLauncher.Android
 {
-	public class ProgramAndroid : AndroidGameView
+	public class DualityAndroidLauncher : AndroidGameView
 	{
 		private static bool _isDebugging = false;
 		private static bool _isProfiling = false;
 		private static bool _isRunFromEditor = false;
 		private Stopwatch _frameLimiterWatch = new Stopwatch();
-		Random r = new Random();
+		
 
-		public ProgramAndroid (Context context) : base (context)
+		public DualityAndroidLauncher (Context context) : base (context)
 		{
+			
+			Duality.ContentProvider.SetAndroidAssetManager(context.Assets);
 		}
 
 		// This gets called when the drawing surface is ready
@@ -33,6 +30,36 @@ namespace DualityLauncher.Android
 		{
 			base.OnLoad (e);
 
+			var logfile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "logfile.txt");
+			DualityApp.Init(DualityApp.ExecutionEnvironment.Launcher, DualityApp.ExecutionContext.Game, new[] { "logfile", logfile });
+			//DualityApp.UserDataChanged += launcherWindow.OnUserDataChanged;
+
+
+			// Initialize default content
+			//launcherWindow.MakeCurrent();
+
+			Log.Core.Write("OpenGL initialized");
+			Log.Core.PushIndent();
+			Log.Editor.Write("Vendor: {0}", GL.GetString(StringName.Vendor));
+			Log.Editor.Write("Version: {0}", GL.GetString(StringName.Version));
+			Log.Editor.Write("Renderer: {0}", GL.GetString(StringName.Renderer));
+			Log.Editor.Write("Shading language version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
+			Log.Core.PopIndent();
+
+//			DualityApp.TargetResolution = new Vector2(view.Size.Width, view.Size.Height);
+			// DualityApp.TargetMode = view.Context.ApplicationInfo. GraphicsMode;
+
+
+			/* DEBT: waiting for duality not sure we need to init the default content
+*/
+			Duality.ContentProvider.InitDefaultContent();
+
+			// Input setup
+			//					DualityApp.Mouse.Source = new GameWindowMouseInputSource(launcherWindow.Mouse, launcherWindow.SetMouseDeviceX, launcherWindow.SetMouseDeviceY);
+			//					DualityApp.Keyboard.Source = new GameWindowKeyboardInputSource(launcherWindow.Keyboard);
+
+			// Load the starting Scene
+			Scene.SwitchTo(new ContentRef<Scene>(Scene.Load<Scene>(@"Data/SceneTest.Scene.res")));
 		}
 
 		private static bool hasConsole = false;
