@@ -379,14 +379,15 @@ namespace Duality
 		/// <returns>The Resource that has been loaded.</returns>
 		public static T Load<T>(string path, Action<T> loadCallback = null, bool initResource = true) where T : Resource
 		{
+#if ! __ANDROID__
 			if (!File.Exists(path)) return null;
-
+			
 			T newContent = null;
 			using (FileStream str = File.OpenRead(path))
 			{
 				if (IsCompressedResource(str))
 				{
-#if ! __ANDROID__
+
 					using (var memoryStream = new MemoryStream())
 					using (var stream = new LZ4Stream(str, CompressionMode.Decompress))
 					{
@@ -394,9 +395,6 @@ namespace Duality
 						memoryStream.Seek(0, SeekOrigin.Begin);
 						newContent = Load<T>(memoryStream, path, loadCallback, initResource);
 					}
-#else
-					Log.Core.WriteWarning("Resource marked as compressed however not compressed because not on PC {0}. Error from Duality.Resource", FileExt);
-#endif
 
 				}
 				else
@@ -406,6 +404,42 @@ namespace Duality
 				}
 			}
 			return newContent;
+			
+#else
+			T newContent = null;
+			try 
+			{
+				using (Stream str = ContentProvider.AndroidAssetManager.Open(path))
+				using(var memoryStream = new MemoryStream())
+				{
+					str.CopyTo(memoryStream);
+
+					/* DEBT: lz4 need to compile LZ4 for android (or get dependency if already exists)
+					* 
+					*/
+	//				if (IsCompressedResource(str))
+	//				{
+	//					using (var memoryStream = new MemoryStream())
+	//					using (var stream = new LZ4Stream(str, CompressionMode.Decompress))
+	//					{
+	//						stream.CopyTo(memoryStream);
+	//						memoryStream.Seek(0, SeekOrigin.Begin);
+	//						newContent = Load<T>(memoryStream, path, loadCallback, initResource);
+	//					}
+	//				}
+	//				else
+					{
+						memoryStream.Seek(0, SeekOrigin.Begin);
+						newContent = Load<T>(memoryStream, path, loadCallback, initResource);
+					}
+				}
+			} 
+			catch (FileNotFoundException fileNotFound)
+			{
+				Log.Core.WriteError("File {0} not found in android device", path);
+			}
+			return newContent;
+#endif
 		}
 
 		/// <summary>

@@ -4,7 +4,9 @@ using System.Globalization;
 using System.Linq;
 using System.IO;
 using System.Diagnostics;
-
+#if __ANDROID__
+using Android.Content.Res;
+#endif
 using Duality.Resources;
 
 namespace Duality
@@ -430,5 +432,13 @@ namespace Duality
 			Log.Core.PopIndent();
 			return res;
 		}
+#if __ANDROID__
+
+		public static AssetManager AndroidAssetManager { get; private set; }
+		public static void SetAndroidAssetManager(AssetManager assets)
+		{
+			AndroidAssetManager = assets;
+		}
+#endif
 	}
 }
