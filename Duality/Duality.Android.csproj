@@ -36,19 +36,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerDuality, Version=3.3.5203.39568, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\farseerduality\bin\Debug\Android\FarseerDuality.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
-    <Reference Include="OpenTK.Android">
-      <HintPath>..\..\opentk\Binaries\OpenTK\Debug\Android\OpenTK.Android.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
+    <Reference Include="FarseerDuality">
+      <HintPath>..\..\farseerduality\bin\Debug\Android\FarseerDuality.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.Android">
+      <HintPath>..\..\opentk\Binaries\OpenTK\Debug\OpenTK.Android.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\FrameCompleteEventArgs.cs" />
