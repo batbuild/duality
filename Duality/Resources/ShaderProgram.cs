@@ -60,14 +60,14 @@ namespace Duality.Resources
 			const string ContentPath_SharpMask	= VirtualContentPath + "SharpAlpha";
 
 			ContentProvider.AddContent(ContentPath_Minimal, new ShaderProgram(VertexShader.Minimal, FragmentShader.Minimal));
-			ContentProvider.AddContent(ContentPath_Picking, new ShaderProgram(VertexShader.Minimal, FragmentShader.Picking));
-			ContentProvider.AddContent(ContentPath_SmoothAnim, new ShaderProgram(VertexShader.SmoothAnim, FragmentShader.SmoothAnim));
-			ContentProvider.AddContent(ContentPath_SharpMask, new ShaderProgram(VertexShader.Minimal, FragmentShader.SharpAlpha));
+//			ContentProvider.AddContent(ContentPath_Picking, new ShaderProgram(VertexShader.Minimal, FragmentShader.Picking));
+//			ContentProvider.AddContent(ContentPath_SmoothAnim, new ShaderProgram(VertexShader.SmoothAnim, FragmentShader.SmoothAnim));
+//			ContentProvider.AddContent(ContentPath_SharpMask, new ShaderProgram(VertexShader.Minimal, FragmentShader.SharpAlpha));
 
 			Minimal		= ContentProvider.RequestContent<ShaderProgram>(ContentPath_Minimal);
-			Picking		= ContentProvider.RequestContent<ShaderProgram>(ContentPath_Picking);
-			SmoothAnim	= ContentProvider.RequestContent<ShaderProgram>(ContentPath_SmoothAnim);
-			SharpAlpha	= ContentProvider.RequestContent<ShaderProgram>(ContentPath_SharpMask);
+//			Picking		= ContentProvider.RequestContent<ShaderProgram>(ContentPath_Picking);
+//			SmoothAnim	= ContentProvider.RequestContent<ShaderProgram>(ContentPath_SmoothAnim);
+//			SharpAlpha	= ContentProvider.RequestContent<ShaderProgram>(ContentPath_SharpMask);
 		}
 		
 		/// <summary>
@@ -206,6 +206,8 @@ namespace Duality.Resources
 		public void AttachShaders(ContentRef<VertexShader> v, ContentRef<FragmentShader> f, ContentRef<GeometryShader> g = new ContentRef<GeometryShader>())
 		{
 			DualityApp.GuardSingleThreadState();
+
+			var str = v.Res.Source;
 
 			if (this.glProgramId == 0)	this.glProgramId = GL.CreateProgram();
 			else						this.DetachShaders();

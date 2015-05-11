@@ -23,7 +23,7 @@ namespace Duality.Launcher
 		private Stopwatch	frameLimiterWatch	= new Stopwatch();
 
 		public DualityLauncher(int w, int h, GraphicsMode mode, string title, GameWindowFlags flags)
-			: base(w, h, mode, title, flags)
+			: base(w, h, mode, title, flags, DisplayDevice.Default, 4, 4, GraphicsContextFlags.Debug)
 		{
 		}
 

@@ -22,7 +22,14 @@ namespace Duality.Resources
 		/// A FragmentShader resources file extension.
 		/// </summary>
 		public new const string FileExt = ".FragmentShader" + Resource.FileExt;
-		
+
+		private const string MinimalFragShader = @"uniform sampler2D mainTex;
+
+void main()
+{
+	gl_FragColor = vec4(1, 0, 0, 1);//gl_Color * texture2D(mainTex, gl_TexCoord[0].st);
+}";
+
 		/// <summary>
 		/// [GET] A minimal FragmentShader. It performs a texture lookup
 		/// and applies vertex-coloring.
@@ -50,16 +57,16 @@ namespace Duality.Resources
 			const string ContentPath_Picking	= VirtualContentPath + "Picking";
 			const string ContentPath_SmoothAnim	= VirtualContentPath + "SmoothAnim";
 			const string ContentPath_SharpMask	= VirtualContentPath + "SharpAlpha";
-#if ! __ANDROID__
-			ContentProvider.AddContent(ContentPath_Minimal,	new FragmentShader(DefaultContent.MinimalFrag));
-			ContentProvider.AddContent(ContentPath_Picking,	new FragmentShader(DefaultContent.PickingFrag));
-			ContentProvider.AddContent(ContentPath_SmoothAnim,	new FragmentShader(DefaultContent.SmoothAnimFrag));
-			ContentProvider.AddContent(ContentPath_SharpMask,	new FragmentShader(DefaultContent.SharpAlphaFrag));
-#endif
+
+			ContentProvider.AddContent(ContentPath_Minimal, new FragmentShader(MinimalFragShader));
+//			ContentProvider.AddContent(ContentPath_Picking,	new FragmentShader(DefaultContent.PickingFrag));
+//			ContentProvider.AddContent(ContentPath_SmoothAnim,	new FragmentShader(DefaultContent.SmoothAnimFrag));
+//			ContentProvider.AddContent(ContentPath_SharpMask,	new FragmentShader(DefaultContent.SharpAlphaFrag));
+
 			Minimal		= ContentProvider.RequestContent<FragmentShader>(ContentPath_Minimal);
-			Picking		= ContentProvider.RequestContent<FragmentShader>(ContentPath_Picking);
-			SmoothAnim	= ContentProvider.RequestContent<FragmentShader>(ContentPath_SmoothAnim);
-			SharpAlpha	= ContentProvider.RequestContent<FragmentShader>(ContentPath_SharpMask);
+//			Picking		= ContentProvider.RequestContent<FragmentShader>(ContentPath_Picking);
+//			SmoothAnim	= ContentProvider.RequestContent<FragmentShader>(ContentPath_SmoothAnim);
+//			SharpAlpha	= ContentProvider.RequestContent<FragmentShader>(ContentPath_SharpMask);
 		}
 
 
@@ -68,9 +75,7 @@ namespace Duality.Resources
 			get { return ShaderType.FragmentShader; }
 		}
 
-#if !__ANDROID__
-public FragmentShader() : base(DefaultContent.MinimalFrag) {}
-#endif
+		public FragmentShader() : base(MinimalFragShader) {}
 
 		public FragmentShader(string sourceCode) : base(sourceCode) {}
 	}

@@ -43,13 +43,21 @@ namespace Duality.Drawing
 		
 		void IVertexData.SetupVBO(Resources.BatchInfo mat)
 		{
-			GL.EnableClientState(ArrayCap.ColorArray);
-			GL.EnableClientState(ArrayCap.VertexArray);
-			GL.EnableClientState(ArrayCap.TextureCoordArray);
+			GL.EnableVertexAttribArray(0);
+			GL.EnableVertexAttribArray(1);
+			GL.EnableVertexAttribArray(2);
 
-			GL.ColorPointer(4, ColorPointerType.UnsignedByte, Size, (IntPtr)OffsetColor);
-			GL.VertexPointer(3, VertexPointerType.Float, Size, (IntPtr)OffsetPos);
-			GL.TexCoordPointer(2, TexCoordPointerType.Float, Size, (IntPtr)OffsetTex0);
+			GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Size, 0);	// pos
+			GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, Size, 12);	// tex
+			GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Byte, false, Size, 20);	// colour
+
+//			GL.EnableClientState(ArrayCap.ColorArray);
+//			GL.EnableClientState(ArrayCap.VertexArray);
+//			GL.EnableClientState(ArrayCap.TextureCoordArray);
+//
+//			GL.ColorPointer(4, ColorPointerType.UnsignedByte, Size, (IntPtr)OffsetColor);
+//			GL.VertexPointer(3, VertexPointerType.Float, Size, (IntPtr)OffsetPos);
+//			GL.TexCoordPointer(2, TexCoordPointerType.Float, Size, (IntPtr)OffsetTex0);
 		}
 		void IVertexData.UploadToVBO<T>(T[] vertexData, int vertexCount)
 		{
@@ -58,9 +66,12 @@ namespace Duality.Drawing
 		}
 		void IVertexData.FinishVBO(Resources.BatchInfo mat)
 		{
-			GL.DisableClientState(ArrayCap.ColorArray);
-			GL.DisableClientState(ArrayCap.VertexArray);
-			GL.DisableClientState(ArrayCap.TextureCoordArray);
+			GL.DisableVertexAttribArray(0);
+			GL.DisableVertexAttribArray(1);
+			GL.DisableVertexAttribArray(2);
+//			GL.DisableClientState(ArrayCap.ColorArray);
+//			GL.DisableClientState(ArrayCap.VertexArray);
+//			GL.DisableClientState(ArrayCap.TextureCoordArray);
 		}
 		
 		/// <summary>

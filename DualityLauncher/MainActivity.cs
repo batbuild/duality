@@ -9,7 +9,7 @@ using Android.Content.PM;
 using Duality;
 using Duality.Resources;
 using OpenTK;
-using OpenTK.Graphics.ES20;
+using OpenTK.Graphics.OpenGL;
 using Environment = System.Environment;
 
 
@@ -43,56 +43,12 @@ namespace DualityLauncher.Android
 				view = new DualityAndroidLauncher(this);
 				SetContentView(view);
 				view.Run();
-
-//				var logfile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "logfile.txt");
-//				DualityApp.Init(DualityApp.ExecutionEnvironment.Launcher, DualityApp.ExecutionContext.Game, new[] { "logfile", logfile});
-//				//DualityApp.UserDataChanged += launcherWindow.OnUserDataChanged;
-//
-//
-//				// Initialize default content
-//				//launcherWindow.MakeCurrent();
-//
-//				Log.Core.Write("OpenGL initialized");
-//				Log.Core.PushIndent();
-//				Log.Editor.Write("Vendor: {0}", GL.GetString(StringName.Vendor));
-//				Log.Editor.Write("Version: {0}", GL.GetString(StringName.Version));
-//				Log.Editor.Write("Renderer: {0}", GL.GetString(StringName.Renderer));
-//				Log.Editor.Write("Shading language version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
-//				Log.Core.PopIndent();
-//
-//				DualityApp.TargetResolution = new Vector2(view.Size.Width, view.Size.Height);
-//				// DualityApp.TargetMode = view.Context.ApplicationInfo. GraphicsMode;
-//
-//
-//				/* DEBT: waiting for duality not sure we need to init the default content
-// */			
-//				//ContentProvider.InitDefaultContent();
-//
-//				// Input setup
-//				//					DualityApp.Mouse.Source = new GameWindowMouseInputSource(launcherWindow.Mouse, launcherWindow.SetMouseDeviceX, launcherWindow.SetMouseDeviceY);
-//				//					DualityApp.Keyboard.Source = new GameWindowKeyboardInputSource(launcherWindow.Keyboard);
-//
-//				// Load the starting Scene
-//				DualityApp.AppData = new DualityAppData(){StartScene = new ContentRef<Scene>(Scene.Load<Scene>(@"Data\SceneTest.Scene.res"))};
-////				Scene.SwitchTo(DualityApp.AppData.StartScene);
-
-				// Run the DualityApp
-				//	launcherWindow.CursorVisible = isDebugging || DualityApp.UserData.SystemCursorVisible;
-				//					launcherWindow.VSync = (isProfiling || isDebugging || !DualityApp.UserData.VSync) ? VSyncMode.Off : VSyncMode.On;
-
-				/* DEBT: waiting for android not sure this needs to be here
- */			
-				// Shut down the DualityApp
-				//DualityApp.Terminate();		
-
 			}
 			catch (Exception exception)
 			{
 				Console.WriteLine("there was a problem {0}", exception.StackTrace);
 			}
 		}
-
-		
 
 		protected override void OnPause()
 		{

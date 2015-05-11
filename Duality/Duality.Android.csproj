@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Components\FrameCompleteEventArgs.cs" />
     <Compile Include="Components\PassCompleteEventArgs.cs" />
+    <Compile Include="Drawing\CommonShaderVariables.cs" />
     <Compile Include="Drawing\IDrawBatch.cs" />
     <Compile Include="Drawing\Resolution.cs" />
     <Compile Include="Resources\GeometryShader.cs" />

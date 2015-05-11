@@ -153,7 +153,7 @@ namespace Duality.Resources
 			const string ContentPath_SmoothAnim_Invert					= ContentDir_SmoothAnim + "Invert";
 
 			ContentProvider.AddContent(ContentPath_Solid,				new DrawTechnique(BlendMode.Solid));
-			ContentProvider.AddContent(ContentPath_Mask,				new DrawTechnique(BlendMode.Mask));
+			ContentProvider.AddContent(ContentPath_Mask,				new DrawTechnique(BlendMode.Mask,					ShaderProgram.Minimal, VertexType_C1P3T2));
 			ContentProvider.AddContent(ContentPath_Add,					new DrawTechnique(BlendMode.Add));
 			ContentProvider.AddContent(ContentPath_Alpha,				new DrawTechnique(BlendMode.Alpha));
 			ContentProvider.AddContent(ContentPath_PremultipliedAlpha,	new DrawTechnique(BlendMode.PremultipliedAlpha));
@@ -411,12 +411,29 @@ namespace Duality.Resources
 				}
 				Texture.ResetBinding(curSamplerIndex);
 
+				for (int i = 0; i < varInfo.Length; i++)
+				{
+					if (varInfo[i].glVarLoc == -1) continue;
+
+					if (varInfo[i].name == "matModelView")
+					{
+						varInfo[i].SetupUniform(CommonShaderVariables.GetModelViewData());
+						continue;
+					}
+					if (varInfo[i].name == "matProj")
+					{
+						varInfo[i].SetupUniform(CommonShaderVariables.GetProjectionData());
+						continue;
+					}
+				}
+				
 				// Transfer uniform data from material to actual shader
 				if (material.Uniforms != null)
 				{
 					for (int i = 0; i < varInfo.Length; i++)
 					{
 						if (varInfo[i].glVarLoc == -1) continue;
+
 						float[] data = material.GetUniform(varInfo[i].name);
 						if (data == null) continue;
 						varInfo[i].SetupUniform(data);

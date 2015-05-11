@@ -6,7 +6,8 @@ using OpenTK;
 using OpenTK.Android;
 using Android.Content;
 using System.Diagnostics;
-using OpenTK.Graphics.ES20;
+using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics;
 
 
 namespace DualityLauncher.Android
@@ -15,13 +16,11 @@ namespace DualityLauncher.Android
 	{
 		private static bool _isDebugging = false;
 		private static bool _isProfiling = false;
-		private static bool _isRunFromEditor = false;
 		private Stopwatch _frameLimiterWatch = new Stopwatch();
 		
 
 		public DualityAndroidLauncher (Context context) : base (context)
 		{
-			
 			Duality.ContentProvider.SetAndroidAssetManager(context.Assets);
 		}
 
@@ -37,6 +36,7 @@ namespace DualityLauncher.Android
 
 			// Initialize default content
 			//launcherWindow.MakeCurrent();
+			MakeCurrent();
 
 			Log.Core.Write("OpenGL initialized");
 			Log.Core.PushIndent();
@@ -47,7 +47,7 @@ namespace DualityLauncher.Android
 			Log.Core.PopIndent();
 
 //			DualityApp.TargetResolution = new Vector2(view.Size.Width, view.Size.Height);
-			// DualityApp.TargetMode = view.Context.ApplicationInfo. GraphicsMode;
+			DualityApp.TargetMode = GraphicsContext.CurrentContext.GraphicsMode; 
 
 
 			/* DEBT: waiting for duality not sure we need to init the default content
@@ -117,14 +117,17 @@ namespace DualityLauncher.Android
 
 			if (DualityApp.ExecContext == DualityApp.ExecutionContext.Terminated) 
 				return;
-			
-			DualityApp.Render(new Rect(this.MinimumWidth, MinimumHeight));
+
+			try {
+				DualityApp.Render(new Rect(this.Size.Width, this.Size.Height));
+			} catch (Exception ex) {
+				Log.Game.WriteError (ex.Message);
+			}
 			Profile.TimeRender.BeginMeasure();
 			Profile.TimeSwapBuffers.BeginMeasure();
 			SwapBuffers();
 			Profile.TimeSwapBuffers.EndMeasure();
 			Profile.TimeRender.EndMeasure();
-			
 		}
 
 	}

@@ -516,16 +516,16 @@ namespace Duality.Drawing
 
 			// Upload and adjust matrices
 			this.UpdateMatrices();
-			GL.MatrixMode(MatrixMode.Modelview);
-			GL.LoadMatrix(ref this.matModelView);
-			GL.MatrixMode(MatrixMode.Projection);
-			GL.LoadMatrix(ref this.matProjection);
-			if (this.renderTarget.IsAvailable)
-			{
-				if (this.renderMode == RenderMatrix.OrthoScreen) GL.Translate(0.0f, RenderTarget.BoundRT.Res.Height * 0.5f, 0.0f);
-				GL.Scale(1.0f, -1.0f, 1.0f);
-				if (this.renderMode == RenderMatrix.OrthoScreen) GL.Translate(0.0f, -RenderTarget.BoundRT.Res.Height * 0.5f, 0.0f);
-			}
+			CommonShaderVariables.ModelView = matModelView;
+			CommonShaderVariables.Proj = matProjection;
+			/* DEBT: waiting for OpenGL Doesn't suppport GL.Translate and Scale
+ */			
+//			if (this.renderTarget.IsAvailable)
+//			{
+//				if (this.renderMode == RenderMatrix.OrthoScreen) GL.Translate(0.0f, RenderTarget.BoundRT.Res.Height * 0.5f, 0.0f);
+//				GL.Scale(1.0f, -1.0f, 1.0f);
+//				if (this.renderMode == RenderMatrix.OrthoScreen) GL.Translate(0.0f, -RenderTarget.BoundRT.Res.Height * 0.5f, 0.0f);
+//			}
 		}
 		public void EndRendering()
 		{
