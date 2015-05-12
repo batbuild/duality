@@ -15,7 +15,14 @@ using Duality.Cloning;
 using Duality.Properties;
 #if ! __ANDROID__
 using System.Drawing.Imaging;
+using Bitmap=System.Drawing.Bitmap;
+using Point=System.Drawing.Point;
 using ManagedSquish;
+#else
+using Android.Graphics;
+using Java.Nio;
+using Bitmap=Android.Graphics.Bitmap;
+using Point=Android.Graphics.Point;
 #endif
 using OpenTK;
 
@@ -222,10 +229,7 @@ namespace Duality.Resources
 			public Layer(Bitmap image)
 			{
 				if (image == null) throw new ArgumentNullException("image");
-#if !__ANDROID__
-this.FromBitmap(image);
-#endif
-
+				this.FromBitmap(image);
 			}
 			public Layer(string imagePath)
 			{
@@ -234,12 +238,10 @@ this.FromBitmap(image);
 				byte[] buffer = File.ReadAllBytes(imagePath);
 #if !__ANDROID__
 				Bitmap bm = new Bitmap(new MemoryStream(buffer));
-				this.FromBitmap(bm);
 #else				
-				Log.Core.WriteWarning("Pixmap should have loaded image from path: {0}");
+				Bitmap bm = BitmapFactory.DecodeByteArray(buffer, 0, buffer.Length);
 #endif
-				
-				
+				this.FromBitmap(bm);				
 			}
 			public Layer(Layer baseLayer)
 			{
@@ -276,16 +278,14 @@ this.FromBitmap(image);
 			}
 #endif
 
-#if !__ANDROID__
 			/// <summary>
 			/// Loads the pixel data in this layer from the specified file.
 			/// </summary>
 			/// <param name="imagePath"></param>
 			public void LoadPixelData(string imagePath)
 			{
-				this.FromBitmap(new Bitmap(imagePath));
+				this.FromBitmap(BitmapFactory.DecodeFile(imagePath));
 			}
-#endif
 
 			/// <summary>
 			/// Discards all pixel data in this Layer.
@@ -362,27 +362,35 @@ this.FromBitmap(image);
 				return argbValues;
 			}
 
-#if !__ANDROID__
 			/// <summary>
 			/// Sets this Layers pixel data to the one contained in the specified <see cref="System.Drawing.Bitmap"/>
 			/// </summary>
 			/// <param name="bm"></param>
 			public void FromBitmap(Bitmap bm)
 			{
+				int pixels = bm.Width * bm.Height;
+#if !__ANDROID__
 				// Retrieve data
 				BitmapData data = bm.LockBits(
 					new Rectangle(0, 0, bm.Width, bm.Height),
 					ImageLockMode.ReadOnly,
 					PixelFormat.Format32bppArgb);
-			
-				int pixels = data.Width * data.Height;
 				int[] argbValues = new int[pixels];
+			
 				System.Runtime.InteropServices.Marshal.Copy(data.Scan0, argbValues, 0, pixels);
 				bm.UnlockBits(data);
 				
 				this.SetPixelDataArgb(argbValues, bm.Width, bm.Height);
-			}
+#else
+				ByteBuffer buffer = ByteBuffer.Allocate(bm.ByteCount);
+				bm.CopyPixelsToBuffer(buffer);
+				buffer.Rewind();
+				byte[] data = new byte[bm.ByteCount];
+				buffer.Get(data);
+				this.SetPixelDataRgba(data, bm.Width, bm.Height);
 #endif
+			}
+
 
 			/// <summary>
 			/// Sets the layers pixel data in the ColorRgba format. Note that the specified data will be copied and thus modifying it
@@ -1137,9 +1145,11 @@ this.FromBitmap(image);
 					byte[] dataBlock;
 					reader.ReadValue("pixelData", out dataBlock);
 #if !__ANDROID__
-					Bitmap bm = dataBlock != null ? new Bitmap(new MemoryStream(dataBlock)) : null;
+					Bitmap bm = dataBlock != null ?  new Bitmap(new MemoryStream(dataBlock)) : null;
 					if (bm != null) this.FromBitmap(bm);
-					//how do you load images from a reader to Android
+#else
+					Bitmap bm = dataBlock != null ? BitmapFactory.DecodeByteArray(dataBlock, 0, dataBlock.Length) : null;
+					if(bm != null) this.FromBitmap(bm);
 #endif
 
 				}
