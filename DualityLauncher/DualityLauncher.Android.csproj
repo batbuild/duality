@@ -57,6 +57,9 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Assets\Data\SceneTest.Scene.res" />
+    <AndroidAsset Include="Assets\Data\armblade-unlock.Material.res" />
+    <AndroidAsset Include="Assets\Data\armblade-unlock.Pixmap.res" />
+    <AndroidAsset Include="Assets\Data\armblade-unlock.Texture.res" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
     <None Include="Properties\AndroidManifest.xml" />

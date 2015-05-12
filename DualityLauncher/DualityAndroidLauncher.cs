@@ -8,6 +8,7 @@ using Android.Content;
 using System.Diagnostics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Graphics;
+using Size=System.Drawing.Size;
 
 
 namespace DualityLauncher.Android

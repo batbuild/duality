@@ -16,6 +16,7 @@ namespace Duality.Drawing
 		private	float		zSortIndex	= 0.0f;
 		private	VertexMode	vertexMode	= VertexMode.Points;
 		private	BatchInfo	material	= null;
+		private int _vao;
 
 		public int SortIndex
 		{
@@ -69,11 +70,16 @@ namespace Duality.Drawing
 				// Keep an eye on this. If for example two material hash codes randomly have the same 23 lower bits, they
 				// will be sorted as if equal, resulting in blocking batch aggregation.
 			}
+
+			_vao = GL.GenVertexArray();
+			GL.BindVertexArray(_vao);
 		}
 
 		public void SetupVBO()
 		{
 			// Set up VBO
+			GL.BindVertexArray(_vao);
+
 			this.vertices[0].SetupVBO(this.material);
 		}
 		public void UploadToVBO(List<IDrawBatch> batches)
@@ -117,6 +123,7 @@ namespace Duality.Drawing
 		{
 			// Finish VBO
 			this.vertices[0].FinishVBO(this.material);
+			GL.BindVertexArray(0);
 		}
 		public void Render(IDrawDevice device, ref int vertexOffset, ref IDrawBatch lastBatchRendered)
 		{
