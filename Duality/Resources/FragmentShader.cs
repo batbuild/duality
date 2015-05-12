@@ -23,11 +23,18 @@ namespace Duality.Resources
 		/// </summary>
 		public new const string FileExt = ".FragmentShader" + Resource.FileExt;
 
-		private const string MinimalFragShader = @"uniform sampler2D mainTex;
+		private const string MinimalFragShader = @"#version 440
+
+in vec2 iTexCoord;
+in vec4 colour;
+
+out vec4 oColour;
+
+uniform sampler2D mainTex;
 
 void main()
 {
-	gl_FragColor = vec4(1, 0, 0, 1);//gl_Color * texture2D(mainTex, gl_TexCoord[0].st);
+	oColour = texture2D(mainTex, iTexCoord);
 }";
 
 		/// <summary>

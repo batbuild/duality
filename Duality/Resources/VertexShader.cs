@@ -24,22 +24,21 @@ namespace Duality.Resources
 		/// </summary>
 		public new const string FileExt = ".VertexShader" + Resource.FileExt;
 
-		private const string MinimalVertShader = @"
-#version 150
+		private const string MinimalVertShader = @"#version 440
+
+layout(location = 0) in vec4 colour;
+layout(location = 1) in vec3 position;
+layout(location = 2) in vec2 texCoord;
+
+out vec2 iTexCoord;
+out vec4 oColour;
 
 uniform mat4 matProj;
-
-in vec3 position;
-in vec2 texCoord;
-in vec4 colour;
-
-out vec2 oTexCoord;
-out vec4 oColour;
 
 void main()
 {
 	gl_Position = vec4(position, 1) * matProj;
-	oTexCoord = texCoord;
+	iTexCoord = texCoord;
 	oColour = colour;
 }";
 

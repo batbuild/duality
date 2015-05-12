@@ -409,6 +409,9 @@ namespace Duality
 			T newContent = null;
 			try 
 			{
+				if(string.IsNullOrEmpty(path)) return null;
+				path = path.Replace("\\", "/");
+
 				using (Stream str = ContentProvider.AndroidAssetManager.Open(path))
 				using(var memoryStream = new MemoryStream())
 				{
