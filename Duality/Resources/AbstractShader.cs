@@ -311,9 +311,17 @@ namespace Duality.Resources
 			DualityApp.GuardSingleThreadState();
 
 			if (this.compiled) return;
-			if (String.IsNullOrEmpty(this.source)) return;
+			var source = this.source;
+			if (String.IsNullOrEmpty(source)) return;
+
+#if __ANDROID__
+			source = ExtractPlatformShader(source, "__ANDROID__");
+#else
+			source = ExtractPlatformShader(source, "__PC__");
+#endif
+
 			if (this.glShaderId == 0) this.glShaderId = GL.CreateShader(this.OglShaderType);
-			GL.ShaderSource(this.glShaderId, this.source);
+			GL.ShaderSource(this.glShaderId, source);
 			GL.CompileShader(this.glShaderId);
 
 			int result;
@@ -333,7 +341,7 @@ namespace Duality.Resources
 				const string lineComments = @"//(.*?)\r?\n";
 				const string strings = @"""((\\[^\n]|[^""\n])*)""";
 				const string verbatimStrings = @"@(""[^""]*"")+";
-				sourceWithoutComments = Regex.Replace(this.source,
+				sourceWithoutComments = Regex.Replace(source,
 					blockComments + "|" + lineComments + "|" + strings + "|" + verbatimStrings,
 					me => {
 						if (me.Value.StartsWith("/*") || me.Value.StartsWith("//"))
@@ -381,6 +389,21 @@ namespace Duality.Resources
 			}
 
 			this.varInfo = varInfoList.ToArray();
+		}
+
+		private string ExtractPlatformShader(string allVersions, string platform)
+		{
+			var versions = allVersions.Split(new[] {"#if"}, StringSplitOptions.None);
+			if (versions.Length > 1)
+			{
+				var version = versions.FirstOrDefault(s => s.Contains(platform));
+				if (version == null)
+					throw new InvalidProgramException(string.Format("Couldn't find a platform shader for '{0}' in '{1}'", platform, this.Name));
+
+				var lines = version.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Skip(1);
+				return string.Join(Environment.NewLine, lines);
+			}
+			return allVersions;
 		}
 
 		protected override void OnLoaded()
