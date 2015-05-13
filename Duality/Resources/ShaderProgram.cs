@@ -50,6 +50,11 @@ namespace Duality.Resources
 		/// a <see cref="Duality.Resources.FragmentShader.SharpAlpha"/> FragmentShader.
 		/// </summary>
 		public static ContentRef<ShaderProgram> SharpAlpha	{ get; private set; }
+		/// <summary>
+		/// The AlphaTest ShaderProgram, using a <see cref="Duality.Resources.VertexShader.Minimal"/> VertexShader and
+		/// a <see cref="Duality.Resources.FragmentShader.AlphaTest"/> FragmentShader.
+		/// </summary>
+		public static ContentRef<ShaderProgram> AlphaTest { get; set; }
 
 		internal static void InitDefaultContent()
 		{
@@ -58,16 +63,19 @@ namespace Duality.Resources
 			const string ContentPath_Picking	= VirtualContentPath + "Picking";
 			const string ContentPath_SmoothAnim	= VirtualContentPath + "SmoothAnim";
 			const string ContentPath_SharpMask	= VirtualContentPath + "SharpAlpha";
+			const string ContentPath_AlphaTest	= VirtualContentPath + "AlphaTest";
 
 			ContentProvider.AddContent(ContentPath_Minimal, new ShaderProgram(VertexShader.Minimal, FragmentShader.Minimal));
-//			ContentProvider.AddContent(ContentPath_Picking, new ShaderProgram(VertexShader.Minimal, FragmentShader.Picking));
-//			ContentProvider.AddContent(ContentPath_SmoothAnim, new ShaderProgram(VertexShader.SmoothAnim, FragmentShader.SmoothAnim));
-//			ContentProvider.AddContent(ContentPath_SharpMask, new ShaderProgram(VertexShader.Minimal, FragmentShader.SharpAlpha));
+			ContentProvider.AddContent(ContentPath_Picking, new ShaderProgram(VertexShader.Minimal, FragmentShader.Picking));
+			ContentProvider.AddContent(ContentPath_SmoothAnim, new ShaderProgram(VertexShader.SmoothAnim, FragmentShader.SmoothAnim));
+			ContentProvider.AddContent(ContentPath_SharpMask, new ShaderProgram(VertexShader.Minimal, FragmentShader.SharpAlpha));
+			ContentProvider.AddContent(ContentPath_AlphaTest, new ShaderProgram(VertexShader.Minimal, FragmentShader.AlphaTest));
 
 			Minimal		= ContentProvider.RequestContent<ShaderProgram>(ContentPath_Minimal);
-//			Picking		= ContentProvider.RequestContent<ShaderProgram>(ContentPath_Picking);
-//			SmoothAnim	= ContentProvider.RequestContent<ShaderProgram>(ContentPath_SmoothAnim);
-//			SharpAlpha	= ContentProvider.RequestContent<ShaderProgram>(ContentPath_SharpMask);
+			Picking		= ContentProvider.RequestContent<ShaderProgram>(ContentPath_Picking);
+			SmoothAnim	= ContentProvider.RequestContent<ShaderProgram>(ContentPath_SmoothAnim);
+			SharpAlpha	= ContentProvider.RequestContent<ShaderProgram>(ContentPath_SharpMask);
+			AlphaTest	= ContentProvider.RequestContent<ShaderProgram>(ContentPath_AlphaTest);
 		}
 		
 		/// <summary>

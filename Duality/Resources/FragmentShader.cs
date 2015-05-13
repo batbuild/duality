@@ -23,20 +23,7 @@ namespace Duality.Resources
 		/// </summary>
 		public new const string FileExt = ".FragmentShader" + Resource.FileExt;
 
-		private const string MinimalFragShader = @"#version 440
-
-in vec2 iTexCoord;
-in vec4 colour;
-
-out vec4 oColour;
-
-uniform sampler2D mainTex;
-
-void main()
-{
-	oColour = texture2D(mainTex, iTexCoord);
-}";
-
+	
 		/// <summary>
 		/// [GET] A minimal FragmentShader. It performs a texture lookup
 		/// and applies vertex-coloring.
@@ -56,33 +43,33 @@ void main()
 		/// [GET] The SharpMask FragmentShader. It enforces an antialiazed sharp mask when upscaling linearly blended textures.
 		/// </summary>
 		public static ContentRef<FragmentShader> SharpAlpha	{ get; private set; }
+		/// <summary>
+		/// [GET] The AlphaTest FragmentShader. It performs alpha testing in the shader to discard fragments below a certain alpha threshold.
+		/// </summary>
+		public static ContentRef<FragmentShader> AlphaTest { get; set; }
 
 		internal static void InitDefaultContent()
 		{
-			const string VirtualContentPath		= ContentProvider.VirtualContentPath + "FragmentShader:";
-			const string ContentPath_Minimal	= VirtualContentPath + "Minimal";
-			const string ContentPath_Picking	= VirtualContentPath + "Picking";
-			const string ContentPath_SmoothAnim	= VirtualContentPath + "SmoothAnim";
-			const string ContentPath_SharpMask	= VirtualContentPath + "SharpAlpha";
-
-			ContentProvider.AddContent(ContentPath_Minimal, new FragmentShader(MinimalFragShader));
-//			ContentProvider.AddContent(ContentPath_Picking,	new FragmentShader(DefaultContent.PickingFrag));
-//			ContentProvider.AddContent(ContentPath_SmoothAnim,	new FragmentShader(DefaultContent.SmoothAnimFrag));
-//			ContentProvider.AddContent(ContentPath_SharpMask,	new FragmentShader(DefaultContent.SharpAlphaFrag));
-
+			const string ContentPath			= "Data\\Default\\FragmentShader\\";
+			const string ContentPath_Minimal	= ContentPath + "Minimal" + FileExt;
+			const string ContentPath_Picking	= ContentPath + "Picking" + FileExt;
+			const string ContentPath_SmoothAnim = ContentPath + "SmoothAnim" + FileExt;
+			const string ContentPath_SharpMask	= ContentPath + "SharpAlpha" + FileExt;
+			const string ContentPath_AlphaTest	= ContentPath + "AlphaTest" + FileExt;
+			
 			Minimal		= ContentProvider.RequestContent<FragmentShader>(ContentPath_Minimal);
-//			Picking		= ContentProvider.RequestContent<FragmentShader>(ContentPath_Picking);
-//			SmoothAnim	= ContentProvider.RequestContent<FragmentShader>(ContentPath_SmoothAnim);
-//			SharpAlpha	= ContentProvider.RequestContent<FragmentShader>(ContentPath_SharpMask);
+			Picking		= ContentProvider.RequestContent<FragmentShader>(ContentPath_Picking);
+			SmoothAnim	= ContentProvider.RequestContent<FragmentShader>(ContentPath_SmoothAnim);
+			SharpAlpha	= ContentProvider.RequestContent<FragmentShader>(ContentPath_SharpMask);
+			AlphaTest	= ContentProvider.RequestContent<FragmentShader>(ContentPath_AlphaTest);
 		}
-
 
 		protected override ShaderType OglShaderType
 		{
 			get { return ShaderType.FragmentShader; }
 		}
 
-		public FragmentShader() : base(MinimalFragShader) {}
+		public FragmentShader() {}
 
 		public FragmentShader(string sourceCode) : base(sourceCode) {}
 	}
