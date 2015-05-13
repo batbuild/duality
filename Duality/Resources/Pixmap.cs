@@ -284,7 +284,13 @@ namespace Duality.Resources
 			/// <param name="imagePath"></param>
 			public void LoadPixelData(string imagePath)
 			{
-				this.FromBitmap(BitmapFactory.DecodeFile(imagePath));
+				this.FromBitmap(
+#if!__ANDROID__
+					new Bitmap(imagePath)
+#else
+					BitmapFactory.DecodeFile(imagePath)
+#endif
+				);
 			}
 
 			/// <summary>
