@@ -152,14 +152,14 @@ namespace Duality.Resources
 			const string ContentPath_SmoothAnim_Light					= ContentDir_SmoothAnim + "Light";
 			const string ContentPath_SmoothAnim_Invert					= ContentDir_SmoothAnim + "Invert";
 
-			ContentProvider.AddContent(ContentPath_Solid,				new DrawTechnique(BlendMode.Solid));
-			ContentProvider.AddContent(ContentPath_Mask,				new DrawTechnique(BlendMode.Mask,					ShaderProgram.Minimal, VertexType_C1P3T2));
-			ContentProvider.AddContent(ContentPath_Add,					new DrawTechnique(BlendMode.Add));
-			ContentProvider.AddContent(ContentPath_Alpha,				new DrawTechnique(BlendMode.Alpha));
-			ContentProvider.AddContent(ContentPath_PremultipliedAlpha,	new DrawTechnique(BlendMode.PremultipliedAlpha));
-			ContentProvider.AddContent(ContentPath_Multiply,			new DrawTechnique(BlendMode.Multiply));
-			ContentProvider.AddContent(ContentPath_Light,				new DrawTechnique(BlendMode.Light));
-			ContentProvider.AddContent(ContentPath_Invert,				new DrawTechnique(BlendMode.Invert));
+			ContentProvider.AddContent(ContentPath_Solid,				new DrawTechnique(BlendMode.Solid,					ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Mask,				new DrawTechnique(BlendMode.Mask,					ShaderProgram.AlphaTest, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Add,					new DrawTechnique(BlendMode.Add,					ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Alpha,				new DrawTechnique(BlendMode.Alpha,					ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_PremultipliedAlpha,	new DrawTechnique(BlendMode.PremultipliedAlpha,		ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Multiply,			new DrawTechnique(BlendMode.Multiply,				ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Light,				new DrawTechnique(BlendMode.Light,					ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Invert,				new DrawTechnique(BlendMode.Invert,					ShaderProgram.Minimal, VertexType_C1P3T2));
 
 			ContentProvider.AddContent(ContentPath_Picking,	new DrawTechnique(BlendMode.Mask, ShaderProgram.Picking));
 			ContentProvider.AddContent(ContentPath_SharpMask,	new DrawTechnique(BlendMode.Alpha, ShaderProgram.SharpAlpha));
@@ -486,10 +486,6 @@ namespace Duality.Resources
 					if (MaskUseAlphaToCoverage)
 					{
 						GL.Enable(EnableCap.SampleAlphaToCoverage);
-					}
-					else
-					{
-						GL.AlphaFunc(AlphaFunction.Gequal, 0.5f);
 					}
 					break;
 				case BlendMode.Alpha:

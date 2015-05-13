@@ -24,24 +24,6 @@ namespace Duality.Resources
 		/// </summary>
 		public new const string FileExt = ".VertexShader" + Resource.FileExt;
 
-		private const string MinimalVertShader = @"#version 440
-
-layout(location = 0) in vec4 colour;
-layout(location = 1) in vec3 position;
-layout(location = 2) in vec2 texCoord;
-
-out vec2 iTexCoord;
-out vec4 oColour;
-
-uniform mat4 matProj;
-
-void main()
-{
-	gl_Position = vec4(position, 1) * matProj;
-	iTexCoord = texCoord;
-	oColour = colour;
-}";
-
 		/// <summary>
 		/// [GET] A minimal VertexShader. It performs OpenGLs default transformation
 		/// and forwards a single texture coordinate and color to the fragment stage.
@@ -55,16 +37,12 @@ void main()
 
 		internal static void InitDefaultContent()
 		{
-			const string VirtualContentPath			= ContentProvider.VirtualContentPath + "VertexShader:";
-			const string ContentPath_Minimal		= VirtualContentPath + "Minimal";
-			const string ContentPath_SmoothAnim		= VirtualContentPath + "SmoothAnim";
-
-ContentProvider.AddContent(ContentPath_Minimal, new VertexShader(MinimalVertShader));
-//			ContentProvider.AddContent(ContentPath_SmoothAnim, new VertexShader(DefaultContent.SmoothAnimVert));
-
+			const string ContentPath				= "Data\\Default\\VertexShader\\";
+			const string ContentPath_Minimal		= ContentPath + "Minimal" + FileExt;
+			const string ContentPath_SmoothAnim		= ContentPath + "SmoothAnim" + FileExt;
 
 			Minimal		= ContentProvider.RequestContent<VertexShader>(ContentPath_Minimal);
-//			SmoothAnim	= ContentProvider.RequestContent<VertexShader>(ContentPath_SmoothAnim);
+			SmoothAnim	= ContentProvider.RequestContent<VertexShader>(ContentPath_SmoothAnim);
 		}
 
 
@@ -73,7 +51,7 @@ ContentProvider.AddContent(ContentPath_Minimal, new VertexShader(MinimalVertShad
 			get { return ShaderType.VertexShader; }
 		}
 
-		public VertexShader() : base(MinimalVertShader) {}
+		public VertexShader() {}
 
 		public VertexShader(string sourceCode) : base(sourceCode) {}
 	}
