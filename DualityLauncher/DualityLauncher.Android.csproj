@@ -57,6 +57,16 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Assets\Data\SceneTest.Scene.res" />
+    <AndroidAsset Include="Assets\Data\armblade-unlock.Material.res" />
+    <AndroidAsset Include="Assets\Data\armblade-unlock.Pixmap.res" />
+    <AndroidAsset Include="Assets\Data\armblade-unlock.Texture.res" />
+    <AndroidAsset Include="Assets\Data\Default\FragmentShader\Minimal.FragmentShader.res" />
+    <AndroidAsset Include="Assets\Data\Default\FragmentShader\Picking.FragmentShader.res" />
+    <AndroidAsset Include="Assets\Data\Default\FragmentShader\SharpAlpha.FragmentShader.res" />
+    <AndroidAsset Include="Assets\Data\Default\FragmentShader\SmoothAnim.FragmentShader.res" />
+    <AndroidAsset Include="Assets\Data\Default\VertexShader\Minimal.VertexShader.res" />
+    <AndroidAsset Include="Assets\Data\Default\VertexShader\SmoothAnim.VertexShader.res" />
+    <AndroidAsset Include="Assets\Data\Default\FragmentShader\AlphaTest.FragmentShader.res" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
     <None Include="Properties\AndroidManifest.xml" />

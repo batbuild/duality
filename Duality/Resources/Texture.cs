@@ -219,7 +219,6 @@ namespace Duality.Resources
 			if (texRes == null)
 			{
 				GL.BindTexture(TextureTarget.Texture2D, 0);
-				GL.Disable(EnableCap.Texture2D);
 				curBound[texUnit] = null;
 			}
 			else
@@ -227,7 +226,6 @@ namespace Duality.Resources
 				if (texRes.glTexId == 0)	throw new ArgumentException(string.Format("Specified texture '{0}' has no valid OpenGL texture Id! Maybe it hasn't been loaded / initialized properly?", texRes.Path), "tex");
 				if (texRes.Disposed)		throw new ArgumentException(string.Format("Specified texture '{0}' has already been deleted!", texRes.Path), "tex");
 					
-				GL.Enable(EnableCap.Texture2D);
 				GL.BindTexture(TextureTarget.Texture2D, texRes.glTexId);
 				curBound[texUnit] = texRes;
 			}
@@ -567,7 +565,7 @@ namespace Duality.Resources
 			int lastTexId;
 			GL.GetInteger(GetPName.TextureBinding2D, out lastTexId);
 			GL.BindTexture(TextureTarget.Texture2D, this.glTexId);
-
+			
 			if (!this.basePixmap.IsExplicitNull)
 			{
 				Pixmap.Layer pixelData = null;
@@ -611,7 +609,7 @@ namespace Duality.Resources
 						GLPixelFormat.Rgba, PixelType.UnsignedByte,
 						pixelData.Data);
 				}
-
+				
 				// Adjust atlas to represent UV coordinates
 				if (this.atlas != null)
 				{
@@ -748,9 +746,6 @@ namespace Duality.Resources
 			// Anisotropic filtering
 			GL.TexParameter(TextureTarget.Texture2D, (TextureParameterName) ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, this.anisoFilter ? maxAnisoLevel : 1.0f);
 
-			// If needed, care for Mipmaps
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.GenerateMipmap, this.HasMipmaps ? 1 : 0);
-
 			// Setup pixel format
 			if (this.compressed)
 				this.pixelformat = PixelInternalFormat.CompressedRgbaS3tcDxt5Ext;
@@ -758,6 +753,9 @@ namespace Duality.Resources
 			GL.TexImage2D(TextureTarget.Texture2D, 0,
 				this.pixelformat, this.texWidth, this.texHeight, 0,
 				GLPixelFormat.Bgra, this.pixelType, IntPtr.Zero);
+
+			if (this.HasMipmaps)
+				GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 			
 			if (lastTexId != this.glTexId) GL.BindTexture(TextureTarget.Texture2D, lastTexId);
 		}
