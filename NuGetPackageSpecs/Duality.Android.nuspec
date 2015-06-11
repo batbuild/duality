@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<metadata>
+		<id>@project@</id>
+		<version>@build.number@</version>
+		<authors>@authors@</authors>
+		<language>en-IE</language>
+		<description>@description@</description>
+		<summary>@summary@</summary>
+        <projectUrl>https://github.com/batbuild/farseerduality</projectUrl>
+		<licenseUrl>https://github.com/batbuild/farseerduality/blob/android-port/LICENSE</licenseUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+		@dependencies@
+	</metadata>
+    <files>
+        <file src="Duality\bin\Release\Duality.Android.dll" target="lib\MonoAndroid\Duality.Android.dll" />
+        <file src="Duality\bin\Release\Duality.Android.dll.mdb" target="lib\MonoAndroid\Duality.Android.dll.mdb" />
+    </files>
+</package>
