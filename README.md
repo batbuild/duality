@@ -10,3 +10,6 @@ Duality Pages on GitHub: http://adamslair.github.io/duality/
 Latest binary release: http://dualitybin.fetzenet.de/
 
 Buy me a drink: [ Donate via PayPal ](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PL2U4Z8XNQENC)
+
+====
+This fork is for creating an android runtime, for details on the progress check [this doc](https://github.com/Andrea/Portdocs/blob/master/README.md)
