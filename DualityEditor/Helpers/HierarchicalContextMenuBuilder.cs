@@ -64,8 +64,8 @@ namespace Duality.Editor.Helpers
 		{
 			List<ToolStripItem> oldItems = new List<ToolStripItem>(parentMenuItem.DropDownItems.OfType<ToolStripItem>());
 			parentMenuItem.DropDownItems.Clear();
-			foreach (ToolStripItem item in oldItems.Skip(2)) item.Dispose();
-			parentMenuItem.DropDownItems.AddRange(oldItems.Take(2).ToArray());
+			foreach (ToolStripItem item in oldItems.Skip(3)) item.Dispose();
+			parentMenuItem.DropDownItems.AddRange(oldItems.Take(3).ToArray());
 		}
 
 		private static void InsertToolStripTypeItem(System.Collections.IList items, ToolStripItem newItem)

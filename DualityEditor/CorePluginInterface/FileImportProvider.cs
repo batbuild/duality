@@ -93,7 +93,7 @@ namespace Duality.Editor
 			for (int i = 0; i < checkContent.Count; ++i)
 			{
 				ContentRef<Resource> resRef = checkContent[i];
-				if (resRef.Name == fileBaseName)
+				if (resRef.Name.Contains(fileBaseName))
 				{
 					checkContent.RemoveAt(i);
 					checkContent.Insert(0, resRef);

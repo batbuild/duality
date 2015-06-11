@@ -121,6 +121,12 @@
   <ItemGroup>
     <Compile Include="Controls\TreeModels\TypeHierarchy\ModelItems.cs" />
     <Compile Include="Controls\TreeModels\TypeHierarchy\TypeBrowserTreeModel.cs" />
+    <Compile Include="Forms\AddComponentDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AddComponentDialog.Designer.cs">
+      <DependentUpon>AddComponentDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\CreateObjectDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -267,6 +273,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Workspace.cs" />
+    <EmbeddedResource Include="Forms\AddComponentDialog.resx">
+      <DependentUpon>AddComponentDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\CreateObjectDialog.resx">
       <DependentUpon>CreateObjectDialog.cs</DependentUpon>
     </EmbeddedResource>

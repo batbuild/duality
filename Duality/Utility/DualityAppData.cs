@@ -25,6 +25,7 @@ namespace Duality
 		private	bool				localUserData			= false;
 		private	bool				multisampleBackBuffer	= true;
 		private	object				customData				= null;
+		private float				minimumShaderVersion	= 3;
 
 		/// <summary>
 		/// [GET / SET] The name of your application / game. It will also be used as a window title by the launcher app.
@@ -119,6 +120,15 @@ namespace Duality
 		{
 			get { return this.multisampleBackBuffer; }
 			set { this.multisampleBackBuffer = value; }
+		}
+		/// <summary>
+		/// [GET / SET] Use this to set a minimum shader version for your project. Duality will fail to launch and show a message box
+		/// if the reported shader version is lower than this.
+		/// </summary>
+		public float MinimumShaderVersion
+		{
+			get { return minimumShaderVersion; }
+			set { minimumShaderVersion = value; }
 		}
 		/// <summary>
 		/// [GET / SET] Use this property to store custom application data.

@@ -1484,16 +1484,39 @@ namespace Duality.Editor.Plugins.SceneView
 				}
 			}
 		}
+		private void findComponentsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			var addComponentDialog = new AddComponentDialog();
+
+			var componentTypes = DualityApp.GetAvailDualityTypes(typeof(Component))
+				.Where(c => !c.IsAbstract && !c.IsInterface && !c.IsGenericTypeDefinition)
+				.Select(c => new Node(c.Name) { Tag = c })
+				.OrderBy(n => n.Text);
+			addComponentDialog.SetTreeViewItems(componentTypes);
+
+			var result = addComponentDialog.ShowDialog();
+			if (result == DialogResult.Cancel)
+				return;
+
+			if (addComponentDialog.SelectedType == null)
+				return;
+
+			CreateComponent(addComponentDialog.SelectedType);
+		}
 		private void newToolStripMenuItem_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
 		{
 			if (e.ClickedItem == this.gameObjectToolStripMenuItem) return;
 			if (e.ClickedItem.Tag as Type == null) return;
 
 			// Create the Component
-			Type clickedType = e.ClickedItem.Tag as Type;
-			Component cmp = this.CreateComponent(this.objectView.SelectedNode, clickedType);
+			CreateComponent(e.ClickedItem.Tag as Type);
+		}
 
-			NodeBase cmpNode = (NodeBase)this.FindNode(cmp) ?? this.FindNode(cmp.GameObj);
+		private void CreateComponent(Type type)
+		{
+			Component cmp = this.CreateComponent(this.objectView.SelectedNode, type);
+
+			NodeBase cmpNode = (NodeBase) this.FindNode(cmp) ?? this.FindNode(cmp.GameObj);
 			if (cmpNode != null)
 			{
 				// Deselect previous
@@ -1509,6 +1532,7 @@ namespace Duality.Editor.Plugins.SceneView
 				return;
 			}
 		}
+
 		private void customObjectActionItem_Click(object sender, EventArgs e)
 		{
 			List<NodeBase> selNodeData = new List<NodeBase>(
