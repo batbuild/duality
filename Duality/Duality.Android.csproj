@@ -68,6 +68,7 @@
     </Compile>
     <Compile Include="Utility\Extensions\ExtMethodsStream.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsXml.cs" />
+    <Compile Include="Utility\FileHelper.cs" />
     <Compile Include="Utility\Grid.cs" />
     <Compile Include="Utility\IRendererVisibilityStrategy.cs" />
     <Compile Include="Utility\Streams\SubStreamWrapper.cs" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Reflection;
+using Duality.Utility;
 
 namespace Duality.Serialization
 {
@@ -719,13 +720,15 @@ namespace Duality.Serialization
 		{
 			try
 			{
-				if (!File.Exists(file)) return default(T);
-				using (FileStream str = File.OpenRead(file))
+				if (!FileHelper.FileExists(file)) 
+					return default(T);
+
+				using (var str = FileHelper.OpenRead(file))
 				{
 					return Formatter.TryReadObject<T>(str, method);
 				}
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
 				return default(T);
 			}
