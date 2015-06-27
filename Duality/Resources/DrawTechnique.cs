@@ -152,14 +152,14 @@ namespace Duality.Resources
 			const string ContentPath_SmoothAnim_Light					= ContentDir_SmoothAnim + "Light";
 			const string ContentPath_SmoothAnim_Invert					= ContentDir_SmoothAnim + "Invert";
 
-			ContentProvider.AddContent(ContentPath_Solid,				new DrawTechnique(BlendMode.Solid));
-			ContentProvider.AddContent(ContentPath_Mask,				new DrawTechnique(BlendMode.Mask,					ShaderProgram.Minimal, VertexType_C1P3T2));
-			ContentProvider.AddContent(ContentPath_Add,					new DrawTechnique(BlendMode.Add));
-			ContentProvider.AddContent(ContentPath_Alpha,				new DrawTechnique(BlendMode.Alpha));
-			ContentProvider.AddContent(ContentPath_PremultipliedAlpha,	new DrawTechnique(BlendMode.PremultipliedAlpha));
-			ContentProvider.AddContent(ContentPath_Multiply,			new DrawTechnique(BlendMode.Multiply));
-			ContentProvider.AddContent(ContentPath_Light,				new DrawTechnique(BlendMode.Light));
-			ContentProvider.AddContent(ContentPath_Invert,				new DrawTechnique(BlendMode.Invert));
+			ContentProvider.AddContent(ContentPath_Solid,				new DrawTechnique(BlendMode.Solid,					ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Mask,				new DrawTechnique(BlendMode.Mask,					ShaderProgram.AlphaTest, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Add,					new DrawTechnique(BlendMode.Add,					ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Alpha,				new DrawTechnique(BlendMode.Alpha,					ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_PremultipliedAlpha,	new DrawTechnique(BlendMode.PremultipliedAlpha,		ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Multiply,			new DrawTechnique(BlendMode.Multiply,				ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Light,				new DrawTechnique(BlendMode.Light,					ShaderProgram.Minimal, VertexType_C1P3T2));
+			ContentProvider.AddContent(ContentPath_Invert,				new DrawTechnique(BlendMode.Invert,					ShaderProgram.Minimal, VertexType_C1P3T2));
 
 			ContentProvider.AddContent(ContentPath_Picking,	new DrawTechnique(BlendMode.Mask, ShaderProgram.Picking));
 			ContentProvider.AddContent(ContentPath_SharpMask,	new DrawTechnique(BlendMode.Alpha, ShaderProgram.SharpAlpha));
@@ -410,22 +410,6 @@ namespace Duality.Resources
 					}
 				}
 				Texture.ResetBinding(curSamplerIndex);
-
-				for (int i = 0; i < varInfo.Length; i++)
-				{
-					if (varInfo[i].glVarLoc == -1) continue;
-
-					if (varInfo[i].name == "matModelView")
-					{
-						varInfo[i].SetupUniform(CommonShaderVariables.GetModelViewData());
-						continue;
-					}
-					if (varInfo[i].name == "matProj")
-					{
-						varInfo[i].SetupUniform(CommonShaderVariables.GetProjectionData());
-						continue;
-					}
-				}
 				
 				// Transfer uniform data from material to actual shader
 				if (material.Uniforms != null)
@@ -433,6 +417,17 @@ namespace Duality.Resources
 					for (int i = 0; i < varInfo.Length; i++)
 					{
 						if (varInfo[i].glVarLoc == -1) continue;
+
+						if (varInfo[i].name == "matModelView")
+						{
+							varInfo[i].SetupUniform(CommonShaderVariables.GetModelViewData());
+							continue;
+						}
+						if (varInfo[i].name == "matProj")
+						{
+							varInfo[i].SetupUniform(CommonShaderVariables.GetProjectionData());
+							continue;
+						}
 
 						float[] data = material.GetUniform(varInfo[i].name);
 						if (data == null) continue;
@@ -483,7 +478,6 @@ namespace Duality.Resources
 				case BlendMode.Solid:
 					GL.DepthMask(depthWrite);
 					GL.Disable(EnableCap.Blend);
-					GL.Disable(EnableCap.AlphaTest);
 					GL.Disable(EnableCap.SampleAlphaToCoverage);
 					break;
 				case BlendMode.Mask:
@@ -491,54 +485,42 @@ namespace Duality.Resources
 					GL.Disable(EnableCap.Blend);
 					if (MaskUseAlphaToCoverage)
 					{
-						GL.Disable(EnableCap.AlphaTest);
 						GL.Enable(EnableCap.SampleAlphaToCoverage);
-					}
-					else
-					{
-						GL.Enable(EnableCap.AlphaTest);
-						GL.AlphaFunc(AlphaFunction.Gequal, 0.5f);
 					}
 					break;
 				case BlendMode.Alpha:
 					GL.DepthMask(false);
 					GL.Enable(EnableCap.Blend);
-					GL.Disable(EnableCap.AlphaTest);
 					GL.Disable(EnableCap.SampleAlphaToCoverage);
 					GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
 					break;
 				case BlendMode.PremultipliedAlpha:
 					GL.DepthMask(false);
 					GL.Enable(EnableCap.Blend);
-					GL.Disable(EnableCap.AlphaTest);
 					GL.Disable(EnableCap.SampleAlphaToCoverage);
 					GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
 					break;
 				case BlendMode.Add:
 					GL.DepthMask(false);
 					GL.Enable(EnableCap.Blend);
-					GL.Disable(EnableCap.AlphaTest);
 					GL.Disable(EnableCap.SampleAlphaToCoverage);
 					GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.One, BlendingFactorSrc.One, BlendingFactorDest.One);
 					break;
 				case BlendMode.Light:
 					GL.DepthMask(false);
 					GL.Enable(EnableCap.Blend);
-					GL.Disable(EnableCap.AlphaTest);
 					GL.Disable(EnableCap.SampleAlphaToCoverage);
 					GL.BlendFuncSeparate(BlendingFactorSrc.DstColor, BlendingFactorDest.One, BlendingFactorSrc.Zero, BlendingFactorDest.One);
 					break;
 				case BlendMode.Multiply:
 					GL.DepthMask(false);
 					GL.Enable(EnableCap.Blend);
-					GL.Disable(EnableCap.AlphaTest);
 					GL.Disable(EnableCap.SampleAlphaToCoverage);
 					GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero);
 					break;
 				case BlendMode.Invert:
 					GL.DepthMask(false);
 					GL.Enable(EnableCap.Blend);
-					GL.Disable(EnableCap.AlphaTest);
 					GL.Disable(EnableCap.SampleAlphaToCoverage);
 					GL.BlendFunc(BlendingFactorSrc.OneMinusDstColor, BlendingFactorDest.OneMinusSrcColor);
 					break;

@@ -8,6 +8,7 @@ using System.Diagnostics;
 using Android.Content.Res;
 #endif
 using Duality.Resources;
+using OpenTK.Graphics.OpenGL;
 
 namespace Duality
 {
@@ -415,7 +416,9 @@ namespace Duality
 		}
 		private static Resource LoadContent(string path)
 		{
-			if (string.IsNullOrEmpty(path) || !File.Exists(path)) return null;
+			if (string.IsNullOrEmpty(path)) return null;
+
+			if (!FileExists(path)) return null;
 
 			Log.Core.Write("Loading Ressource '{0}'...", path);
 			Log.Core.PushIndent();
@@ -432,12 +435,50 @@ namespace Duality
 			Log.Core.PopIndent();
 			return res;
 		}
+
+		private static bool FileExists(string path)
+		{
+#if !__ANDROID__
+			return File.Exists(path);
+#else
+			if (filesInDataDir == null)
+			{
+				filesInDataDir = new HashSet<string>();
+				BuildFileCache("Data");
+			}
+			
+			return filesInDataDir.Contains(path.Replace("\\", "/"));
+#endif
+		}
+
 #if __ANDROID__
 
+		private static HashSet<string> filesInDataDir;
+		
 		public static AssetManager AndroidAssetManager { get; private set; }
+
 		public static void SetAndroidAssetManager(AssetManager assets)
 		{
 			AndroidAssetManager = assets;
+		}
+
+		private static bool BuildFileCache(string path)
+		{
+			var list = AndroidAssetManager.List(path);
+			if(list.Length > 0)
+			{
+				foreach (var dir in list)
+				{
+					if (!BuildFileCache(path + "/" + dir))
+						return false;
+				}
+			}
+			else
+			{
+				filesInDataDir.Add(path);
+			}
+
+			return true;
 		}
 #endif
 	}
