@@ -2,13 +2,19 @@
   <source dataType="String">#version 440
 
 uniform sampler2D mainTex;
-varying float animBlendVar;
+
+in vec2 iTexCoord;
+in vec4 colour;
+in float animBlendVar;
+
+out vec4 oColour;
+
 
 void main()
 {
 	// Retrieve frames
-	vec4 texClrOld = texture2D(mainTex, gl_TexCoord[0].st);
-	vec4 texClrNew = texture2D(mainTex, gl_TexCoord[0].pq);
+	vec4 texClrOld = texture2D(mainTex, iTexCoord);
+	vec4 texClrNew = texture2D(mainTex, iTexCoord);
 
 	// This code prevents nasty artifacts when blending between differently masked frames
 	float accOldNew = (texClrOld.w - texClrNew.w) / (texClrOld.w + texClrNew.w);
@@ -17,7 +23,7 @@ void main()
 	texClrOld.xyz = mix(texClrOld.xyz, texClrNew.xyz, max(-accOldNew, 0.0));
 
 	// Blend between frames
-	gl_FragColor = gl_Color * mix(texClrOld, texClrNew, animBlendVar);
+	oColour = colour * mix(texClrOld, texClrNew, animBlendVar);
 }</source>
   <sourcePath dataType="String">Source\Media\Default\FragmentShader\SmoothAnim.frag</sourcePath>
 </root>
