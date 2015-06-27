@@ -31,7 +31,9 @@ namespace Duality
 	/// <seealso cref="ContentProvider"/>
 	/// <seealso cref="IContentRef"/>
 	[Serializable]
+#if !__ANDROID__
 	[DebuggerTypeProxy(typeof(ContentRef<>.DebuggerTypeProxy))]
+#endif
 	public struct ContentRef<T> : IEquatable<ContentRef<T>>, IContentRef where T : Resource
 	{
 		/// <summary>

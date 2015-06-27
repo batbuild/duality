@@ -31,9 +31,8 @@ namespace DualityLauncher.Android
 
 			var logfile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "logfile.txt");
 			DualityApp.Init(DualityApp.ExecutionEnvironment.Launcher, DualityApp.ExecutionContext.Game, new[] { "logfile", logfile });
-			//DualityApp.UserDataChanged += launcherWindow.OnUserDataChanged;
-
-
+			
+			
 			// Initialize default content
 			//launcherWindow.MakeCurrent();
 			MakeCurrent();
@@ -46,32 +45,14 @@ namespace DualityLauncher.Android
 			Log.Editor.Write("Shading language version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
 			Log.Core.PopIndent();
 
-//			DualityApp.TargetResolution = new Vector2(view.Size.Width, view.Size.Height);
 			DualityApp.TargetMode = GraphicsContext.CurrentContext.GraphicsMode; 
 
-
-			/* DEBT: waiting for duality not sure we need to init the default content
-*/
 			Duality.ContentProvider.InitDefaultContent();
 
-			// Input setup
-			//					DualityApp.Mouse.Source = new GameWindowMouseInputSource(launcherWindow.Mouse, launcherWindow.SetMouseDeviceX, launcherWindow.SetMouseDeviceY);
-			//					DualityApp.Keyboard.Source = new GameWindowKeyboardInputSource(launcherWindow.Keyboard);
-
-			// Load the starting Scene
-			Scene.SwitchTo(new ContentRef<Scene>(Scene.Load<Scene>(@"Data/SceneTest.Scene.res")));
+			Scene.SwitchTo(DualityApp.AppData.StartScene);
 		}
 
-		private static bool hasConsole = false;
-		public static void ShowConsole()
-		{
-			/* DEBT: Not sure we need this console
-			 */			
-			if (hasConsole) return;
-		//	NativeMethods.AllocConsole();
-			hasConsole = true;
-		}
-
+		
 		protected override void OnUpdateFrame(FrameEventArgs e)
 		{
 			base.OnUpdateFrame(e);
@@ -90,9 +71,7 @@ namespace DualityLauncher.Android
 				//}
 
 				// Give the processor a rest if we have the time, don't use 100% CPU even without VSync
-	
-				/* DEBT: waiting for VSync no control for VSync on android
- */			
+			
 				if (_frameLimiterWatch.IsRunning) // && this.VSync == VSyncMode.Off)
 				{
 					while (_frameLimiterWatch.Elapsed.TotalMilliseconds < Time.MsPFMult)
@@ -106,8 +85,6 @@ namespace DualityLauncher.Android
 			}
 			DualityApp.Update();
 		}
-
-		
 
 		protected override void OnRenderFrame (FrameEventArgs e)
 		{
@@ -129,7 +106,6 @@ namespace DualityLauncher.Android
 			Profile.TimeSwapBuffers.EndMeasure();
 			Profile.TimeRender.EndMeasure();
 		}
-
 	}
 }
 
