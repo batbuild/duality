@@ -604,10 +604,25 @@ namespace Duality.Resources
 				}
 				else
 				{
-					GL.TexImage2D(TextureTarget.Texture2D, 0,
-						this.pixelformat, pixelData.Width, pixelData.Height, 0,
-						GLPixelFormat.Rgba, PixelType.UnsignedByte,
-						pixelData.Data);
+					if (HasMipmaps)
+					{
+						GL.TexStorage2D(TextureTarget2d.Texture2D, 7, SizedInternalFormat.Rgba8, PixelWidth, PixelHeight);
+						GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, PixelWidth, PixelHeight,
+							GLPixelFormat.Rgba, PixelType.UnsignedByte, pixelData.Data);
+
+						GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+						GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) this.filterMin);
+						GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) this.filterMag);
+						GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) this.wrapX);
+						GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) this.wrapY);
+					}
+					else
+					{
+						GL.TexImage2D(TextureTarget.Texture2D, 0,
+							this.pixelformat, pixelData.Width, pixelData.Height, 0,
+							GLPixelFormat.Rgba, PixelType.UnsignedByte,
+							pixelData.Data);
+					}
 				}
 				
 				// Adjust atlas to represent UV coordinates
@@ -742,7 +757,7 @@ namespace Duality.Resources
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)this.filterMag);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)this.wrapX);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)this.wrapY);
-
+			 
 			// Anisotropic filtering
 			GL.TexParameter(TextureTarget.Texture2D, (TextureParameterName) ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, this.anisoFilter ? maxAnisoLevel : 1.0f);
 
@@ -753,9 +768,6 @@ namespace Duality.Resources
 			GL.TexImage2D(TextureTarget.Texture2D, 0,
 				this.pixelformat, this.texWidth, this.texHeight, 0,
 				GLPixelFormat.Bgra, this.pixelType, IntPtr.Zero);
-
-			if (this.HasMipmaps)
-				GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 			
 			if (lastTexId != this.glTexId) GL.BindTexture(TextureTarget.Texture2D, lastTexId);
 		}
