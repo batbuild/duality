@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using Duality.Utility;
 
 namespace Duality
 {
@@ -288,9 +289,9 @@ namespace Duality
 		/// <returns></returns>
 		public static int GetFileHash(string filePath)
 		{
-			if (!File.Exists(filePath)) return 0;
+			if (!FileHelper.FileExists(filePath)) return 0;
 
-			using (BufferedStream stream = new BufferedStream(File.OpenRead(filePath), 512000))
+			using (BufferedStream stream = new BufferedStream(FileHelper.OpenRead(filePath), 512000))
 			{
 				var sha = MD5.Create();
 				byte[] hash = sha.ComputeHash(stream);

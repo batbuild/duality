@@ -1,22 +1,28 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Duality.Utility
 {
 	public static class FileHelper
 	{
-		public static bool FileExists(string path)
+		static FileHelper ()
 		{
-#if !__ANDROID__
-			return File.Exists(path);
-#else
+#if __ANDROID__
 			if (filesInDataDir == null)
 			{
 				filesInDataDir = new HashSet<string>();
 				BuildFileCache("");
 			}
-			
+#endif
+		}
+
+		public static bool FileExists(string path)
+		{
+#if !__ANDROID__
+			return File.Exists(path);
+#else
 			return filesInDataDir.Contains(NormalizePath(path));
 #endif
 		}
@@ -30,10 +36,10 @@ namespace Duality.Utility
 #endif
 		}
 
+
 #if __ANDROID__
-
 		private static HashSet<string> filesInDataDir;
-
+		
 		private static string NormalizePath(string path)
 		{
 			return path.Replace('\\', '/');
@@ -57,7 +63,11 @@ namespace Duality.Utility
 
 			return true;
 		}
+		
+		public static IEnumerable<string> EnumerateFiles(string pluginDirectory, string searchPattern)
+		{
+			return filesInDataDir.Where(file => file.EndsWith("core.dll"));
+		}
 #endif
-
 	}
 }
