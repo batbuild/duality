@@ -410,30 +410,8 @@ namespace Duality.Resources
 					}
 				}
 				Texture.ResetBinding(curSamplerIndex);
-				
-				// Transfer uniform data from material to actual shader
-				if (material.Uniforms != null)
-				{
-					for (int i = 0; i < varInfo.Length; i++)
-					{
-						if (varInfo[i].glVarLoc == -1) continue;
 
-						if (varInfo[i].name == "matModelView")
-						{
-							varInfo[i].SetupUniform(CommonShaderVariables.GetModelViewData());
-							continue;
-						}
-						if (varInfo[i].name == "matProj")
-						{
-							varInfo[i].SetupUniform(CommonShaderVariables.GetProjectionData());
-							continue;
-						}
-
-						float[] data = material.GetUniform(varInfo[i].name);
-						if (data == null) continue;
-						varInfo[i].SetupUniform(data);
-					}
-				}
+				SetShaderVars(material, varInfo);
 			}
 			// Setup fixed function data
 			else
@@ -453,6 +431,31 @@ namespace Duality.Resources
 					Texture.ResetBinding();
 			}
 		}
+
+		private static void SetShaderVars(BatchInfo material, ShaderVarInfo[] varInfo)
+		{
+			for (int i = 0; i < varInfo.Length; i++)
+			{
+				if (varInfo[i].glVarLoc == -1) continue;
+
+				if (varInfo[i].name == "matModelView")
+				{
+					varInfo[i].SetupUniform(CommonShaderVariables.GetModelViewData());
+				}
+				else if (varInfo[i].name == "matProj")
+				{
+					varInfo[i].SetupUniform(CommonShaderVariables.GetProjectionData());
+				}
+				else if (material.Uniforms != null)
+				{
+					// Transfer uniform data from material to actual shader
+					float[] data = material.GetUniform(varInfo[i].name);
+					if (data == null) continue;
+					varInfo[i].SetupUniform(data);
+				}
+			}
+		}
+
 		/// <summary>
 		/// Resets the OpenGL rendering state after finishing DrawTechnique-Setups. Only call this when there are no more
 		/// DrawTechniques to follow directly.
