@@ -13,6 +13,9 @@ using OpenTK.Audio.OpenAL;
 using Duality.Resources;
 using Duality.Serialization;
 using Duality.Drawing;
+#if __ANDROID__
+using Android.Content.Res;
+#endif
 
 namespace Duality
 {
@@ -384,7 +387,9 @@ namespace Duality
 			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 			AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
 
-#if !__ANDROID__
+#if __ANDROID__
+			CopyDependentAssemblies();
+#else
 			sound = new SoundDevice();
 #endif
 			LoadPlugins();
@@ -735,7 +740,19 @@ namespace Duality
 		{
 			Formatter.WriteObject(metaData, MetaDataPath, FormattingMethod.Xml);
 		}
+#if __ANDROID__
 
+		private static void CopyDependentAssemblies()
+		{
+
+			var dlls = ContentProvider.AndroidAssetManager.List(PluginDirectory);
+			foreach (string dllPath in dlls)
+			{
+				if (dllPath.Contains("core.dll") == false)
+					ExtractAndSavePlugin(Path.Combine(PluginDirectory, dllPath));
+			}
+		}
+#endif
 		private static void LoadPlugins()
 		{
 			ClearPlugins();
@@ -743,42 +760,77 @@ namespace Duality
 			Log.Core.Write("Scanning for core plugins...");
 			Log.Core.PushIndent();
 
-			foreach (string dllPath in GetPluginLibPaths("*.core.dll"))
-			{
-				LoadPlugin(dllPath);
-			}
+			var pluginLibPaths = GetPluginLibPaths("*.core.dll");
 
+#if __ANDROID__
+			foreach (string dllPath in pluginLibPaths)
+			{
+				ExtractAndSavePlugin(dllPath);
+			}
+#endif
+
+			foreach (string dllPath in pluginLibPaths)
+			{
+				var path = dllPath;
+#if __ANDROID__
+				if (dllPath.Contains(PluginDirectory) == false)
+					path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), PluginDirectory,dllPath);
+				else
+					path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), dllPath);
+#endif
+				LoadPlugin(path);
+			}
+			
 			Log.Core.PopIndent();
 		}
+
+#if __ANDROID__
+		private static void ExtractAndSavePlugin(string pluginFilePath)
+		{
+			string path = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+			
+			var pluginsPath = Path.Combine(path, "Plugins");
+			if(Directory.Exists(pluginsPath) == false)
+				Directory.CreateDirectory(pluginsPath);
+
+
+			string pluginName = Path.Combine(pluginsPath, Path.GetFileName( pluginFilePath));
+
+			try
+			{
+				using (var stream = Duality.ContentProvider.AndroidAssetManager.Open(pluginFilePath, Access.Streaming))
+				using (var streamWriter = new FileStream(pluginName, System.IO.FileMode.Create))
+				{
+					stream.CopyTo(streamWriter);
+					streamWriter.Flush();
+				}
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("An error ocurred when converting asset to a file on the device. E {0} {1}", e.Message, e.StackTrace);
+			}
+		}
+#endif
+
 
 		private static CorePlugin LoadPlugin(string pluginFilePath)
 		{
 			Log.Core.Write("{0}...", pluginFilePath);
 			Log.Core.PushIndent();
-
+			
 			string asmName = Path.GetFileNameWithoutExtension(pluginFilePath);
 			CorePlugin plugin = plugins.Values.FirstOrDefault(p => p.AssemblyName == asmName);
 			if (plugin != null)
 				return plugin;
 			try
 			{
-				Assembly pluginAssembly;
+				Assembly pluginAssembly = null;
+				
 				if (environment == ExecutionEnvironment.Launcher)
-				{
-#if !__ANDROID__
 					pluginAssembly = Assembly.LoadFrom(pluginFilePath);
-#else
-					var assemblyStream = FileHelper.OpenRead(pluginFilePath);
-					using (var stream = new MemoryStream())
-					{
-						assemblyStream.CopyTo(stream);
-						pluginAssembly = Assembly.Load(stream.ToArray());
-					}
-#endif
-				}
 				else
 					pluginAssembly = Assembly.Load(File.ReadAllBytes(pluginFilePath));
-
+				
 				plugin = LoadPlugin(pluginAssembly, pluginFilePath);
 				if (plugin == null)
 				{
@@ -816,7 +868,6 @@ namespace Duality
 			string asmName = pluginAssembly.GetShortAssemblyName();
 			CorePlugin plugin = plugins.Values.FirstOrDefault(p => p.AssemblyName == asmName);
 			if (plugin != null) return plugin;
-
 			Type pluginType = pluginAssembly.GetExportedTypes().FirstOrDefault(t => typeof(CorePlugin).IsAssignableFrom(t));
 			if (pluginType == null)
 			{
