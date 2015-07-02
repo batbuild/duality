@@ -1022,7 +1022,9 @@ namespace Duality
 		{
 			// Search for plugin libraries in both "WorkingDir/Plugins" and "ExecDir/Plugins"
 			IEnumerable<string> availLibFiles = new string[0];
-#if !__ANDROID__
+#if __ANDROID__
+			availLibFiles = FileHelper.EnumerateFiles(PluginDirectory, searchPattern);
+#else
 			if (Directory.Exists(PluginDirectory)) 
 			{
 				availLibFiles = availLibFiles.Concat(Directory.EnumerateFiles(PluginDirectory, searchPattern, SearchOption.AllDirectories));
@@ -1032,8 +1034,8 @@ namespace Duality
 			{
 				availLibFiles = availLibFiles.Concat(Directory.EnumerateFiles(execPluginDir, searchPattern, SearchOption.AllDirectories));
 			}
-#else
-			availLibFiles = FileHelper.EnumerateFiles(PluginDirectory, searchPattern);
+
+			
 #endif
 			return availLibFiles;
 		}

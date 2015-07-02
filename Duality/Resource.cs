@@ -541,8 +541,14 @@ namespace Duality
 		/// <returns></returns>
 		public static List<string> GetResourceFiles(string folderPath = null)
 		{
-			if (string.IsNullOrEmpty(folderPath)) folderPath = DualityApp.DataDirectory;
+			if (string.IsNullOrEmpty(folderPath)) 
+				folderPath = DualityApp.DataDirectory;
+#if __ANDROID__
+			//HACK complete the code here
+			return Duality.Utility.FileHelper.EnumerateFiles(folderPath, "*" + Resource.FileExt).ToList();
+#else
 			return Directory.EnumerateFiles(folderPath, "*" + Resource.FileExt, SearchOption.AllDirectories).ToList();
+#endif
 		}
 		/// <summary>
 		/// Returns the Resource file extension for a specific Resource Type.
