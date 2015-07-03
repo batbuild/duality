@@ -38,8 +38,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerDuality">
-      <HintPath>..\packages\FarseerDuality.0.1.4\lib\net40\FarseerDuality.dll</HintPath>
+    <Reference Include="FarseerDuality, Version=3.3.5520.35854, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FarseerDuality.0.1.7\lib\net40\FarseerDuality.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
