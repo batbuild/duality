@@ -28,6 +28,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DualityLauncher.Android", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duality.Android", "Duality\Duality.Android.csproj", "{39FF8C9A-A220-4B45-AFE4-7CBC5E034C1C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Default", "Default", "{B6263B07-AAE5-4953-A3FC-37A6B1813257}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FragmentShader", "FragmentShader", "{09740B2C-588B-4D1A-8454-21B042709A67}"
+	ProjectSection(SolutionItems) = preProject
+		DefaultResoources\FragmentShader\AlphaTest.FragmentShader.res = DefaultResoources\FragmentShader\AlphaTest.FragmentShader.res
+		DefaultResoources\FragmentShader\Minimal.FragmentShader.res = DefaultResoources\FragmentShader\Minimal.FragmentShader.res
+		DefaultResoources\FragmentShader\Picking.FragmentShader.res = DefaultResoources\FragmentShader\Picking.FragmentShader.res
+		DefaultResoources\FragmentShader\SharpAlpha.FragmentShader.res = DefaultResoources\FragmentShader\SharpAlpha.FragmentShader.res
+		DefaultResoources\FragmentShader\SmoothAnim.FragmentShader.res = DefaultResoources\FragmentShader\SmoothAnim.FragmentShader.res
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VertexShader", "VertexShader", "{B1CABC98-934C-46BC-B0F2-3BF69EE16B2F}"
+	ProjectSection(SolutionItems) = preProject
+		DefaultResoources\VertexShader\Minimal.VertexShader.res = DefaultResoources\VertexShader\Minimal.VertexShader.res
+		DefaultResoources\VertexShader\SmoothAnim.VertexShader.res = DefaultResoources\VertexShader\SmoothAnim.VertexShader.res
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,5 +88,8 @@ Global
 		{FDA21F0F-1646-4E41-A1FC-1C3F05694CE4} = {03729F9B-E2FF-4FFC-ADC1-862D9BE94803}
 		{0C1B88A8-4FF3-43D3-9BC6-E71DBB561075} = {25E5F85E-2B49-4959-A7F4-45E7C492F345}
 		{9A7492CF-9D22-4196-81FE-C6837E89E12C} = {25E5F85E-2B49-4959-A7F4-45E7C492F345}
+		{B6263B07-AAE5-4953-A3FC-37A6B1813257} = {CBF76FE4-285D-4843-BBB8-00C88CE9FB67}
+		{09740B2C-588B-4D1A-8454-21B042709A67} = {B6263B07-AAE5-4953-A3FC-37A6B1813257}
+		{B1CABC98-934C-46BC-B0F2-3BF69EE16B2F} = {B6263B07-AAE5-4953-A3FC-37A6B1813257}
 	EndGlobalSection
 EndGlobal
