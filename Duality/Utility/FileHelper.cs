@@ -27,10 +27,10 @@ namespace Duality.Utility
 
 		public static bool FileExists(string path)
 		{
-#if !__ANDROID__
-			return File.Exists(path);
-#else
+#if __ANDROID__
 			return filesInDataDir.Contains(NormalizePath(path));
+#else
+			return File.Exists(path);
 #endif
 		}
 
@@ -71,10 +71,10 @@ namespace Duality.Utility
 			return true;
 		}
 		
-		public static IEnumerable<string> EnumerateFiles(string pluginDirectory, string searchPattern)
+		public static IEnumerable<string> EnumerateFiles(string dir, string searchPattern)
 		{
 			
-			return filesInDataDir.Where(file => AssertPatterMatchesTarget(file, searchPattern)==SearchResults.Found);
+			return filesInDataDir.Where(x=> x.StartsWith(dir)).Where(file => AssertPatterMatchesTarget(file, searchPattern)==SearchResults.Found);
 		}
 #endif
 
