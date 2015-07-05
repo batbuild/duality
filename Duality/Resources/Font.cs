@@ -70,16 +70,18 @@ namespace Duality.Resources
 		internal static void InitDefaultContent()
 		{
 			string contentPath;
+			string extension = string.Empty;
 #if __ANDROID__
 			 contentPath = "Data\\Default\\Font\\";
+			extension = FileExt;
 #else
 			contentPath = ContentProvider.VirtualContentPath + "Font:";
 #endif	
 
-			string ContentPath_GenericMonospace10 = contentPath + "GenericMonospace10" + FileExt;
-			string ContentPath_GenericMonospace8 = contentPath + "GenericMonospace8" + FileExt;
-			string ContentPath_GenericSerif12 = contentPath + "GenericSerif12" + FileExt;
-			string ContentPath_GenericSansSerif12 = contentPath + "GenericSansSerif12" + FileExt;
+			string ContentPath_GenericMonospace10 = contentPath + "GenericMonospace10" + extension;
+			string ContentPath_GenericMonospace8 = contentPath + "GenericMonospace8" + extension;
+			string ContentPath_GenericSerif12 = contentPath + "GenericSerif12" + extension;
+			string ContentPath_GenericSansSerif12 = contentPath + "GenericSansSerif12" + extension;
 #if !__ANDROID__
 
 			Font tmp;
