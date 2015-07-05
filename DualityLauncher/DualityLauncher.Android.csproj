@@ -78,8 +78,15 @@
     <AndroidAsset Include="Assets\Data\Default\VertexShader\SmoothAnim.VertexShader.res" />
     <AndroidAsset Include="Assets\Data\Default\Font\GenericMonospace10.Font.res" />
     <AndroidAsset Include="Assets\Data\Default\Font\GenericMonospace8.Font.res" />
-    <AndroidAsset Include="Assets\Data\Default\Font\GenericSanSerif12.Font.res" />
     <AndroidAsset Include="Assets\Data\Default\Font\GenericSerif12.Font.res" />
+    <AndroidAsset Include="Assets\Data\catbits.Material.res" />
+    <AndroidAsset Include="Assets\Data\catbits.Pixmap.res" />
+    <AndroidAsset Include="Assets\Data\catbits.Texture.res" />
+    <AndroidAsset Include="Assets\Data\Scene.Scene.res" />
+    <AndroidAsset Include="Assets\Data\SceneCat.Scene.res" />
+    <AndroidAsset Include="Assets\Data\Default\Font\GenericSansSerif12.Font.res" />
+    <AndroidAsset Include="Assets\Data\Default\Pixmap\Checkerboard.Pixmap.res" />
+    <AndroidAsset Include="Assets\Data\Default\Pixmap\White.Pixmap.res" />
     <None Include="packages.config" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
