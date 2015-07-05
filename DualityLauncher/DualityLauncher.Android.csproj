@@ -76,6 +76,10 @@
     <AndroidAsset Include="Assets\Data\Default\FragmentShader\SmoothAnim.FragmentShader.res" />
     <AndroidAsset Include="Assets\Data\Default\VertexShader\Minimal.VertexShader.res" />
     <AndroidAsset Include="Assets\Data\Default\VertexShader\SmoothAnim.VertexShader.res" />
+    <AndroidAsset Include="Assets\Data\Default\Font\GenericMonospace10.Font.res" />
+    <AndroidAsset Include="Assets\Data\Default\Font\GenericMonospace8.Font.res" />
+    <AndroidAsset Include="Assets\Data\Default\Font\GenericSanSerif12.Font.res" />
+    <AndroidAsset Include="Assets\Data\Default\Font\GenericSerif12.Font.res" />
     <None Include="packages.config" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
