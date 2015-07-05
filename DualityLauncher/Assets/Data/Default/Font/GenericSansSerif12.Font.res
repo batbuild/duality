@@ -1,178 +1,38 @@
 ﻿<root dataType="Struct" type="Duality.Resources.Font" id="129723834">
   <ascent dataType="Int">7</ascent>
-  <baseLine dataType="Int">10</baseLine>
+  <baseLine dataType="Int">9</baseLine>
   <bodyAscent dataType="Int">5</bodyAscent>
   <characters dataType="Enum" type="Duality.Resources.Font+CharacterSet" name="PreRendered" value="1" />
   <customFamilyData />
-  <descent dataType="Int">2</descent>
-  <familyName dataType="String">Times New Roman</familyName>
+  <descent dataType="Int">3</descent>
+  <familyName dataType="String">Microsoft Sans Serif</familyName>
   <glyphs dataType="Array" type="Duality.Resources.Font+GlyphData[]" id="427169525">
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
+      <offsetX dataType="Int">-2</offsetX>
       <width dataType="Int">4</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
+      <offsetX dataType="Int">-2</offsetX>
       <width dataType="Int">2</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">4</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">4</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
+      <offsetX dataType="Int">0</offsetX>
       <width dataType="Int">6</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-1</offsetX>
-      <width dataType="Int">9</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">6</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">4</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-1</offsetX>
-      <width dataType="Int">6</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
+      <offsetX dataType="Int">0</offsetX>
       <width dataType="Int">6</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
@@ -180,111 +40,13 @@
       <kerningSamplesLeft />
       <kerningSamplesRight />
       <offsetX dataType="Int">-1</offsetX>
-      <width dataType="Int">8</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
       <width dataType="Int">5</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">6</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">6</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">6</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">6</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">6</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">4</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">8</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
+      <offsetX dataType="Int">0</offsetX>
       <width dataType="Int">6</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
@@ -292,69 +54,62 @@
       <kerningSamplesLeft />
       <kerningSamplesRight />
       <offsetX dataType="Int">-1</offsetX>
-      <width dataType="Int">9</width>
+      <width dataType="Int">5</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
       <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">6</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
       <width dataType="Int">4</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">6</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
       <width dataType="Int">7</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
       <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">4</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">6</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
       <width dataType="Int">7</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
@@ -362,195 +117,34 @@
       <kerningSamplesLeft />
       <kerningSamplesRight />
       <offsetX dataType="Int">0</offsetX>
-      <width dataType="Int">11</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
       <width dataType="Int">7</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
+      <offsetX dataType="Int">0</offsetX>
       <width dataType="Int">6</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">2</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">2</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-5</offsetX>
-      <width dataType="Int">1</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-5</offsetX>
-      <width dataType="Int">1</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
+      <offsetX dataType="Int">0</offsetX>
       <width dataType="Int">6</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-5</offsetX>
-      <width dataType="Int">1</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">6</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-5</offsetX>
-      <width dataType="Int">1</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
+      <offsetX dataType="Int">-1</offsetX>
       <width dataType="Int">5</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
@@ -558,48 +152,468 @@
       <kerningSamplesLeft />
       <kerningSamplesRight />
       <offsetX dataType="Int">-1</offsetX>
-      <width dataType="Int">9</width>
+      <width dataType="Int">5</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">6</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">6</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">6</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">6</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">6</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">3</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">3</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">2</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">2</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-3</offsetX>
+      <width dataType="Int">1</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-3</offsetX>
+      <width dataType="Int">1</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">3</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-3</offsetX>
+      <width dataType="Int">1</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">3</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
       <width dataType="Int">4</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-5</offsetX>
-      <width dataType="Int">1</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
+      <offsetX dataType="Int">-2</offsetX>
       <width dataType="Int">4</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">4</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
       <width dataType="Int">5</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
@@ -607,160 +621,146 @@
       <kerningSamplesLeft />
       <kerningSamplesRight />
       <offsetX dataType="Int">-1</offsetX>
-      <width dataType="Int">9</width>
+      <width dataType="Int">5</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
       <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">8</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
       <width dataType="Int">2</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
-      <width dataType="Int">3</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-4</offsetX>
+      <offsetX dataType="Int">-2</offsetX>
       <width dataType="Int">2</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-3</offsetX>
-      <width dataType="Int">5</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
       <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">2</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">3</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">3</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">3</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">2</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">2</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">3</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">4</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-2</offsetX>
+      <width dataType="Int">2</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">-1</offsetX>
+      <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
       <width dataType="Int">6</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
+      <offsetX dataType="Int">0</offsetX>
       <width dataType="Int">7</width>
     </item>
     <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
       <height dataType="Int">14</height>
       <kerningSamplesLeft />
       <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
-      <width dataType="Int">7</width>
-    </item>
-    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
-      <height dataType="Int">14</height>
-      <kerningSamplesLeft />
-      <kerningSamplesRight />
-      <offsetX dataType="Int">-2</offsetX>
+      <offsetX dataType="Int">-1</offsetX>
       <width dataType="Int">5</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">7</width>
+    </item>
+    <item dataType="Struct" type="Duality.Resources.Font+GlyphData">
+      <height dataType="Int">14</height>
+      <kerningSamplesLeft />
+      <kerningSamplesRight />
+      <offsetX dataType="Int">0</offsetX>
+      <width dataType="Int">6</width>
     </item>
   </glyphs>
   <height dataType="Int">13</height>
   <kerning dataType="Bool">false</kerning>
   <lineHeightFactor dataType="Float">1</lineHeightFactor>
-  <maxGlyphWidth dataType="Int">11</maxGlyphWidth>
+  <maxGlyphWidth dataType="Int">7</maxGlyphWidth>
   <monospace dataType="Bool">true</monospace>
   <pixelData dataType="Struct" type="Duality.Resources.Pixmap" id="2035693768">
     <_x003C_ProcessedLayerIsPremultiplied_x003E_k__BackingField dataType="Bool">false</_x003C_ProcessedLayerIsPremultiplied_x003E_k__BackingField>
@@ -783,176 +783,158 @@
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
+          <W dataType="Float">6</W>
           <X dataType="Float">13</X>
           <Y dataType="Float">1</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">20</X>
-          <Y dataType="Float">1</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">4</W>
-          <X dataType="Float">27</X>
+          <W dataType="Float">6</W>
+          <X dataType="Float">21</X>
           <Y dataType="Float">1</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">5</W>
-          <X dataType="Float">33</X>
-          <Y dataType="Float">1</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">4</W>
-          <X dataType="Float">40</X>
-          <Y dataType="Float">1</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">46</X>
-          <Y dataType="Float">1</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">53</X>
+          <X dataType="Float">29</X>
           <Y dataType="Float">1</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">6</W>
-          <X dataType="Float">60</X>
-          <Y dataType="Float">1</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
-          <X dataType="Float">68</X>
-          <Y dataType="Float">1</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
-          <X dataType="Float">73</X>
-          <Y dataType="Float">1</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">78</X>
-          <Y dataType="Float">1</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
-          <X dataType="Float">85</X>
-          <Y dataType="Float">1</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">9</W>
-          <X dataType="Float">90</X>
-          <Y dataType="Float">1</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">6</W>
-          <X dataType="Float">1</X>
-          <Y dataType="Float">17</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">9</X>
-          <Y dataType="Float">17</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">16</X>
-          <Y dataType="Float">17</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">23</X>
-          <Y dataType="Float">17</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">4</W>
-          <X dataType="Float">30</X>
-          <Y dataType="Float">17</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
           <X dataType="Float">36</X>
-          <Y dataType="Float">17</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
-          <X dataType="Float">41</X>
-          <Y dataType="Float">17</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">6</W>
-          <X dataType="Float">46</X>
-          <Y dataType="Float">17</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">6</W>
-          <X dataType="Float">54</X>
-          <Y dataType="Float">17</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">8</W>
-          <X dataType="Float">62</X>
-          <Y dataType="Float">17</Y>
+          <Y dataType="Float">1</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">5</W>
-          <X dataType="Float">72</X>
-          <Y dataType="Float">17</Y>
+          <X dataType="Float">44</X>
+          <Y dataType="Float">1</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">4</W>
+          <X dataType="Float">51</X>
+          <Y dataType="Float">1</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">6</W>
-          <X dataType="Float">79</X>
-          <Y dataType="Float">17</Y>
+          <X dataType="Float">57</X>
+          <Y dataType="Float">1</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">7</W>
+          <X dataType="Float">65</X>
+          <Y dataType="Float">1</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">5</W>
+          <X dataType="Float">74</X>
+          <Y dataType="Float">1</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">4</W>
+          <X dataType="Float">81</X>
+          <Y dataType="Float">1</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">6</W>
           <X dataType="Float">87</X>
+          <Y dataType="Float">1</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">95</X>
+          <Y dataType="Float">1</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">7</W>
+          <X dataType="Float">1</X>
           <Y dataType="Float">17</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">7</W>
-          <X dataType="Float">94</X>
+          <X dataType="Float">10</X>
+          <Y dataType="Float">17</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">19</X>
           <Y dataType="Float">17</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">6</W>
+          <X dataType="Float">26</X>
+          <Y dataType="Float">17</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">6</W>
+          <X dataType="Float">34</X>
+          <Y dataType="Float">17</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">42</X>
+          <Y dataType="Float">17</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">49</X>
+          <Y dataType="Float">17</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">6</W>
+          <X dataType="Float">56</X>
+          <Y dataType="Float">17</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">7</W>
+          <X dataType="Float">64</X>
+          <Y dataType="Float">17</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">7</W>
+          <X dataType="Float">73</X>
+          <Y dataType="Float">17</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">7</W>
+          <X dataType="Float">82</X>
+          <Y dataType="Float">17</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">91</X>
+          <Y dataType="Float">17</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">7</W>
           <X dataType="Float">1</X>
           <Y dataType="Float">33</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">6</W>
-          <X dataType="Float">9</X>
+          <W dataType="Float">5</W>
+          <X dataType="Float">10</X>
           <Y dataType="Float">33</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
@@ -969,98 +951,110 @@
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">6</W>
+          <W dataType="Float">5</W>
           <X dataType="Float">34</X>
           <Y dataType="Float">33</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">7</W>
-          <X dataType="Float">42</X>
+          <W dataType="Float">6</W>
+          <X dataType="Float">41</X>
           <Y dataType="Float">33</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">7</W>
-          <X dataType="Float">51</X>
+          <W dataType="Float">5</W>
+          <X dataType="Float">49</X>
           <Y dataType="Float">33</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
-          <X dataType="Float">60</X>
-          <Y dataType="Float">33</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">4</W>
-          <X dataType="Float">65</X>
-          <Y dataType="Float">33</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">8</W>
-          <X dataType="Float">71</X>
+          <W dataType="Float">5</W>
+          <X dataType="Float">56</X>
           <Y dataType="Float">33</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">6</W>
-          <X dataType="Float">81</X>
-          <Y dataType="Float">33</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">9</W>
-          <X dataType="Float">89</X>
+          <X dataType="Float">63</X>
           <Y dataType="Float">33</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">7</W>
+          <X dataType="Float">71</X>
+          <Y dataType="Float">33</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">80</X>
+          <Y dataType="Float">33</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">87</X>
+          <Y dataType="Float">33</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">7</W>
+          <X dataType="Float">94</X>
+          <Y dataType="Float">33</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
           <X dataType="Float">1</X>
           <Y dataType="Float">49</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">7</W>
-          <X dataType="Float">10</X>
+          <X dataType="Float">8</X>
+          <Y dataType="Float">49</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">7</W>
+          <X dataType="Float">17</X>
+          <Y dataType="Float">49</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">26</X>
+          <Y dataType="Float">49</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">33</X>
+          <Y dataType="Float">49</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">40</X>
           <Y dataType="Float">49</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">6</W>
-          <X dataType="Float">19</X>
+          <X dataType="Float">47</X>
           <Y dataType="Float">49</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">7</W>
-          <X dataType="Float">27</X>
+          <W dataType="Float">5</W>
+          <X dataType="Float">55</X>
           <Y dataType="Float">49</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">7</W>
-          <X dataType="Float">36</X>
-          <Y dataType="Float">49</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">4</W>
-          <X dataType="Float">45</X>
-          <Y dataType="Float">49</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">7</W>
-          <X dataType="Float">51</X>
-          <Y dataType="Float">49</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">7</W>
-          <X dataType="Float">60</X>
+          <W dataType="Float">5</W>
+          <X dataType="Float">62</X>
           <Y dataType="Float">49</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
@@ -1071,14 +1065,20 @@
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">11</W>
+          <W dataType="Float">7</W>
           <X dataType="Float">78</X>
           <Y dataType="Float">49</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">7</W>
-          <X dataType="Float">91</X>
+          <X dataType="Float">87</X>
+          <Y dataType="Float">49</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">7</W>
+          <X dataType="Float">96</X>
           <Y dataType="Float">49</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
@@ -1089,140 +1089,134 @@
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">6</W>
+          <W dataType="Float">5</W>
           <X dataType="Float">10</X>
           <Y dataType="Float">65</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">17</X>
+          <Y dataType="Float">65</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">24</X>
+          <Y dataType="Float">65</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">31</X>
+          <Y dataType="Float">65</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">38</X>
+          <Y dataType="Float">65</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">45</X>
+          <Y dataType="Float">65</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">52</X>
+          <Y dataType="Float">65</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">59</X>
+          <Y dataType="Float">65</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">66</X>
+          <Y dataType="Float">65</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">73</X>
+          <Y dataType="Float">65</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">80</X>
+          <Y dataType="Float">65</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
           <W dataType="Float">3</W>
-          <X dataType="Float">18</X>
+          <X dataType="Float">87</X>
           <Y dataType="Float">65</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">23</X>
-          <Y dataType="Float">65</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">30</X>
-          <Y dataType="Float">65</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">37</X>
-          <Y dataType="Float">65</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">44</X>
-          <Y dataType="Float">65</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">51</X>
-          <Y dataType="Float">65</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">58</X>
-          <Y dataType="Float">65</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">65</X>
-          <Y dataType="Float">65</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">72</X>
-          <Y dataType="Float">65</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">79</X>
+          <W dataType="Float">3</W>
+          <X dataType="Float">92</X>
           <Y dataType="Float">65</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">2</W>
-          <X dataType="Float">86</X>
-          <Y dataType="Float">65</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">2</W>
-          <X dataType="Float">90</X>
-          <Y dataType="Float">65</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">1</W>
-          <X dataType="Float">94</X>
-          <Y dataType="Float">65</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">1</W>
           <X dataType="Float">97</X>
           <Y dataType="Float">65</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
-          <X dataType="Float">100</X>
+          <W dataType="Float">2</W>
+          <X dataType="Float">101</X>
           <Y dataType="Float">65</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">6</W>
+          <W dataType="Float">5</W>
           <X dataType="Float">1</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">9</X>
+          <W dataType="Float">7</W>
+          <X dataType="Float">8</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">5</W>
-          <X dataType="Float">16</X>
+          <X dataType="Float">17</X>
+          <Y dataType="Float">81</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">24</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">1</W>
-          <X dataType="Float">23</X>
+          <X dataType="Float">31</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">6</W>
-          <X dataType="Float">26</X>
-          <Y dataType="Float">81</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">1</W>
+          <W dataType="Float">5</W>
           <X dataType="Float">34</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">37</X>
+          <W dataType="Float">1</W>
+          <X dataType="Float">41</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
@@ -1239,104 +1233,122 @@
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">9</W>
+          <W dataType="Float">5</W>
           <X dataType="Float">58</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">4</W>
-          <X dataType="Float">69</X>
+          <W dataType="Float">5</W>
+          <X dataType="Float">65</X>
+          <Y dataType="Float">81</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">72</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">3</W>
-          <X dataType="Float">75</X>
+          <X dataType="Float">79</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">1</W>
-          <X dataType="Float">80</X>
+          <X dataType="Float">84</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">3</W>
-          <X dataType="Float">83</X>
+          <X dataType="Float">87</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">4</W>
-          <X dataType="Float">88</X>
+          <X dataType="Float">92</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">94</X>
+          <W dataType="Float">4</W>
+          <X dataType="Float">98</X>
           <Y dataType="Float">81</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">9</W>
+          <W dataType="Float">4</W>
           <X dataType="Float">1</X>
           <Y dataType="Float">97</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">8</W>
-          <X dataType="Float">12</X>
-          <Y dataType="Float">97</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
-          <X dataType="Float">22</X>
-          <Y dataType="Float">97</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
-          <X dataType="Float">27</X>
-          <Y dataType="Float">97</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
-          <X dataType="Float">32</X>
+          <W dataType="Float">5</W>
+          <X dataType="Float">7</X>
           <Y dataType="Float">97</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">5</W>
-          <X dataType="Float">37</X>
+          <X dataType="Float">14</X>
           <Y dataType="Float">97</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">2</W>
-          <X dataType="Float">44</X>
+          <X dataType="Float">21</X>
+          <Y dataType="Float">97</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">2</W>
+          <X dataType="Float">25</X>
+          <Y dataType="Float">97</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
+          <X dataType="Float">29</X>
+          <Y dataType="Float">97</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">2</W>
+          <X dataType="Float">36</X>
           <Y dataType="Float">97</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">3</W>
-          <X dataType="Float">48</X>
+          <X dataType="Float">40</X>
           <Y dataType="Float">97</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">3</W>
-          <X dataType="Float">53</X>
+          <X dataType="Float">45</X>
           <Y dataType="Float">97</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">3</W>
-          <X dataType="Float">58</X>
+          <X dataType="Float">50</X>
+          <Y dataType="Float">97</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">2</W>
+          <X dataType="Float">55</X>
+          <Y dataType="Float">97</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">2</W>
+          <X dataType="Float">59</X>
           <Y dataType="Float">97</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
@@ -1347,68 +1359,56 @@
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
+          <W dataType="Float">4</W>
           <X dataType="Float">68</X>
           <Y dataType="Float">97</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
-          <X dataType="Float">73</X>
+          <W dataType="Float">2</W>
+          <X dataType="Float">74</X>
           <Y dataType="Float">97</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">3</W>
+          <W dataType="Float">5</W>
           <X dataType="Float">78</X>
           <Y dataType="Float">97</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">2</W>
-          <X dataType="Float">83</X>
-          <Y dataType="Float">97</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">87</X>
-          <Y dataType="Float">97</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">94</X>
-          <Y dataType="Float">97</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
           <W dataType="Float">6</W>
+          <X dataType="Float">85</X>
+          <Y dataType="Float">97</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">7</W>
+          <X dataType="Float">93</X>
+          <Y dataType="Float">97</Y>
+        </item>
+        <item dataType="Struct" type="Duality.Rect">
+          <H dataType="Float">14</H>
+          <W dataType="Float">5</W>
           <X dataType="Float">1</X>
           <Y dataType="Float">113</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">7</W>
-          <X dataType="Float">9</X>
+          <X dataType="Float">8</X>
           <Y dataType="Float">113</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
           <W dataType="Float">7</W>
-          <X dataType="Float">18</X>
+          <X dataType="Float">17</X>
           <Y dataType="Float">113</Y>
         </item>
         <item dataType="Struct" type="Duality.Rect">
           <H dataType="Float">14</H>
-          <W dataType="Float">7</W>
-          <X dataType="Float">27</X>
-          <Y dataType="Float">113</Y>
-        </item>
-        <item dataType="Struct" type="Duality.Rect">
-          <H dataType="Float">14</H>
-          <W dataType="Float">5</W>
-          <X dataType="Float">36</X>
+          <W dataType="Float">6</W>
+          <X dataType="Float">26</X>
           <Y dataType="Float">113</Y>
         </item>
       </_items>
@@ -1420,13 +1420,13 @@
         <item dataType="Struct" type="Duality.Resources.Pixmap+Layer" id="1130222838" custom="true">
           <body>
             <version dataType="Int">3</version>
-            <pixelData dataType="Array" type="System.Byte[]" id="3930871008">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</pixelData>
+            <pixelData dataType="Array" type="System.Byte[]" id="3930871008">iVBORw0KGgoAAAANSUhEUgAAAGoAAACsCAYAAACTkDk+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAfJSURBVHhe7ZPRjhtJDgT3/3/ad2lcCik6WN2akXz0mgEEigy2ngbzz48fP9Y/QIzrPDGu88S4zhPjOs9cTLavauj2ioZuJw3dSEO3qqAuRd1Ftqqh20MPgubvKKi/qqDeKahfKah/V0E9FdQfUhTUq0l39yvontDNc97yLrou6FbnvHe37OJ0E/VWv8l7ftNag6iNFKfdTeRO8+lmvNf7nb02k3fqIu9X3YpuF3m76g9rELV1Vuje7SJvqbjaK/WeOzWROzWR+1W3ou4meyqoP8R4Q3HaqYnulopX9qq4aiJ3aiL3q25Ft4u8XfWHuZhsnR2ne/6evjndxOl+1V+50V6b8S0VOYucRb0nvj2J8S9QUH+Hgvq3xPgvNaH7d0zo/m0xrvPEuM4T4zpPjOs8Ma7zxLjOE+M6T4zrPDH+CxXU/xg9JN4fH/1PU+dqQr3Od78xdMtmui7od92eTdD+6jd1vjQXQW9qcq/3q13QXeQsvN/ptaWCuhWnnZrInZrIPZvfW+Yi6E3Fp3bR3U7NJnSrLRWnvTaRt9rrWxXUW3MR9KbiU7vobqdGiq/uJu95y7cq6E1Fd2v1cIK+ob37rruJV+6Vuzf65nSvc/dNp8i33kSdL8X4QQV1UlD/K8X4IRO6pwnd/zoxrvPEuM4T4zpPjOs8Ma7zxLjOE+M6T4zf0JxuydU3V727izs3unc32mszvtGdOu1P/hLeoKAuRbeL7lZ3kbfaxJ2b8Ew7NZH7VbfiqoncH3pIaK/N+Jbf5FsV3S7yVhV3dr93biJ3Upz2q27FqYm8PZmLuLuLvNXut1qpt9yr4mo32U83kTtJdN9Rt4KaqbcnaxD5koK6TLp7t4u8VcWd3e+dm8jZdN/QfuqCZmoib0/WIPKtCprv7NTEnVvdRd5qE93t1EXu1ETupy5o7prI/SFF0fUK3Wi/+j1903WRN7oLuuVv7tyT7lvCt7xnyy5qy+9++kv4r4L6+n80lyT7OkCM6zwxrvPEuM4T4zpPjOs8Ma7zxLjO00Py9IFC0H2bdN/c7SJv9d51kbf6jefaE7rR/olvvGOrx9xTU+fuG+/1fncXNF/t4nQT9Vbfeu92aiJ3aiJ3aiL3v+oP1SnudJE7NZF7tvpWRb5P5iJyTwW9qaC33u/sguarXeTNzdSb73e6yL02kbfa60sK6u0fSnQ32rPVt95Pu6n9ajfZSXGnURe51+63KuitinyfzEXQfGevzXT3O3vXRbeL7kZ716iL3Gv3WxX0puK0P/5QBN1oP33je/fdVb+6J9noLtzpXm937tLQzYp8600cWx6nm9D9Xy3GdZ4Y13liXOeJcZ0nxnWeGNd5YlzniXGdp4eE9tqMb3nPVm/ilZsV1JLTnZq5+s13b28xF/Gd/W4Td27ZBPXarLjTxSdvb7MGkW+neKVbQd0K2v3S7W4nBc3vunUauknzaHm0groV1KWgLgV1aWqjOZvpushbKqiZ001kr9/l/hYpCupSULfilV4VOVfy21TQTHvXxWlPBc20v0WK4k4Xub/SrDjtXRfdLrrbK03k3nVx2klDN7SG5HQz373Ve/are5L96uZ7182dfuduuv3WN49h/YimttxviXF9m4L6y2Jc54lxnSfGdZ4Y13liXOeJcZ0nxvW2Cd3fJsbfqOia3zqfmhXUTybdvWt+u9lvdpPdt9o+9ocSNFcF7X5rv9Mq9RtS3Nn9ZjfZ6uz3NHs32d/+hzKv9Jwr9N2pWUG9U+Qs6EZ7VdTZr2fhPXttDz0QTx9eaOiWmtzrnXpK1Hu+9SbqXdD7FQV1K/KtN1H7qP+o3P2eFNQ7hV/R3fL9ioJ6KvKtiqf2tLxRQXNV5FzJb6uC+lcUOYu8f0JTd5Hf/fSX8JsVtPs9Kah/RUH9KwrqVtBM+0OMv1FRZ7+/2wp98w4TutX2U4zrPDEWT9D36wfEuM4T4zpPjOs8Ma7zxLjOE+M6z1xE7q8qul3k7aSgJuou8jvfchan3fOpWUG737s3K/Jt9SDyrRq6SXFqIm9Xijr7zS5qO+3URO6vtN9mLiL3q56K014bkd9WxZ0uTjs1kXvXyOQrt27/RQ+V/EjkXhVfbXdMTs39tFMTuV91K7pddLeuidyfrEHQbvJmxauNyG+/oqktd2omm3ttqbjak7z5ftqfzEXke5pPreuitncrTjs1kftVt6LbRXejZvL+ZA2CWlJvuaeC5k8qTjs1kXsqqNuk60l+k9/V+Rcx3lRQt4LmTyrqLrrdLfdUUP/tYvzDFdRJQX2cGNd5YlzniXGdJ8Z1nhjXeeYi8q2KfEmR7/omMa7zzCXJXu+nm6D99O16Qw8iDyL3qy7Faacmcl8bPYg8iNyz+a2K057N1Pva6EHkQeSezW9VnHZqIve10YPIg8jdzdSb76edmsh9bfQg8iBe2amJ3LPVd70wl+TUk/zulZup36yNGNd5YlzniXGdJ8Z1nhjXeWJc54lxnSfGdZ4Y13liXOeJcZ0nxnWeGNd5YlzniXGdJ8Z1nhjXeWJc54lxnSfGdZ4Y13liXOeJcZ0nxnWeGNd5YlzniXGdJ8Z1nhjXeWJc54lxnSfGdZ4Y13liXOeJcZ0nxnWeGNd5YlzniXGdJ8Z1nhjXeWJc54lxnSfGdZ4Y13liXOeJcZ0nxnWaP/75DxibpFSS4kOOAAAAAElFTkSuQmCC</pixelData>
           </body>
         </item>
         <item dataType="Struct" type="Duality.Resources.Pixmap+Layer" id="1022987802" custom="true">
           <body>
             <version dataType="Int">3</version>
-            <pixelData dataType="Array" type="System.Byte[]" id="3051297732">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</pixelData>
+            <pixelData dataType="Array" type="System.Byte[]" id="3051297732">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</pixelData>
           </body>
         </item>
       </_items>
@@ -1436,9 +1436,9 @@
     <sourcePath />
   </pixelData>
   <renderMode dataType="Enum" type="Duality.Resources.Font+RenderMode" name="MonochromeBitmap" value="0" />
-  <size dataType="Float">10</size>
+  <size dataType="Float">12</size>
   <sourcePath />
-  <spacing dataType="Float">1</spacing>
+  <spacing dataType="Float">1.2</spacing>
   <style dataType="Enum" type="System.Drawing.FontStyle" name="Regular" value="0" />
 </root>
 <!-- XmlFormatterBase Document Separator -->
