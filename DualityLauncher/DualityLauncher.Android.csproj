@@ -68,7 +68,6 @@
     <Compile Include="DualityAndroidLauncher.cs" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="Assets\appdata.dat" />
     <AndroidAsset Include="Assets\Data\Default\FragmentShader\AlphaTest.FragmentShader.res" />
     <AndroidAsset Include="Assets\Data\Default\FragmentShader\Minimal.FragmentShader.res" />
     <AndroidAsset Include="Assets\Data\Default\FragmentShader\Picking.FragmentShader.res" />
@@ -79,11 +78,6 @@
     <AndroidAsset Include="Assets\Data\Default\Font\GenericMonospace10.Font.res" />
     <AndroidAsset Include="Assets\Data\Default\Font\GenericMonospace8.Font.res" />
     <AndroidAsset Include="Assets\Data\Default\Font\GenericSerif12.Font.res" />
-    <AndroidAsset Include="Assets\Data\catbits.Material.res" />
-    <AndroidAsset Include="Assets\Data\catbits.Pixmap.res" />
-    <AndroidAsset Include="Assets\Data\catbits.Texture.res" />
-    <AndroidAsset Include="Assets\Data\Scene.Scene.res" />
-    <AndroidAsset Include="Assets\Data\SceneCat.Scene.res" />
     <AndroidAsset Include="Assets\Data\Default\Font\GenericSansSerif12.Font.res" />
     <AndroidAsset Include="Assets\Data\Default\Pixmap\Checkerboard.Pixmap.res" />
     <AndroidAsset Include="Assets\Data\Default\Pixmap\White.Pixmap.res" />
@@ -105,38 +99,12 @@
     <AndroidResource Include="Resources\drawable-xxxhdpi\Icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="Assets\Plugins\spine-csharp.Android.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidAsset Include="Assets\Plugins\DisciplineOak.Android.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidAsset Include="Assets\Plugins\FastMember.Android.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidAsset Include="Assets\Plugins\Flow.Android.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidAsset Include="Assets\Plugins\GamePlay.GamePlugin.Android.core.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidAsset Include="Assets\Plugins\GamePlugin.Android.core.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidAsset Include="Assets\Plugins\Mercury.ParticleEngine.Android.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidAsset Include="Assets\Plugins\ScriptingPlugin.Android.core.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Duality\Duality.Android.csproj">
       <Project>{39ff8c9a-a220-4b45-afe4-7cbc5e034c1c}</Project>
       <Name>Duality.Android</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Assets\sounds\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
