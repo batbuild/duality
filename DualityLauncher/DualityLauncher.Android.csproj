@@ -87,6 +87,10 @@
     <AndroidAsset Include="Assets\Data\Default\Font\GenericSansSerif12.Font.res" />
     <AndroidAsset Include="Assets\Data\Default\Pixmap\Checkerboard.Pixmap.res" />
     <AndroidAsset Include="Assets\Data\Default\Pixmap\White.Pixmap.res" />
+    <AndroidAsset Include="Assets\Data\Default\Material\Checkerboard.Material.res" />
+    <AndroidAsset Include="Assets\Data\Default\Material\White.Material.res" />
+    <AndroidAsset Include="Assets\Data\Default\Texture\Checkerboard.Texture.res" />
+    <AndroidAsset Include="Assets\Data\Default\Texture\White.Texture.res" />
     <None Include="packages.config" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />

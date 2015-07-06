@@ -97,14 +97,23 @@ namespace Duality.Resources
 
 		internal static void InitDefaultContent()
 		{
-			const string VirtualContentPath				= ContentProvider.VirtualContentPath + "Pixmap:";
-			const string ContentPath_DualityIcon		= VirtualContentPath + "DualityIcon";
-			const string ContentPath_DualityIconB		= VirtualContentPath + "DualityIconB";
-			const string ContentPath_DualityLogoBig		= VirtualContentPath + "DualityLogoBig";
-			const string ContentPath_DualityLogoMedium	= VirtualContentPath + "DualityLogoMedium";
-			const string ContentPath_DualityLogoSmall	= VirtualContentPath + "DualityLogoSmall";
-			const string ContentPath_White				= VirtualContentPath + "White";
-			const string ContentPath_Checkerboard		= VirtualContentPath + "Checkerboard";
+			string contentPath;
+			string extension = string.Empty;
+			
+#if  __ANDROID__
+			contentPath = "Data\\Default\\Pixmap\\";
+			extension = FileExt;
+
+#else
+			contentPath = ContentProvider.VirtualContentPath + "Pixmap:";
+#endif
+			 string ContentPath_DualityIcon		= contentPath + "DualityIcon" +extension;
+			 string ContentPath_DualityIconB = contentPath + "DualityIconB" + extension;
+			 string ContentPath_DualityLogoBig = contentPath + "DualityLogoBig" + extension;
+			 string ContentPath_DualityLogoMedium = contentPath + "DualityLogoMedium" + extension;
+			 string ContentPath_DualityLogoSmall = contentPath + "DualityLogoSmall" + extension;
+			 string ContentPath_White = contentPath + "White" + extension;
+			 string ContentPath_Checkerboard = contentPath + "Checkerboard" + extension;
 #if ! __ANDROID__
 			ContentProvider.AddContent(ContentPath_DualityIcon,		new Pixmap(DefaultContent.DualityIcon));
 			ContentProvider.AddContent(ContentPath_DualityIconB,		new Pixmap(DefaultContent.DualityIconB));
@@ -119,9 +128,10 @@ namespace Duality.Resources
 			DualityLogoBig		= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityLogoBig);
 			DualityLogoMedium	= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityLogoMedium);
 			DualityLogoSmall	= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityLogoSmall);
-			White				= ContentProvider.RequestContent<Pixmap>(ContentPath_White);
-			Checkerboard		= ContentProvider.RequestContent<Pixmap>(ContentPath_Checkerboard);
+			
 #endif
+			 White = ContentProvider.RequestContent<Pixmap>(ContentPath_White);
+			 Checkerboard = ContentProvider.RequestContent<Pixmap>(ContentPath_Checkerboard);
 		}
 
 		

@@ -64,14 +64,24 @@ namespace Duality.Resources
 
 		internal static void InitDefaultContent()
 		{
-			const string VirtualContentPath				= ContentProvider.VirtualContentPath + "Texture:";
-			const string ContentPath_DualityIcon		= VirtualContentPath + "DualityIcon";
-			const string ContentPath_DualityIconB		= VirtualContentPath + "DualityIconB";
-			const string ContentPath_DualityLogoBig		= VirtualContentPath + "DualityLogoBig";
-			const string ContentPath_DualityLogoMedium	= VirtualContentPath + "DualityLogoMedium";
-			const string ContentPath_DualityLogoSmall	= VirtualContentPath + "DualityLogoSmall";
-			const string ContentPath_White				= VirtualContentPath + "White";
-			const string ContentPath_Checkerboard		= VirtualContentPath + "Checkerboard";
+			string contentPath;
+			string extension = string.Empty;
+
+#if  __ANDROID__
+			contentPath = "Data\\Default\\Texture\\";
+			extension = FileExt;
+#else
+			contentPath = ContentProvider.VirtualContentPath + "Texture:";
+#endif
+			
+			 string ContentPath_DualityIcon		= contentPath + "DualityIcon" + extension;
+			 string ContentPath_DualityIconB = contentPath + "DualityIconB" + extension;
+			 string ContentPath_DualityLogoBig = contentPath + "DualityLogoBig" + extension;
+			 string ContentPath_DualityLogoMedium = contentPath + "DualityLogoMedium" + extension;
+			 string ContentPath_DualityLogoSmall = contentPath + "DualityLogoSmall" + extension;
+			 string ContentPath_White = contentPath + "White" + extension;
+			 string ContentPath_Checkerboard = contentPath + "Checkerboard" + extension;
+#if ! __ANDROID__
 
 			ContentProvider.AddContent(ContentPath_DualityIcon, new Texture(Pixmap.DualityIcon));
 			ContentProvider.AddContent(ContentPath_DualityIconB, new Texture(Pixmap.DualityIconB));
@@ -87,11 +97,13 @@ namespace Duality.Resources
 				TextureWrapMode.Repeat,
 				TextureWrapMode.Repeat));
 
+
 			DualityIcon			= ContentProvider.RequestContent<Texture>(ContentPath_DualityIcon);
 			DualityIconB		= ContentProvider.RequestContent<Texture>(ContentPath_DualityIconB);
 			DualityLogoBig		= ContentProvider.RequestContent<Texture>(ContentPath_DualityLogoBig);
 			DualityLogoMedium	= ContentProvider.RequestContent<Texture>(ContentPath_DualityLogoMedium);
 			DualityLogoSmall	= ContentProvider.RequestContent<Texture>(ContentPath_DualityLogoSmall);
+#endif
 			White				= ContentProvider.RequestContent<Texture>(ContentPath_White);
 			Checkerboard		= ContentProvider.RequestContent<Texture>(ContentPath_Checkerboard);
 		}
