@@ -32,6 +32,8 @@ namespace DualityLauncher.Android
 
 			var logfile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "logfile.txt");
 			DualityApp.Init(DualityApp.ExecutionEnvironment.Launcher, DualityApp.ExecutionContext.Game, new[] { "logfile", logfile });
+
+			DualityApp.TargetResolution = new Vector2(Width, Height);
 			
 			
 			// Initialize default content
