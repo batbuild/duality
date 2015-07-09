@@ -113,4 +113,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
+	<UsingTask TaskName="ScanAndFile" AssemblyFile="..\ScanFilesMsBuildTask.dll" />
+	<Target Name="ScanAndFile" AfterTargets="UpdateAndroidAssets" BeforeTargets="UpdateAndroidInterfaceProxies">
+		<ScanAndFile PathToAssets="obj\Debug\assets"/>
+	</Target>
 </Project>
