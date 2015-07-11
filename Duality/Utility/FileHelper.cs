@@ -66,7 +66,7 @@ namespace Duality.Utility
 					while (reader.Peek() >= 0)
 					{
 						var filePath = reader.ReadLine();
-						filesInDataDir.Add(filePath);
+						filesInDataDir.Add(NormalizePath( filePath));
 					}
 				}
 				return true;
