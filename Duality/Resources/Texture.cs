@@ -81,6 +81,15 @@ namespace Duality.Resources
 			 string ContentPath_DualityLogoSmall = contentPath + "DualityLogoSmall" + extension;
 			 string ContentPath_White = contentPath + "White" + extension;
 			 string ContentPath_Checkerboard = contentPath + "Checkerboard" + extension;
+
+			 ContentProvider.AddContent(ContentPath_White, new Texture(Pixmap.White, filterMin: TextureMinFilter.Linear));
+			 ContentProvider.AddContent(ContentPath_Checkerboard, new Texture(
+				 Pixmap.Checkerboard,
+				 SizeMode.Default,
+				 TextureMagFilter.Nearest,
+				 TextureMinFilter.Nearest,
+				 TextureWrapMode.Repeat,
+				 TextureWrapMode.Repeat));
 #if ! __ANDROID__
 
 			ContentProvider.AddContent(ContentPath_DualityIcon, new Texture(Pixmap.DualityIcon));
@@ -88,15 +97,7 @@ namespace Duality.Resources
 			ContentProvider.AddContent(ContentPath_DualityLogoBig, new Texture(Pixmap.DualityLogoBig));
 			ContentProvider.AddContent(ContentPath_DualityLogoMedium, new Texture(Pixmap.DualityLogoMedium));
 			ContentProvider.AddContent(ContentPath_DualityLogoSmall, new Texture(Pixmap.DualityLogoSmall));
-			ContentProvider.AddContent(ContentPath_White, new Texture(Pixmap.White));
-			ContentProvider.AddContent(ContentPath_Checkerboard, new Texture(
-				Pixmap.Checkerboard, 
-				SizeMode.Default,
-				TextureMagFilter.Nearest,
-				TextureMinFilter.Nearest,
-				TextureWrapMode.Repeat,
-				TextureWrapMode.Repeat));
-
+			
 
 			DualityIcon			= ContentProvider.RequestContent<Texture>(ContentPath_DualityIcon);
 			DualityIconB		= ContentProvider.RequestContent<Texture>(ContentPath_DualityIconB);

@@ -128,10 +128,12 @@ namespace Duality.Resources
 			DualityLogoBig		= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityLogoBig);
 			DualityLogoMedium	= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityLogoMedium);
 			DualityLogoSmall	= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityLogoSmall);
-			
+#else
+			ContentProvider.AddContent(ContentPath_White,				new Pixmap(new Layer(1, 1, ColorRgba.White)));
+			ContentProvider.AddContent(ContentPath_Checkerboard,		new Pixmap(new Layer(1, 1, ColorRgba.White)));	// not a checkerboard pattern:)
 #endif
-			 White = ContentProvider.RequestContent<Pixmap>(ContentPath_White);
-			 Checkerboard = ContentProvider.RequestContent<Pixmap>(ContentPath_Checkerboard);
+			White = ContentProvider.RequestContent<Pixmap>(ContentPath_White);
+			Checkerboard = ContentProvider.RequestContent<Pixmap>(ContentPath_Checkerboard);
 		}
 
 		
