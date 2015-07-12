@@ -393,32 +393,6 @@ namespace Duality.Drawing
 		{
 			if (vertexCount == 0) return;
 			if (vertexBuffer == null || vertexBuffer.Length == 0) return;
-
-			// DEBT: quads are deprecated in modern OpenGL, so turn any quads into triangles instead. This can probably be made way more efficient
-			// by having two separate code paths in DrawBatch, one that uses indexed triangles and the original quad data, and one that uses DrawArrays
-			if (vertexMode == VertexMode.Quads)
-			{
-				vertexMode = VertexMode.Triangles;
-
-				// there are two extra verts per quad for triangle data
-				var numQuads = vertexCount / 4;
-				var triangleData = new T[vertexCount + numQuads * 2];
-				var triangleIndex = 0;
-				for (var i = 0; i < vertexBuffer.Length; i += 4)
-				{
-					triangleData[triangleIndex++] = vertexBuffer[i];
-					triangleData[triangleIndex++] = vertexBuffer[i + 1];
-					triangleData[triangleIndex++] = vertexBuffer[i + 2];
-
-					triangleData[triangleIndex++] = vertexBuffer[i];
-					triangleData[triangleIndex++] = vertexBuffer[i + 2];
-					triangleData[triangleIndex++] = vertexBuffer[i + 3];
-				}
-
-				vertexBuffer = triangleData;
-				vertexCount = vertexBuffer.Length;
-			}
-
 			if (vertexCount > vertexBuffer.Length) vertexCount = vertexBuffer.Length;
 			if (material == null) material = Material.Checkerboard.Res.InfoDirect;
 
@@ -463,7 +437,11 @@ namespace Duality.Drawing
 			}
 			else
 			{
-				buffer.Add(new DrawBatch<T>(material, vertexMode, vertexBuffer, vertexCount, zSortIndex));
+				if(vertexMode == VertexMode.Quads)
+					// fast path for quads for versions of GL where quads are deprecated
+					buffer.Add(new IndexedDrawBatch<T>(material, vertexBuffer, vertexCount, zSortIndex));
+				else
+					buffer.Add(new DrawBatch<T>(material, vertexMode, vertexBuffer, vertexCount, zSortIndex));
 			}
 			++this.numRawBatches;
 		}
