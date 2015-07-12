@@ -544,7 +544,6 @@ namespace Duality
 			if (string.IsNullOrEmpty(folderPath)) 
 				folderPath = DualityApp.DataDirectory;
 #if __ANDROID__
-			//HACK complete the code here
 			return Duality.Utility.FileHelper.EnumerateFiles(folderPath, "*" + Resource.FileExt).ToList();
 #else
 			return Directory.EnumerateFiles(folderPath, "*" + Resource.FileExt, SearchOption.AllDirectories).ToList();

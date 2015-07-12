@@ -36,10 +36,12 @@ namespace Duality
 #endif
 	public struct ContentRef<T> : IEquatable<ContentRef<T>>, IContentRef where T : Resource
 	{
+#if !__ANDROID__
 		/// <summary>
 		/// An explicit null reference.
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+#endif
 		public static readonly ContentRef<T> Null = new ContentRef<T>(null);
 
 		[NonSerialized]

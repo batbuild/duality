@@ -17,6 +17,7 @@
     <TargetFrameworkVersion>v4.4</TargetFrameworkVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -28,6 +29,16 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <AndroidLinkMode>None</AndroidLinkMode>
+    <AndroidLinkSkip>
+    </AndroidLinkSkip>
+    <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
+    <AndroidSupportedAbis>armeabi,armeabi-v7a,x86</AndroidSupportedAbis>
+    <AndroidStoreUncompressedFileExtensions>
+    </AndroidStoreUncompressedFileExtensions>
+    <MandroidI18n>
+    </MandroidI18n>
+    <Debugger>Xamarin</Debugger>
+    <DevInstrumentationEnabled>True</DevInstrumentationEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -36,11 +47,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerDuality, Version=0.1.8.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Farseer.Duality.Android.0.1.8\lib\MonoAndroid\FarseerDuality.dll</HintPath>
+    <Reference Include="FarseerDuality.Android, Version=0.1.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Farseer.Duality.Android.0.1.10\lib\MonoAndroid\FarseerDuality.Android.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="OpenTK.Android, Version=0.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
@@ -58,15 +68,24 @@
     <Compile Include="DualityAndroidLauncher.cs" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="Assets\Data\SceneTest.Scene.res" />
-    <None Include="packages.config" />
+    <AndroidAsset Include="Assets\Data\Default\FragmentShader\AlphaTest.FragmentShader.res" />
     <AndroidAsset Include="Assets\Data\Default\FragmentShader\Minimal.FragmentShader.res" />
     <AndroidAsset Include="Assets\Data\Default\FragmentShader\Picking.FragmentShader.res" />
     <AndroidAsset Include="Assets\Data\Default\FragmentShader\SharpAlpha.FragmentShader.res" />
     <AndroidAsset Include="Assets\Data\Default\FragmentShader\SmoothAnim.FragmentShader.res" />
     <AndroidAsset Include="Assets\Data\Default\VertexShader\Minimal.VertexShader.res" />
     <AndroidAsset Include="Assets\Data\Default\VertexShader\SmoothAnim.VertexShader.res" />
-    <AndroidAsset Include="Assets\Data\Default\FragmentShader\AlphaTest.FragmentShader.res" />
+    <AndroidAsset Include="Assets\Data\Default\Font\GenericMonospace10.Font.res" />
+    <AndroidAsset Include="Assets\Data\Default\Font\GenericMonospace8.Font.res" />
+    <AndroidAsset Include="Assets\Data\Default\Font\GenericSerif12.Font.res" />
+    <AndroidAsset Include="Assets\Data\Default\Font\GenericSansSerif12.Font.res" />
+    <AndroidAsset Include="Assets\Data\Default\Pixmap\Checkerboard.Pixmap.res" />
+    <AndroidAsset Include="Assets\Data\Default\Pixmap\White.Pixmap.res" />
+    <AndroidAsset Include="Assets\Data\Default\Material\Checkerboard.Material.res" />
+    <AndroidAsset Include="Assets\Data\Default\Material\White.Material.res" />
+    <AndroidAsset Include="Assets\Data\Default\Texture\Checkerboard.Texture.res" />
+    <AndroidAsset Include="Assets\Data\Default\Texture\White.Texture.res" />
+    <None Include="packages.config" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
     <None Include="Properties\AndroidManifest.xml" />
@@ -81,10 +100,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Duality\Duality.Android.csproj">
-      <Project>{39FF8C9A-A220-4B45-AFE4-7CBC5E034C1C}</Project>
+      <Project>{39ff8c9a-a220-4b45-afe4-7cbc5e034c1c}</Project>
       <Name>Duality.Android</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -93,4 +113,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
+	<UsingTask TaskName="ScanAndFile" AssemblyFile="..\ScanFilesMsBuildTask.dll" />
+	<Target Name="ScanAndFile" AfterTargets="UpdateAndroidAssets" BeforeTargets="UpdateAndroidInterfaceProxies">
+		<ScanAndFile PathToAssets="obj\Debug\assets"/>
+	</Target>
 </Project>

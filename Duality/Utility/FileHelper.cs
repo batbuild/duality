@@ -5,12 +5,15 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+#if __ANDROID__
+using Android.Content.Res;
+#endif
 
 namespace Duality.Utility
 {
 	public static class FileHelper
 	{
-		static FileHelper ()
+		static FileHelper()
 		{
 #if __ANDROID__
 			if (filesInDataDir == null)
@@ -27,10 +30,10 @@ namespace Duality.Utility
 
 		public static bool FileExists(string path)
 		{
-#if !__ANDROID__
-			return File.Exists(path);
-#else
+#if __ANDROID__
 			return filesInDataDir.Contains(NormalizePath(path));
+#else
+			return File.Exists(path);
 #endif
 		}
 
@@ -41,12 +44,13 @@ namespace Duality.Utility
 #else
 			return ContentProvider.AndroidAssetManager.Open(NormalizePath(path));
 #endif
+
 		}
 
 
 #if __ANDROID__
 		private static HashSet<string> filesInDataDir;
-		
+
 		private static string NormalizePath(string path)
 		{
 			return path.Replace('\\', '/');
@@ -54,33 +58,37 @@ namespace Duality.Utility
 
 		private static bool BuildFileCache(string path)
 		{
-			var list = ContentProvider.AndroidAssetManager.List(path);
-			if(list.Length > 0)
+			try
 			{
-				foreach (var dir in list)
+				using (var cache = ContentProvider.AndroidAssetManager.Open("FilesCache.txt", Access.Streaming))
+				using (var reader = new StreamReader(cache))
 				{
-					if (!BuildFileCache(string.IsNullOrEmpty(path) ? dir : path + "/" + dir))
-						return false;
+					while (reader.Peek() >= 0)
+					{
+						var filePath = reader.ReadLine();
+						filesInDataDir.Add(NormalizePath( filePath));
+					}
 				}
+				return true;
 			}
-			else
+			catch (Exception ex)
 			{
-				filesInDataDir.Add(path);
-			}
+				Log.Core.WriteWarning("Problem building cache {0}", ex);
+				return false;
 
-			return true;
+			}
 		}
-		
-		public static IEnumerable<string> EnumerateFiles(string pluginDirectory, string searchPattern)
+
+		public static IEnumerable<string> EnumerateFiles(string dir, string searchPattern)
 		{
-			
-			return filesInDataDir.Where(file => AssertPatterMatchesTarget(file, searchPattern)==SearchResults.Found);
+
+			return filesInDataDir.Where(x => x.StartsWith(dir)).Where(file => AssertPatterMatchesTarget(file, searchPattern) == SearchResults.Found);
 		}
 #endif
 
 		public static SearchResults AssertPatterMatchesTarget(string target, string searchPattern)
 		{
-			   char[] trimEndChars =
+			char[] trimEndChars =
 			   {
 				   '\t',
 				   '\n',
@@ -101,7 +109,7 @@ namespace Duality.Utility
 				s.RemoveAt(0);
 				strings = s.ToArray();
 			}
-				
+
 			var patternCount = strings.Count(x => x == "*" || x == "?");
 			switch (patternCount)
 			{
@@ -118,15 +126,15 @@ namespace Duality.Utility
 		private static SearchResults OnePattern(string target, string[] strings, string searchPattern)
 		{
 			var len = strings.Length - 1;
-			
+
 			// since only one pattern allowed and 
-			if ((strings[len] == "?" || strings[len] == "*") && target.StartsWith(strings[0])) 
+			if ((strings[len] == "?" || strings[len] == "*") && target.StartsWith(strings[0]))
 				return SearchResults.Found;
-			if ((strings[0] == "?" || strings[0] == "*") && target.EndsWith(strings[1])) 
+			if ((strings[0] == "?" || strings[0] == "*") && target.EndsWith(strings[1]))
 				return SearchResults.Found;
-			if (strings[1]== "*")
+			if (strings[1] == "*")
 				return target.StartsWith(strings[0]) && target.EndsWith(strings[2]) ? SearchResults.Found : SearchResults.NotFound;
-			if (strings[1]== "?")
+			if (strings[1] == "?")
 			{
 				if (target.StartsWith(strings[0]) && target.EndsWith(strings[2]) && (target.Length == searchPattern.Length))
 					return SearchResults.Found;

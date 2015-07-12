@@ -69,15 +69,20 @@ namespace Duality.Resources
 
 		internal static void InitDefaultContent()
 		{
-			const string VirtualContentPath				= ContentProvider.VirtualContentPath + "Font:";
-			/* DEBT: Thiese are needed
-			 * 
-			 */
+			string contentPath;
+			string extension = string.Empty;
+#if __ANDROID__
+			 contentPath = "Data\\Default\\Font\\";
+			extension = FileExt;
+#else
+			contentPath = ContentProvider.VirtualContentPath + "Font:";
+#endif	
+
+			string ContentPath_GenericMonospace10 = contentPath + "GenericMonospace10" + extension;
+			string ContentPath_GenericMonospace8 = contentPath + "GenericMonospace8" + extension;
+			string ContentPath_GenericSerif12 = contentPath + "GenericSerif12" + extension;
+			string ContentPath_GenericSansSerif12 = contentPath + "GenericSansSerif12" + extension;
 #if !__ANDROID__
-			const string ContentPath_GenericMonospace10	= VirtualContentPath + "GenericMonospace10";
-			const string ContentPath_GenericMonospace8	= VirtualContentPath + "GenericMonospace8";
-			const string ContentPath_GenericSerif12		= VirtualContentPath + "GenericSerif12";
-			const string ContentPath_GenericSansSerif12	= VirtualContentPath + "GenericSansSerif12";
 
 			Font tmp;
 			
@@ -117,11 +122,13 @@ namespace Duality.Resources
 			tmp.ReloadData();
 			ContentProvider.AddContent(ContentPath_GenericSansSerif12, tmp);
 
-			GenericMonospace8	= ContentProvider.RequestContent<Font>(ContentPath_GenericMonospace8);
-			GenericMonospace10	= ContentProvider.RequestContent<Font>(ContentPath_GenericMonospace10);
-			GenericSerif12		= ContentProvider.RequestContent<Font>(ContentPath_GenericSerif12);
-			GenericSansSerif12	= ContentProvider.RequestContent<Font>(ContentPath_GenericSansSerif12);
+			
 #endif
+			GenericMonospace8 = ContentProvider.RequestContent<Font>(ContentPath_GenericMonospace8);
+			GenericMonospace10 = ContentProvider.RequestContent<Font>(ContentPath_GenericMonospace10);
+			GenericSerif12 = ContentProvider.RequestContent<Font>(ContentPath_GenericSerif12);
+			GenericSansSerif12 = ContentProvider.RequestContent<Font>(ContentPath_GenericSansSerif12);
+
 		}
 
 
