@@ -30,7 +30,7 @@ namespace Duality.Drawing
 			vertexData.UploadToVBO(new T[InitialVboSize], InitialVboSize);
 			
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, _iboHandle);
-			GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(ushort) * InitialVboSize), (IntPtr)null, BufferUsageHint.StaticDraw);
+			GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(ushort) * InitialVboSize), (IntPtr)null, BufferUsageHint.StreamDraw);
 
 			GL.BindVertexArray(_vaoHandle);
 			GL.BindBuffer(BufferTarget.ArrayBuffer, _vboHandle);
@@ -78,11 +78,12 @@ namespace Duality.Drawing
 			vertexData[0].UploadToVBO(vertexData, vertexCount);
 		}
 
-		public static void UploadIndexData(ushort[] indexData)
+		public static void UploadIndexData(ushort[] indexData, int indexCount)
 		{
 			EnsureInitialized();
 
-			GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indexData.Length * sizeof(short)), indexData, BufferUsageHint.StaticDraw);
+			GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indexCount * sizeof(short)), (IntPtr)null, BufferUsageHint.StreamDraw);
+			GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indexCount * sizeof(short)), indexData, BufferUsageHint.StreamDraw);
 		}
 
 		private static void EnsureInitialized()

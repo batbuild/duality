@@ -90,6 +90,7 @@ namespace Duality.Drawing
 			GlobalDynamicIndexedVertexBuffer<T>.Bind(this.vertices);
 
 			int vertexCount = 0;
+			int indexCount = 0;
 			T[] vertexData = null;
 			short[] indexData = null;
 
@@ -99,60 +100,72 @@ namespace Duality.Drawing
 				IndexedDrawBatch<T> b = batches[0] as IndexedDrawBatch<T>;
 				vertexData = b.vertices;
 				vertexCount = b.vertices.Length;
+
+				indexCount = vertexCount / 4 * 6;
+				EnsureIndexBufferSize(indexCount);
+				UpdateIndexData(0, indexCount);
 			}
 			else
 			{
 				// Check how many vertices we got
 				vertexCount = batches.Sum(t => t.VertexCount);
+				indexCount = (vertexCount / 4) * 6;
 
 				// Allocate a static / shared buffer for uploading vertices
-				if (vertexUploadBuffer == null)
-					vertexUploadBuffer = new T[Math.Max(vertexCount, 64)];
-				else if (vertexUploadBuffer.Length < vertexCount)
-					Array.Resize(ref vertexUploadBuffer, Math.Max(vertexCount, vertexUploadBuffer.Length * 2));
+				EnsureVertexBufferSize(vertexCount);
+				EnsureIndexBufferSize(indexCount);
 
 				// Collect vertex data in one array
 				int curVertexPos = 0;
+				int curIndexPos = 0;
+				
 				vertexData = vertexUploadBuffer;
 				for (int i = 0; i < batches.Count; i++)
 				{
 					IndexedDrawBatch<T> b = batches[i] as IndexedDrawBatch<T>;
 					Array.Copy(b.vertices, 0, vertexData, curVertexPos, b.vertexCount);
 					curVertexPos += b.vertexCount;
-				}
-			}
 
-			var indexCount = vertexCount / 4 * 6;
-			if (indexUploadBuffer == null)
-			{
-				indexUploadBuffer = new ushort[Math.Max(indexCount, indices.Length * 64)];
-				UpdateIndexData(0);
-			}
-			else if (indexUploadBuffer.Length < indexCount)
-			{
-				Array.Resize(ref indexUploadBuffer, Math.Max(indexCount, indexUploadBuffer.Length * 2));
-				UpdateIndexData(indexUploadBuffer.Length);
+					UpdateIndexData(curIndexPos, (b.VertexCount / 4) * 6);
+					curIndexPos += (b.vertexCount / 4) * 6;
+				}
 			}
 			
 			// Submit vertex data to GPU
 			GlobalDynamicIndexedVertexBuffer<T>.UploadVertexData(vertexData, vertexCount);
+			GlobalDynamicIndexedVertexBuffer<T>.UploadIndexData(indexUploadBuffer, indexCount);
 		}
 
-		private static void UpdateIndexData(int startIndex)
+		private static void EnsureVertexBufferSize(int vertexCount)
 		{
-			for (var i = startIndex; i < indexUploadBuffer.Length / indices.Length; i++)
+			if (vertexUploadBuffer == null)
+				vertexUploadBuffer = new T[Math.Max(vertexCount, 64)];
+			else if (vertexUploadBuffer.Length < vertexCount)
+				Array.Resize(ref vertexUploadBuffer, Math.Max(vertexCount, vertexUploadBuffer.Length*2));
+		}
+
+		private static void EnsureIndexBufferSize(int indexCount)
+		{
+			if (indexUploadBuffer == null)
+				indexUploadBuffer = new ushort[Math.Max(indexCount, indices.Length*64)];
+			else if (indexUploadBuffer.Length < indexCount)
+				Array.Resize(ref indexUploadBuffer, Math.Max(indexCount, indexUploadBuffer.Length*2));
+		}
+
+		private static void UpdateIndexData(int startIndex, int indexCount)
+		{
+			for (var i = startIndex; i < startIndex + indexCount; i += 6)
 			{
-				var indexBufferOffset = i*6;
-				indexUploadBuffer[indexBufferOffset] = (ushort) (indices[0] + i*4);
-				indexUploadBuffer[indexBufferOffset + 1] = (ushort) (indices[1] + i*4);
-				indexUploadBuffer[indexBufferOffset + 2] = (ushort) (indices[2] + i*4);
+				var indexOffset = ((i - startIndex) / 6) * 4;
 
-				indexUploadBuffer[indexBufferOffset + 3] = (ushort) (indices[3] + i*4);
-				indexUploadBuffer[indexBufferOffset + 4] = (ushort) (indices[4] + i*4);
-				indexUploadBuffer[indexBufferOffset + 5] = (ushort) (indices[5] + i*4);
+				indexUploadBuffer[i] = (ushort) (indices[0] + indexOffset);
+				indexUploadBuffer[i + 1] = (ushort) (indices[1] + indexOffset);
+				indexUploadBuffer[i + 2] = (ushort) (indices[2] + indexOffset);
+
+				indexUploadBuffer[i + 3] = (ushort) (indices[3] + indexOffset);
+				indexUploadBuffer[i + 4] = (ushort) (indices[4] + indexOffset);
+				indexUploadBuffer[i + 5] = (ushort) (indices[5] + indexOffset);
 			}
-
-			GlobalDynamicIndexedVertexBuffer<T>.UploadIndexData(indexUploadBuffer);
 		}
 
 		public void SetupVBO()
@@ -170,7 +183,8 @@ namespace Duality.Drawing
 			if (lastBatchRendered == null || lastBatchRendered.Material != this.material)
 				this.material.SetupForRendering(device, lastBatchRendered == null ? null : lastBatchRendered.Material);
 
-			GL.DrawElementsBaseVertex(PrimitiveType.Triangles, this.VertexCount / 2, DrawElementsType.UnsignedShort, IntPtr.Zero, vertexOffset);
+			var indexCount = (this.VertexCount / 4) * 6;
+			GL.DrawElementsBaseVertex(PrimitiveType.Triangles, indexCount, DrawElementsType.UnsignedShort, (IntPtr)(((vertexOffset / 4) * 6) * sizeof(ushort)), vertexOffset);
 
 			vertexOffset += this.vertexCount;
 			lastBatchRendered = this;
