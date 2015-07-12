@@ -384,6 +384,12 @@ namespace Duality.Resources
 
 			// Bind Shader
 			ContentRef<ShaderProgram> selShader = this.SelectShader();
+			if (selShader.Res == null)
+			{
+				Log.Game.WriteError("All draw techniques require a shader in this version of the engine, as there is no fixed function pipeline available");
+				return;
+			}
+
 			if (lastTechnique == null || selShader.Res != lastTechnique.shader.Res)
 				ShaderProgram.Bind(selShader);
 
