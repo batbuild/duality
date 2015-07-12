@@ -39,11 +39,11 @@ namespace Duality.Drawing
 		
 		void IVertexData.SetupVBO(Resources.BatchInfo mat)
 		{
-			GL.EnableClientState(ArrayCap.ColorArray);
-			GL.EnableClientState(ArrayCap.VertexArray);
+			GL.VertexAttribPointer(0, 4, VertexAttribPointerType.UnsignedByte, false, Size, 0);		// colour
+			GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, Size, 4);			// pos
 
-			GL.ColorPointer(4, ColorPointerType.UnsignedByte, Size, (IntPtr)OffsetColor);
-			GL.VertexPointer(3, VertexPointerType.Float, Size, (IntPtr)OffsetPos);
+			GL.EnableVertexAttribArray(0);
+			GL.EnableVertexAttribArray(1);
 		}
 		void IVertexData.UploadToVBO<T>(T[] vertexData, int vertexCount)
 		{
@@ -52,8 +52,6 @@ namespace Duality.Drawing
 		}
 		void IVertexData.FinishVBO(Resources.BatchInfo mat)
 		{
-			GL.DisableClientState(ArrayCap.ColorArray);
-			GL.DisableClientState(ArrayCap.VertexArray);
 		}
 
 		/// <summary>
