@@ -39,6 +39,9 @@ namespace DualityLauncher.Android
 			{
 				base.OnCreate(bundle);
 
+				RequestWindowFeature(WindowFeatures.NoTitle);
+				Window.SetFlags(WindowManagerFlags.Fullscreen, WindowManagerFlags.Fullscreen);
+
 				// Create our OpenGL view, and display it
 				view = new DualityAndroidLauncher(this);
 				SetContentView(view);
