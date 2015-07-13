@@ -168,10 +168,12 @@ namespace Duality.Drawing
 				Array.Resize(ref this.vertices, newArrSize);
 			}
 			Array.Copy(data, 0, this.vertices, this.vertexCount, length);
-			this.vertexCount += length;
-				
+
 			if (this.material.Technique.Res.NeedsZSort)
-				this.zSortIndex = CalcZSortIndex(this.vertices, this.vertexCount);
+				// find the cumulative average for all of the points in the batch, rather than calculating from the start again.
+				this.zSortIndex = (data.Sum(v => v.Pos.Z) + this.VertexCount * zSortIndex) / (this.VertexCount + length);
+
+			this.vertexCount += length;
 		}
 		public bool CanAppend(IDrawBatch other)
 		{
