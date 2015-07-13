@@ -55,10 +55,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerDuality, Version=3.3.5520.35854, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\FarseerDuality.0.1.7\lib\net40\FarseerDuality.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="LZ4">
       <HintPath>..\packages\lz4net.1.0.5.93\lib\net40-client\LZ4.dll</HintPath>
     </Reference>
@@ -94,12 +90,17 @@
       <HintPath>..\packages\AdamsLair.WinForms.0.1.14\lib\net40\PopupControl.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
+    <Reference Include="FarseerDuality, Version=3.3.5520.35854, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\FarseerDuality.0.1.7\lib\net40\FarseerDuality.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\FrameCompleteEventArgs.cs" />
     <Compile Include="Components\PassCompleteEventArgs.cs" />
     <Compile Include="Drawing\CommonShaderVariables.cs" />
+    <Compile Include="Drawing\GlobalDynamicIndexedVertexBuffer.cs" />
     <Compile Include="Drawing\IDrawBatch.cs" />
+    <Compile Include="Drawing\IndexedDrawBatch.cs" />
     <Compile Include="Drawing\Resolution.cs" />
     <Compile Include="Resources\GeometryShader.cs" />
     <Compile Include="Utility\DefaultRendererVisibilityStrategy.cs" />

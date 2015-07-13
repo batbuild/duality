@@ -14,7 +14,7 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
     <DevInstrumentationEnabled>True</DevInstrumentationEnabled>
-    <TargetFrameworkVersion>v4.4</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -57,7 +57,9 @@
     <Compile Include="Components\FrameCompleteEventArgs.cs" />
     <Compile Include="Components\PassCompleteEventArgs.cs" />
     <Compile Include="Drawing\CommonShaderVariables.cs" />
+    <Compile Include="Drawing\GlobalDynamicIndexedVertexBuffer.cs" />
     <Compile Include="Drawing\IDrawBatch.cs" />
+    <Compile Include="Drawing\IndexedDrawBatch.cs" />
     <Compile Include="Drawing\Resolution.cs" />
     <Compile Include="Resources\GeometryShader.cs" />
     <Compile Include="Utility\DefaultRendererVisibilityStrategy.cs" />
