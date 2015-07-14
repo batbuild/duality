@@ -522,14 +522,6 @@ namespace Duality.Drawing
 			this.UpdateMatrices();
 			CommonShaderVariables.ModelView = matModelView;
 			CommonShaderVariables.Proj = matProjection;
-			/* DEBT: waiting for OpenGL Doesn't suppport GL.Translate and Scale
- */			
-//			if (this.renderTarget.IsAvailable)
-//			{
-//				if (this.renderMode == RenderMatrix.OrthoScreen) GL.Translate(0.0f, RenderTarget.BoundRT.Res.Height * 0.5f, 0.0f);
-//				GL.Scale(1.0f, -1.0f, 1.0f);
-//				if (this.renderMode == RenderMatrix.OrthoScreen) GL.Translate(0.0f, -RenderTarget.BoundRT.Res.Height * 0.5f, 0.0f);
-//			}
 		}
 		public void EndRendering()
 		{
@@ -592,6 +584,14 @@ namespace Duality.Drawing
 					this.nearZ, 
 					this.farZ,
 					out projMat);
+
+				if (this.renderTarget.IsAvailable)
+				{
+					projMat = Matrix4.CreateTranslation(0, RenderTarget.BoundRT.Res.Height * 0.5f, 0) *
+						Matrix4.CreateScale(1, -1, 1) *
+						Matrix4.CreateTranslation(0, -RenderTarget.BoundRT.Res.Height * 0.5f, 0);
+				}
+				
 				// Flip Z direction from "out of the screen" to "into the screen".
 				projMat.M33 = -projMat.M33;
 			}
@@ -605,6 +605,10 @@ namespace Duality.Drawing
 					this.nearZ, 
 					this.farZ,
 					out projMat);
+
+				if (this.renderTarget.IsAvailable)
+					projMat *= Matrix4.CreateScale(1, -1, 1);
+				
 				// Flip Z direction from "out of the screen" to "into the screen".
 				projMat.M33 = -projMat.M33;
 			}
