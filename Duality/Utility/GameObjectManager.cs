@@ -38,12 +38,7 @@ namespace Duality
 		{
 			get 
 			{
-#if __ANDROID__
 				return this.allObj.Where(o => o.Active);
-#else
-				return this.allObj.AsParallel().Where(o => o.Active);
-#endif
-
 			}
 		}
 		/// <summary>
@@ -150,6 +145,17 @@ namespace Duality
 				this.OnObjectRemoved(obj);
 		}
 
+		public void GetActiveObjects(List<GameObject> buffer)
+		{
+			buffer.Clear();
+			foreach (var gameObject in allObj)
+			{
+				if (gameObject.Active == false)
+					continue;
+
+				buffer.Add(gameObject);
+			}
+		}
 
 		private bool AddObjectDeep(GameObject obj)
 		{
