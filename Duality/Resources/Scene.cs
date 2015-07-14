@@ -613,6 +613,23 @@ namespace Duality.Resources
 			return FindComponents(typeof(T)).OfType<T>();
 		}
 		/// <summary>
+		/// Finds all Components of the specified type in this Scene without generating garbage.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public void FindComponents<T>(List<T> components) where T : class
+		{
+			// Determine which by-type lists to use
+			var type = typeof (T);
+			foreach (var pair in this.componentyByType)
+			{
+				if (type.IsAssignableFrom(pair.Key) == false)
+					continue;
+
+				components.AddRange(pair.Value.OfType<T>());
+			}
+		}
+		/// <summary>
 		/// Finds all Components of the specified type in this Scene.
 		/// </summary>
 		/// <param name="name"></param>
