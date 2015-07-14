@@ -40,8 +40,8 @@ namespace Duality
 		private		bool						active		= true;
 		private		InitState					initState	= InitState.Initialized;
 		
-		[NonSerialized] 
-		private		List<int>					executionOrder = new List<int>(); 
+		[NonSerialized] private		List<int>	 executionOrder = new List<int>();
+		[NonSerialized] private List<GameObject> emptyList = new List<GameObject>();
 
 		// Built-in heavily used component lookup
 		private		Components.Transform		compTransform	= null;
@@ -49,7 +49,7 @@ namespace Duality
 		[NonSerialized] private EventHandler<GameObjectParentChangedEventArgs>	eventParentChanged		= null;
 		[NonSerialized] private EventHandler<ComponentEventArgs>				eventComponentAdded		= null;
 		[NonSerialized] private EventHandler<ComponentEventArgs>				eventComponentRemoving	= null;
-
+		
 
 		/// <summary>
 		/// [GET / SET] This GameObject's parent object in the scene graph.
@@ -188,15 +188,11 @@ namespace Duality
 		/// <summary>
 		/// [GET] Enumerates this objects child GameObjects.
 		/// </summary>
-		public IEnumerable<GameObject> Children
+		public List<GameObject> Children
 		{
 			get
 			{
-				if (this.children == null) yield break;
-				foreach (GameObject c in this.children)
-				{
-					yield return c;
-				}
+				return this.children ?? emptyList;
 			}
 		}
 		/// <summary>
@@ -499,6 +495,21 @@ namespace Duality
 		public IEnumerable<T> GetComponents<T>() where T : class
 		{
 			return this.compList.OfType<T>();
+		}
+		/// <summary>
+		/// Enumerates all <see cref="Component"/>s of this GameObject that match the specified <see cref="Type"/> or subclass it and populates
+		/// the supplied list with those components. This method is the same as the overloads but doesn't generate garbage.
+		/// </summary>
+		/// <typeparam name="T">The base Type to match when iterating through the Components.</typeparam>
+		/// <returns>An enumeration of all Components that match the specified conditions.</returns>
+		/// <seealso cref="GetComponents(System.Type)"/>
+		public void GetComponents<T>(List<T> components) where T : class
+		{
+			for (var i = 0; i < compList.Count; i++)
+			{
+				if(compList[i] is T)
+					components.Add(compList[i] as T);
+			}
 		}
 		/// <summary>
 		/// Enumerates all <see cref="Component"/>s of this object's child GameObjects that match the specified <see cref="Type"/> or subclass it.
