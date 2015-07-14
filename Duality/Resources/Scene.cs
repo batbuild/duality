@@ -46,7 +46,7 @@ namespace Duality.Resources
 		private	static	int					switchLock			= 0;
 		private	static	bool				switchToScheduled	= false;
 		private	static	ContentRef<Scene>	switchToTarget		= null;
-
+		private static List<GameObject>		gameObjectScratchMemory		= new List<GameObject>(); 
 
 		/// <summary>
 		/// [GET] When using fixed-timestep physics, the alpha value [0.0 - 1.0] indicates how
@@ -412,11 +412,11 @@ namespace Duality.Resources
 			Profile.TimeUpdateScene.BeginMeasure();
 			{
 				// Update all GameObjects
-				GameObject[] activeObj = this.objectManager.ActiveObjects.ToArray();
-				foreach (GameObject obj in activeObj)
+				this.objectManager.GetActiveObjects(gameObjectScratchMemory);
+				foreach (GameObject obj in gameObjectScratchMemory)
 					obj.Update();
 
-				foreach (GameObject obj in activeObj)
+				foreach (GameObject obj in gameObjectScratchMemory)
 					obj.LateUpdate();
 
 				if(this.visibilityStrategy != null)
@@ -445,8 +445,8 @@ namespace Duality.Resources
 			Profile.TimeUpdateScene.BeginMeasure();
 			{
 				// Update all GameObjects
-				GameObject[] activeObj = this.objectManager.ActiveObjects.ToArray();
-				foreach (GameObject obj in activeObj)
+				this.objectManager.GetActiveObjects(gameObjectScratchMemory);
+				foreach (GameObject obj in gameObjectScratchMemory)
 					obj.EditorUpdate();
 			}
 			Profile.TimeUpdateScene.EndMeasure();
