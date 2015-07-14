@@ -91,6 +91,42 @@ namespace Duality.Tests.Messaging
 			Assert.IsTrue(firstReceiver.MessageHandled ^ secondReceiver.MessageHandled);
 		}
 
+		[Test]
+		public void CanRegisterMultipleComponentsOnTheSameGameObjectForTargettedDelivery()
+		{
+			var gameObject = new GameObject();
+			var testComponent = new TestComponent();
+			var testComponent2 = new TestComponent2();
+
+			gameObject.AddComponent(testComponent);
+			gameObject.AddComponent(testComponent2);
+
+			Scene.Current.AddObject(gameObject);
+			
+			gameObject.SendMessage(new TestGameMessage(), gameObject);
+
+			Assert.True(testComponent.MessageHandled);
+			Assert.True(testComponent2.MessageHandled);
+		}
+
+		[Test]
+		public void HandlesReentrancy()
+		{
+			var gameObject = new GameObject();
+			var testComponent = new TestComponent();
+			var testComponent2 = new ComponentThatCallsSendMessageInsideHandleMessage();
+
+			gameObject.AddComponent(testComponent);
+			gameObject.AddComponent(testComponent2);
+
+			Scene.Current.AddObject(gameObject);
+
+			gameObject.SendMessage(new TestGameMessageTwo(), gameObject);
+
+			Assert.True(testComponent.MessageHandled);
+			Assert.True(testComponent2.MessageHandled);
+		}
+
 		private static Component RegisterInactiveObject()
 		{
 			var gameObject = new GameObject();
@@ -103,10 +139,58 @@ namespace Duality.Tests.Messaging
 		private class TestComponent : Component, ICmpHandlesMessages
 		{
 			public bool MessageHandled { get; set; }
+			public int MessageHandledCount { get; set; }
 
 			public void HandleMessage(GameObject sender, GameMessage msg)
 			{
 				MessageHandled = true;
+				MessageHandledCount++;
+			}
+
+			public void TestBroadcastMessage()
+			{
+				this.SendMessage(new TestGameMessage());
+			}
+
+			public void TestBroadcastMessageToNamedGameObject()
+			{
+				this.SendMessage(new TestGameMessage(), "TestGameObject");
+			}
+		}
+
+		private class TestComponent2 : Component, ICmpHandlesMessages
+		{
+			public bool MessageHandled { get; set; }
+			public int MessageHandledCount { get; set; }
+
+			public void HandleMessage(GameObject sender, GameMessage msg)
+			{
+				MessageHandled = true;
+				MessageHandledCount++;
+			}
+
+			public void TestBroadcastMessage()
+			{
+				this.SendMessage(new TestGameMessage());
+			}
+
+			public void TestBroadcastMessageToNamedGameObject()
+			{
+				this.SendMessage(new TestGameMessage(), "TestGameObject");
+			}
+		}
+
+		private class ComponentThatCallsSendMessageInsideHandleMessage : Component, ICmpHandlesMessages
+		{
+			public bool MessageHandled { get; set; }
+
+			public void HandleMessage(GameObject sender, GameMessage msg)
+			{
+				if (msg is TestGameMessageTwo)
+				{
+					MessageHandled = true;
+					this.SendMessage(new TestGameMessage());
+				}
 			}
 
 			public void TestBroadcastMessage()
@@ -133,7 +217,10 @@ namespace Duality.Tests.Messaging
 
 		private class TestGameMessage : GameMessage
 		{
-			
+		}
+
+		private class TestGameMessageTwo : GameMessage
+		{
 		}
 	}
 }

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Duality.Resources;
 
 namespace Duality.Helpers
 {
 	public static class ExtMethodsGameObject
 	{
+		private static Stack<List<ICmpHandlesMessages>> _receiverStack = new Stack<List<ICmpHandlesMessages>>();
+		private static List<ICmpHandlesMessages> _receivers = new List<ICmpHandlesMessages>();
+		private static List<ICmpHandlesMessages> _currentReceivers = _receivers; 
+
 		public static void SendMessage(this Component sender, GameMessage msg, string targetName)
 		{
 			if (string.IsNullOrEmpty(targetName))
@@ -32,29 +35,53 @@ namespace Duality.Helpers
 				return;
 			}
 
-			IEnumerable<ICmpHandlesMessages> receivers;
+			// if there is already a list on the stack then we have re-entered SendMessage i.e. a HandleMessage method has
+			// called SendMessage
+			if (_receiverStack.Count > 0)
+				_currentReceivers = new List<ICmpHandlesMessages>();
+
+			_receiverStack.Push(_currentReceivers);
+			_currentReceivers.Clear();
 
 			if (target != null)
 			{
 				if (!target.Active)
-					return;
+				{
+					_currentReceivers = _receiverStack.Pop();
 
-				receivers = target.GetComponents<ICmpHandlesMessages>().ToList();
+					Log.Game.WriteWarning("{0}: Message type '{1}' sent to inactive game object '{2}'. Inactive game objects don't respond to messages", Log.CurrentMethod(), msg.GetType().Name, target);
+					return;
+				}
+
+				target.GetComponents(_currentReceivers);
 			}
 			else
 			{
-				receivers = Scene.Current.FindComponents<ICmpHandlesMessages>();
+				Scene.Current.FindComponents(_currentReceivers);
 			}
 
-			foreach (var receiver in receivers)
+
+			try
 			{
-				if (((Component)receiver).Active == false)
-					continue;
+				for (int i = _currentReceivers.Count - 1; i >= 0; i--)
+				{
+					var receiver = _currentReceivers[i];
+				
+					if (receiver == null || ((Component)receiver).Disposed || ((Component)receiver).Active == false)
+						continue;
 
-				receiver.HandleMessage(sender, msg);
+					receiver.HandleMessage(sender, msg);
 
-				if (msg.Handled)
-					break;
+					if (i > _currentReceivers.Count) 
+						i = _currentReceivers.Count;
+
+					if (msg.Handled)
+						break;
+				}
+			}
+			finally
+			{
+				_currentReceivers = _receiverStack.Pop();
 			}
 		}
 	}
