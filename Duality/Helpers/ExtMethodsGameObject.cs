@@ -81,7 +81,11 @@ namespace Duality.Helpers
 			}
 			finally
 			{
-				_currentReceivers = _receiverStack.Pop();
+				_receiverStack.Pop();
+				if (_receiverStack.Count > 0)
+					_currentReceivers = _receiverStack.Peek();
+				else
+					_currentReceivers = _receivers;
 			}
 		}
 	}
