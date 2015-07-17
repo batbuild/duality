@@ -760,7 +760,7 @@ namespace Duality
 			Log.Core.Write("Scanning for core plugins...");
 			Log.Core.PushIndent();
 
-			var pluginLibPaths = GetPluginLibPaths("*.core.dll");
+			var pluginLibPaths = GetPluginLibPaths("*.dll");
 
 #if __ANDROID__
 			foreach (string dllPath in pluginLibPaths)
