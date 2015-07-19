@@ -688,7 +688,8 @@ namespace Duality.Resources
 			this.texture = new Texture(this.pixelData,
 				Texture.SizeMode.Enlarge,
 				this.IsPixelGridAligned ? TextureMagFilter.Nearest : TextureMagFilter.Linear,
-				this.IsPixelGridAligned ? TextureMinFilter.Nearest : TextureMinFilter.LinearMipmapLinear);
+				this.IsPixelGridAligned ? TextureMinFilter.Nearest : TextureMinFilter.LinearMipmapLinear,
+				keepPixmapDataResident: true);
 		}
 
 		private void CreateInternalMaterial()
