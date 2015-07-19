@@ -40,12 +40,6 @@ namespace Duality.Editor
 			GetPreview(query);
 			return query.Result;
 		}
-		public static Sound GetPreviewSound(object obj)
-		{
-			PreviewSoundQuery query = new PreviewSoundQuery(obj);
-			GetPreview(query);
-			return query.Result;
-		}
 		public static void GetPreview(IPreviewQuery query)
 		{
 			if (DualityApp.ExecContext == DualityApp.ExecutionContext.Terminated) return;
@@ -147,10 +141,6 @@ namespace Duality.Editor
 			this.SizeMode = mode;
 		}
 	}
-	public class PreviewSoundQuery : PreviewQuery<Sound>
-	{
-		public PreviewSoundQuery(object src) : base(src) {}
-	}
 	
 
 
@@ -178,7 +168,6 @@ namespace Duality.Editor
 		}
 
 		public virtual void Perform(T obj, PreviewImageQuery query) {}
-		public virtual void Perform(T obj, PreviewSoundQuery query) {}
 
 		void IPreviewGenerator.Perform(IPreviewQuery query)
 		{
@@ -186,12 +175,6 @@ namespace Duality.Editor
 			if (imgQuery != null)
 			{
 				this.Perform((T)query.Source, imgQuery);
-				return;
-			}
-			PreviewSoundQuery sndQuery = query as PreviewSoundQuery;
-			if (sndQuery != null)
-			{
-				this.Perform((T)query.Source, sndQuery);
 				return;
 			}
 		}

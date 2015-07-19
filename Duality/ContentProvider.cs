@@ -55,8 +55,6 @@ namespace Duality
 			Texture.InitDefaultContent();
 			Material.InitDefaultContent();
 			Font.InitDefaultContent();
-			AudioData.InitDefaultContent();
-			Sound.InitDefaultContent();
 
 			// Make a list of all default content available
 			foreach (var pair in resLibrary)

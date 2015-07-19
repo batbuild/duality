@@ -116,11 +116,6 @@ namespace Duality.Editor.Plugins.CamView
 			DualityApp.TargetResolution = new Vector2(this.ClientSize.Width, this.ClientSize.Height);
 			DualityApp.Mouse.Source = this.view;
 			DualityApp.Keyboard.Source = this.view;
-			if (DualityApp.ExecContext != DualityApp.ExecutionContext.Terminated)
-			{
-				if (this.CameraObj.GetComponent<SoundListener>() != null)
-					this.CameraObj.GetComponent<SoundListener>().MakeCurrent();
-			}
 		}
 	}
 }

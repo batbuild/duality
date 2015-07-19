@@ -82,10 +82,6 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 			if (this.prevImageHash == prevHash) return;
 			this.prevImageHash = prevHash;
 			
-			this.StopPreviewSound();
-			if (this.prevSound != null) this.prevSound.Dispose();
-			this.prevSound = null;
-
 			if (this.prevImage != null) this.prevImage.Dispose();
 			this.prevImage = null;
 			this.Height = 22;
@@ -99,8 +95,6 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 					var avgColor = this.prevImage.GetAverageColor();
 					this.prevImageLum = avgColor.GetLuminance();
 				}
-
-				this.prevSound = PreviewProvider.GetPreviewSound(this.gameObj);
 			}
 		}
 		protected override int GetPreviewHash()
