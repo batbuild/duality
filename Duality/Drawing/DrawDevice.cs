@@ -484,12 +484,31 @@ namespace Duality.Drawing
 			this.GenerateProjection(new Rect(refSize), out this.matProjection);
 			this.matFinal = this.matModelView * this.MatProjection;
 		}
-		public void BeginRendering(ClearFlag clearFlags, ColorRgba clearColor, float clearDepth)
+		public void BeginRendering(ClearFlag clearFlags, ColorRgba clearColor, float clearDepth, bool scaleViewport = true)
 		{
 			RenderTarget.Bind(this.renderTarget);
 
 			// Setup viewport
-			GL.Viewport((int)this.viewportRect.X, (int)this.viewportRect.Y, (int)this.viewportRect.W, (int)this.viewportRect.H);
+			Rect viewport = this.ViewportRect;
+			if (scaleViewport)
+			{
+				float width = this.viewportRect.W;
+				var targetAspectRatio = nominalViewportSize.X/nominalViewportSize.Y;
+				float height = (width/targetAspectRatio + 0.5f);
+
+				if (height > viewportRect.H)
+				{
+					height = viewportRect.H;
+					width = height*targetAspectRatio + 0.5f;
+				}
+
+				viewport = new Rect(
+					(viewportRect.W/2) - (width/2),
+					(viewportRect.H/2) - (height/2),
+					width, height);
+			}
+
+			GL.Viewport((int)viewport.X, (int)viewport.Y, (int)viewport.W, (int)viewport.H);
 			GL.Scissor((int)this.viewportRect.X, (int)this.viewportRect.Y, (int)this.viewportRect.W, (int)this.viewportRect.H);
 
 			// Clear buffers
@@ -566,12 +585,8 @@ namespace Duality.Drawing
 			{
 				float scaleX = viewport.W / NominalViewportSize.X;
 				float scaleY = viewport.H / NominalViewportSize.Y;
-				float scale = MathF.Min(scaleX, scaleY);
 
-				float translateX = (viewport.W - (NominalViewportSize.X * scale)) / 2f;
-				float translateY = (viewport.H - (NominalViewportSize.Y * scale)) / 2f;
-
-				scaleMatrix = Matrix4.CreateScale(scale, scale, 1) * Matrix4.CreateTranslation(translateX, -translateY, 0);
+				scaleMatrix = Matrix4.CreateScale(scaleX, scaleY, 1);
 			}
 			// Rotate them according to the camera angle
 			mvMat *= scaleMatrix * Matrix4.CreateRotationZ(-this.refAngle);

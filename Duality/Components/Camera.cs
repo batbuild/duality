@@ -177,9 +177,10 @@ namespace Duality.Components
 		[NonSerialized]	private	Texture				pickingTex		= null;
 		[NonSerialized]	private	int					pickingLast		= -1;
 		[NonSerialized]	private	byte[]				pickingBuffer	= new byte[4 * 256 * 256];
+		[NonSerialized] private Rect				screenRect		= new Rect(0, 0, 1280, 720);
 		[NonSerialized]	private	List<Predicate<ICmpRenderer>>	editorRenderFilter	= new List<Predicate<ICmpRenderer>>();
 
-		
+
 		/// <summary>
 		/// [GET / SET] The lowest Z value that can be displayed by the device.
 		/// </summary>
@@ -305,6 +306,7 @@ namespace Duality.Components
 		{
 			this.MakeAvailable();
 			this.UpdateDeviceConfig();
+			this.screenRect = viewportRect;
 
 			string counterName = Path.Combine("Cameras", this.gameobj.Name);
 			Profile.BeginMeasure(counterName);
@@ -549,6 +551,31 @@ namespace Duality.Components
 			this.UpdateDeviceConfig();
 			return this.drawDevice.IsCoordInView(c, boundRad);
 		}
+		/// <summary>
+		/// Transforms screen space coordinates to viewport coordinates.
+		/// </summary>
+		/// <param name="screenPos"></param>
+		/// <returns></returns>
+		public Vector2 ScreenToViewportCoord(Vector2 screenPos)
+		{
+			if (UseViewportScaling == false)
+				return screenPos;
+
+			float width = this.screenRect.W;
+			var targetAspectRatio = this.drawDevice.NominalViewportSize.X / this.drawDevice.NominalViewportSize.Y;
+			float height = (width / targetAspectRatio + 0.5f);
+
+			if (height > this.screenRect.H)
+			{
+				height = this.screenRect.H;
+				width = height * targetAspectRatio + 0.5f;
+			}
+
+			screenPos = new Vector2(screenPos.X - ((screenRect.W / 2) - (width / 2)), screenPos.Y - ((screenRect.H / 2) - (height / 2)));
+			screenPos.X *= this.screenRect.W / width;
+			screenPos.Y *= this.screenRect.H / height;
+			return screenPos;
+		}
 
 		private void SetupDevice()
 		{
@@ -599,7 +626,7 @@ namespace Duality.Components
 			else
 			{
 				Profile.TimePostProcessing.BeginMeasure();
-				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth);
+				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth, false);
 
 				Texture mainTex = p.Input.MainTexture.Res;
 				Vector2 uvRatio = mainTex != null ? mainTex.UVRatio : Vector2.One;
