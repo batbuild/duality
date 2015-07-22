@@ -490,7 +490,7 @@ namespace Duality.Drawing
 
 			// Setup viewport
 			Rect viewport = this.ViewportRect;
-			if (scaleViewport)
+			if (scaleViewport && DualityApp.ExecContext != DualityApp.ExecutionContext.Editor)
 			{
 				float width = this.viewportRect.W;
 				var targetAspectRatio = nominalViewportSize.X/nominalViewportSize.Y;
