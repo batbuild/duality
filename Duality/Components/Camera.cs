@@ -611,7 +611,7 @@ namespace Duality.Components
 			if (p.Input == null)
 			{
 				// Render Scene
-				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth);
+				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth, p.Output.IsAvailable ? false : UseViewportScaling);
 				try
 				{
 					this.CollectDrawcalls();
@@ -626,7 +626,7 @@ namespace Duality.Components
 			else
 			{
 				Profile.TimePostProcessing.BeginMeasure();
-				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth, false);
+				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth, !p.Output.IsAvailable && UseViewportScaling);
 
 				Texture mainTex = p.Input.MainTexture.Res;
 				Vector2 uvRatio = mainTex != null ? mainTex.UVRatio : Vector2.One;
