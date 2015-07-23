@@ -561,6 +561,13 @@ namespace Duality.Components
 			if (UseViewportScaling == false)
 				return screenPos;
 
+			// the draw device could have been disposed if switching between scenes
+			if (this.drawDevice == null)
+			{
+				Log.Game.WriteWarning("ScreenToViewportCoord called after camera has been disposed: {0}", Log.CurrentStackFrame());
+				return screenPos;
+			}
+
 			float width = this.screenRect.W;
 			var targetAspectRatio = this.drawDevice.NominalViewportSize.X / this.drawDevice.NominalViewportSize.Y;
 			float height = (width / targetAspectRatio + 0.5f);
