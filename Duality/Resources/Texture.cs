@@ -269,6 +269,12 @@ namespace Duality.Resources
 			return tex;
 		}
 
+		/// <summary>
+		/// For most textures, once they're uploaded to OpenGL, we can safely dispose the pixel data, but there are cases,
+		/// such as with non-pregenerated fonts, where we want to keep the data around. This flag is false by default but can be set
+		/// to true for those special cases.
+		/// </summary>
+		private bool keepPixmapDataResident;
 		
 		private	ContentRef<Pixmap>		basePixmap	= ContentRef<Pixmap>.Null;
 		private	Vector2					size		= Vector2.Zero;
@@ -505,7 +511,8 @@ namespace Duality.Resources
 			TextureWrapMode wrapX		= TextureWrapMode.ClampToEdge,
 			TextureWrapMode wrapY		= TextureWrapMode.ClampToEdge,
 			PixelInternalFormat format	= PixelInternalFormat.Rgba,
-			PixelType pixelType			= PixelType.UnsignedByte)
+			PixelType pixelType			= PixelType.UnsignedByte,
+			bool keepPixmapDataResident	= false)
 		{
 			this.filterMag = filterMag;
 			this.filterMin = filterMin;
@@ -513,6 +520,7 @@ namespace Duality.Resources
 			this.wrapY = wrapY;
 			this.pixelformat = format;
 			this.pixelType = pixelType;
+			this.keepPixmapDataResident = keepPixmapDataResident;
 			this.LoadData(basePixmap, sizeMode);
 		}
 		/// <summary>
@@ -661,6 +669,9 @@ namespace Duality.Resources
 			}
 
 			GL.BindTexture(TextureTarget.Texture2D, lastTexId);
+
+			if (this.keepPixmapDataResident == false)
+				basePixmap.Res.Dispose();
 		}
 
 		/// <summary>

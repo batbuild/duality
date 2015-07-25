@@ -51,26 +51,6 @@ namespace Duality.Editor.Plugins.Base
 			Material.CreateFromTexture(obj);
 		}
 	}
-	public class EditorActionAudioDataToSound : EditorAction<AudioData>
-	{
-		public override string Name
-		{
-			get { return EditorBaseRes.ActionName_CreateSound; }
-		}
-		public override string Description
-		{
-			get { return EditorBaseRes.ActionDesc_CreateSound; }
-		}
-		public override Image Icon
-		{
-			get { return CoreRes.IconResSound; }
-		}
-
-		public override void Perform(IEnumerable<AudioData> objEnum)
-		{
-			Sound.CreateMultipleFromAudioData(objEnum.Ref());
-		}
-	}
 	public class EditorActionShaderToProgram : EditorAction<AbstractShader>
 	{
 		public override string Name
@@ -137,17 +117,14 @@ namespace Duality.Editor.Plugins.Base
 		public override void Perform(Resource obj)
 		{
 			Pixmap			pixmap		= obj as Pixmap;
-			AudioData		audioData	= obj as AudioData;
 			AbstractShader	shader		= obj as AbstractShader;
 			if (pixmap		!= null)		FileImportProvider.OpenSourceFile(pixmap, ".png", pixmap.SavePixelData);
-			else if (audioData	!= null)	FileImportProvider.OpenSourceFile(audioData, ".ogg", audioData.SaveOggVorbisData);
 			else if (shader		!= null)	FileImportProvider.OpenSourceFile(shader, shader is FragmentShader ? ".frag" : shader is VertexShader ? ".vert" : ".geom", shader.SaveSource);
 		}
 		public override bool CanPerformOn(Resource obj)
 		{
 			if (!base.CanPerformOn(obj)) return false;
 			if (obj is Pixmap) return true;
-			if (obj is AudioData) return true;
 			if (obj is AbstractShader) return true;
 			return false;
 		}

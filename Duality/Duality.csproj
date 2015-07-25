@@ -113,7 +113,6 @@
     <Compile Include="Utility\Streams\StreamWrapper.cs" />
     <Compile Include="Utility\Streams\NonClosingStreamWrapper.cs" />
     <Compile Include="Utility\Animation\AnimationGroup.cs" />
-    <Compile Include="Audio\AudioLibraryLoader.cs" />
     <Compile Include="Cloning\CloneProvider.cs" />
     <Compile Include="Cloning\CloneProviderContext.cs" />
     <Compile Include="Cloning\ICloneExplicit.cs" />
@@ -175,8 +174,6 @@
     <Compile Include="Drawing\ColorFormat\ColorHsva.cs" />
     <Compile Include="Components\Renderers\AnimSpriteRenderer.cs" />
     <Compile Include="Components\Renderers\TextRenderer.cs" />
-    <Compile Include="Components\SoundEmitter.cs" />
-    <Compile Include="Components\SoundListener.cs" />
     <Compile Include="Drawing\Canvas.cs" />
     <Compile Include="Utility\DualityAppData.cs" />
     <Compile Include="Utility\DualityMetaData.cs" />
@@ -242,7 +239,6 @@
     <Compile Include="Utility\Extensions\ExtMethodsString.cs" />
     <Compile Include="Drawing\GraphicsModeComparer.cs" />
     <Compile Include="Utility\ReflectionInfo.cs" />
-    <Compile Include="Audio\OggVorbis\OggVorbis.cs" />
     <Compile Include="Utility\PathHelper.cs" />
     <Compile Include="Utility\ReflectionHelper.cs" />
     <Compile Include="Drawing\ColorFormat\ColorRgba.cs" />
@@ -262,7 +258,6 @@
     <Compile Include="Utility\Math\Rect.cs" />
     <Compile Include="Resource.cs" />
     <Compile Include="Resources\AbstractShader.cs" />
-    <Compile Include="Resources\AudioData.cs" />
     <Compile Include="Resources\DefaultContent.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -274,15 +269,11 @@
     <Compile Include="Resources\ShaderProgram.cs" />
     <Compile Include="Resources\Material.cs" />
     <Compile Include="Resources\RenderTarget.cs" />
-    <Compile Include="Resources\Sound.cs" />
     <Compile Include="Resources\Texture.cs" />
     <Compile Include="Resources\Pixmap.cs" />
     <Compile Include="Resources\Prefab.cs" />
     <Compile Include="Resources\VertexShader.cs" />
     <Compile Include="Resources\Scene.cs" />
-    <Compile Include="Audio\SoundBudgetPad.cs" />
-    <Compile Include="Audio\SoundDevice.cs" />
-    <Compile Include="Audio\SoundInstance.cs" />
     <Compile Include="Drawing\FormattedText.cs" />
     <Compile Include="Utility\Log\TextWriterLogOutput.cs" />
     <Compile Include="Serialization\BinaryFormatter.cs" />
@@ -376,12 +367,6 @@
     <None Include="EmbeddedResources\EditorSupport\Field.png" />
     <None Include="EmbeddedResources\EditorSupport\Property.png" />
     <None Include="EmbeddedResources\EditorSupport\iconCmpProfileRenderer.png" />
-    <Content Include="OpenALSoft32.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="OpenALSoft64.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

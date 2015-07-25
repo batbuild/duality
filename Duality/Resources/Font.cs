@@ -270,10 +270,7 @@ namespace Duality.Resources
 		// Embedded custom font family
 		private	byte[]		customFamilyData	= null;
 		// Data that is automatically acquired while loading the font
-#if !__ANDROID__
 		[NonSerialized]	private SysDrawFont	internalFont	= null;
-#endif
-
 		[NonSerialized]	private	Material	mat				= null;
 		[NonSerialized]	private	Texture		texture			= null;
 		[NonSerialized] private	bool		needsReload		= true;
@@ -555,9 +552,7 @@ namespace Duality.Resources
 			if (this.Characters == CharacterSet.Dynamic || this.pixelData == null)
 			{
 				this.ReleaseResources();
-#if !__ANDROID__				
 				this.UpdateInternalFont();
-#endif
 
 				this.maxGlyphWidth = 0;
 				this.height = 0;
@@ -750,7 +745,8 @@ namespace Duality.Resources
 			this.texture = new Texture(this.pixelData,
 				Texture.SizeMode.Enlarge,
 				this.IsPixelGridAligned ? TextureMagFilter.Nearest : TextureMagFilter.Linear,
-				this.IsPixelGridAligned ? TextureMinFilter.Nearest : TextureMinFilter.LinearMipmapLinear);
+				this.IsPixelGridAligned ? TextureMinFilter.Nearest : TextureMinFilter.LinearMipmapLinear,
+				keepPixmapDataResident: true);
 		}
 
 		private void CreateInternalMaterial()
@@ -1342,7 +1338,6 @@ namespace Duality.Resources
 			c.ReloadData();
 		}
 
-#if !__ANDROID__
 		/// <summary>
 		/// Retrieves a <see cref="System.Drawing.FontFamily"/> by its name.
 		/// </summary>
@@ -1393,8 +1388,6 @@ namespace Duality.Resources
 			loadedFontRegistry[result.Name] = result;
 			return result;
 		}
-
-#endif
 	}
 
 }

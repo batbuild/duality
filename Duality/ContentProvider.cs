@@ -59,10 +59,6 @@ namespace Duality
 			Texture.InitDefaultContent();
 			Material.InitDefaultContent();
 			Font.InitDefaultContent();
-#if !__ANDROID__
-			AudioData.InitDefaultContent();
-			Sound.InitDefaultContent();
-#endif
 			// Make a list of all default content available
 			foreach (var pair in resLibrary)
 			{

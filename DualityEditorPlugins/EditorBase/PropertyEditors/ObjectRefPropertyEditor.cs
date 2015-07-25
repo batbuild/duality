@@ -41,8 +41,6 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 		protected	Bitmap		prevImage			= null;
 		protected	float		prevImageLum		= 0.0f;
 		protected	int			prevImageHash		= -1;
-		protected	Sound		prevSound			= null;
-		protected	SoundInstance	prevSoundInst	= null;
 
 		public abstract string ReferenceName { get; }
 		public abstract bool ReferenceBroken { get; }
@@ -61,25 +59,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 		{
 			return 0;
 		}
-
-		public void PlayPreviewSound()
-		{
-			if (this.prevSound == null) return;
-			if (this.prevSoundInst != null) return;
-
-			this.prevSoundInst = DualityApp.Sound.PlaySound(this.prevSound);
-			this.prevSoundInst.Looped = true;
-			this.Invalidate();
-		}
-		public void StopPreviewSound()
-		{
-			if (this.prevSoundInst == null) return;
-			
-			this.prevSoundInst.FadeOut(0.25f);
-			this.prevSoundInst = null;
-			this.Invalidate();
-		}
-
+		
 		protected abstract void SerializeToData(DataObject data);
 		protected abstract void DeserializeFromData(DataObject data);
 		protected abstract bool CanDeserializeFromData(DataObject data);
@@ -140,23 +120,6 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 				}
 			}
 			
-			if (this.prevSound != null)
-			{
-				if (this.prevSoundInst != null)
-				{
-					e.Graphics.DrawImage(darkBg ? EditorBaseRes.IconSpeakerWhite : EditorBaseRes.IconSpeakerBlack, 
-						this.rectPrevSound.X, 
-						this.rectPrevSound.Y);
-				}
-				else
-				{
-					e.Graphics.DrawImageAlpha(darkBg ? EditorBaseRes.IconSpeakerWhite : EditorBaseRes.IconSpeakerBlack, 
-						0.5f,
-						this.rectPrevSound.X, 
-						this.rectPrevSound.Y);
-				}
-			}
-
 			StringFormat format = StringFormat.GenericDefault;
 			format.Alignment = StringAlignment.Center;
 			format.LineAlignment = StringAlignment.Center;
@@ -279,11 +242,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 				lastPanelHovered != this.panelHovered)
 				this.Invalidate();
 
-			if (this.rectPrevSound.Contains(e.Location))
-				this.PlayPreviewSound();
-			else
-				this.StopPreviewSound();
-			
+		
 			if (this.panelDragBegin != Point.Empty)
 			{
 				if (Math.Abs(this.panelDragBegin.X - e.X) > 5 || Math.Abs(this.panelDragBegin.Y - e.Y) > 5)
@@ -304,7 +263,6 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 			this.buttonShowHovered = false;
 			this.panelHovered = false;
 			this.panelDragBegin = Point.Empty;
-			this.StopPreviewSound();
 		}
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
@@ -392,7 +350,6 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 		protected override void OnDisposing(bool manually)
 		{
 			base.OnDisposing(manually);
-			this.StopPreviewSound();
 		}
 
 		protected override void UpdateGeometry()
@@ -449,11 +406,6 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 			}
 
 			this.rectPrevSound = new Rectangle(this.rectPanel.Right - 17, this.rectPanel.Y + 1, 16, 16);
-		}
-		
-		private void prevSoundTimer_Tick(object sender, EventArgs e)
-		{
-			this.PlayPreviewSound();
 		}
 	}
 }

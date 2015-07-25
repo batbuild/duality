@@ -34,7 +34,16 @@ namespace Duality
 		/// </summary>
 		public const string FileExt = ".res";
 
-		private	static	List<Resource>	finalizeSched	= new List<Resource>();
+		/// <summary>
+		/// The finalizer adds resources to this list
+		/// </summary>
+		private	static	List<Resource>	finalizeSched		= new List<Resource>();
+
+		/// <summary>
+		/// We use this list as a bit of scratch memory, for copying items to be disposed from the finalizeSched list.
+		/// </summary>
+		private static	List<Resource>	finalizeSchedCopy	= new List<Resource>();
+		
 
 		public static event EventHandler<ResourceEventArgs>	ResourceDisposing = null;
 		public static event EventHandler<ResourceEventArgs>	ResourceLoaded = null;
@@ -320,7 +329,10 @@ namespace Duality
 
 		~Resource()
 		{
-			finalizeSched.Add(this);
+			// this is almost definitely not a good idea. If anything else takes a lock on this object, and deadlocks, no more
+			// finalizers will run!
+			lock (finalizeSched)
+				finalizeSched.Add(this);
 		}
 		/// <summary>
 		/// Disposes the Resource.
@@ -603,15 +615,25 @@ namespace Duality
 
 		internal static void RunCleanup()
 		{
-			if (finalizeSched.Count > 0)
+			lock (finalizeSched)
 			{
-				Resource[] finalizeSchedArray = finalizeSched.NotNull().ToArray();
-				finalizeSched.Clear();
-				foreach (Resource res in finalizeSchedArray)
+				if (finalizeSched.Count <= 0) return;
+
+				for (int i = 0; i < finalizeSched.Count; i++)
 				{
-					res.Dispose(false);
+					if (finalizeSched[i] == null)
+						continue;
+
+					finalizeSchedCopy.Add(finalizeSched[i]);
 				}
+				finalizeSched.Clear();
 			}
+			
+			foreach (Resource res in finalizeSchedCopy)
+			{
+				res.Dispose(false);
+			}
+			finalizeSchedCopy.Clear();
 		}
 
 		/// <summary>

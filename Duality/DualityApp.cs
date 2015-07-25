@@ -90,10 +90,6 @@ namespace Duality
 		private	static	KeyboardInput				keyboard			= new KeyboardInput();
 		private	static	JoystickInputCollection		joysticks			= new JoystickInputCollection();
 		private	static	GamepadInputCollection		gamepads			= new GamepadInputCollection();
-#if !__ANDROID__
-		private	static	SoundDevice					sound				= null;
-#endif
-
 		private	static	ExecutionEnvironment		environment			= ExecutionEnvironment.Unknown;
 		private	static	ExecutionContext			execContext			= ExecutionContext.Terminated;
 		private	static	DualityAppData				appData				= null;
@@ -180,15 +176,6 @@ namespace Duality
 		{
 			get { return gamepads; }
 		}
-#if !__ANDROID__
-		/// <summary>
-		/// [GET] Provides access to the main <see cref="SoundDevice"/>.
-		/// </summary>
-		public static SoundDevice Sound
-		{
-			get { return sound; }
-		}
-#endif
 		/// <summary>
 		/// [GET / SET] Provides access to Duality's current <see cref="DualityAppData">application data</see>. This is never null.
 		/// Any kind of data change event is fired as soon as you re-assign this property. Be sure to do that after changing its data.
@@ -387,11 +374,6 @@ namespace Duality
 			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 			AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
 
-#if __ANDROID__
-			CopyDependentAssemblies();
-#else
-			sound = new SoundDevice();
-#endif
 			LoadPlugins();
 			LoadAppData();
 			LoadUserData();
@@ -506,10 +488,6 @@ namespace Duality
 					SaveUserData();
 					SaveMetaData();
 				}
-#if !__ANDROID__
-				sound.Dispose();
-				sound = null;
-#endif
 				ClearPlugins();
 				Profile.SaveTextReport(environment == ExecutionEnvironment.Editor ? "perflog_editor.txt" : "perflog.txt");
 				Log.Core.Write("DualityApp terminated");
@@ -545,14 +523,8 @@ namespace Duality
 			OnBeforeUpdate();
 			UpdateUserInput();
 			Scene.Current.Update();
-#if !__ANDROID__
-			sound.Update();
-#endif
 			OnAfterUpdate();
 			VisualLog.PrepareRenderLogEntries();
-#if !__ANDROID__
-			CheckOpenALErrors();
-#endif
 			//CheckOpenGLErrors();
 			RunCleanup();
 
@@ -648,14 +620,8 @@ namespace Duality
 				Scene.Current.EditorUpdate();
 				foreach (GameObject obj in updateObjects) obj.Update();
 			}
-#if !__ANDROID__
-			sound.Update();
-#endif
 			OnAfterUpdate();
 			VisualLog.PrepareRenderLogEntries();
-#if !__ANDROID__
-			CheckOpenALErrors();
-#endif
 			//CheckOpenGLErrors();
 			RunCleanup();
 
@@ -1310,33 +1276,6 @@ namespace Duality
 			Log.Core.Write("Assembly loaded: {0}", args.LoadedAssembly.GetShortAssemblyName());
 		}
 
-#if !__ANDROID__
-
-		/// <summary>
-		/// Checks for errors that might have occurred during audio processing.
-		/// </summary>
-		/// <param name="silent">If true, errors aren't logged.</param>
-		/// <returns>True, if an error occurred, false if not.</returns>
-		public static bool CheckOpenALErrors(bool silent = false)
-		{
-			if (sound != null && !sound.IsAvailable) return false;
-			ALError error;
-			bool found = false;
-			while ((error = AL.GetError()) != ALError.NoError)
-			{
-				if (!silent)
-				{
-					Log.Core.WriteError(
-						"Internal OpenAL error, code {0} at {1}",
-						error,
-						Log.CurrentMethod(1));
-				}
-				found = true;
-				if (!silent && System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-			}
-			return found;
-		}
-#endif
 		/// <summary>
 		/// Checks for errors that might have occurred during video processing. You should avoid calling this method due to performance reasons.
 		/// Only use it on suspect.
