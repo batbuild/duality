@@ -56,27 +56,16 @@ namespace Duality.Resources
 			 string ContentPath_White = contentPath + "White" + extension;
 			 string ContentPath_Checkerboard = contentPath + "Checkerboard" + extension;
 
-			 ContentProvider.AddContent(ContentPath_White, new Texture(Pixmap.White, filterMin: TextureMinFilter.Linear));
+			 ContentProvider.AddContent(ContentPath_White, new Texture(Pixmap.White, filterMin: TextureMinFilter.Linear, keepPixmapDataResident: true));
 			 ContentProvider.AddContent(ContentPath_Checkerboard, new Texture(
 				 Pixmap.Checkerboard,
 				 SizeMode.Default,
 				 TextureMagFilter.Nearest,
 				 TextureMinFilter.Nearest,
 				 TextureWrapMode.Repeat,
-				 TextureWrapMode.Repeat));
-#if ! __ANDROID__
-			ContentProvider.AddContent(ContentPath_White, new Texture(Pixmap.White, keepPixmapDataResident: true));
+				 TextureWrapMode.Repeat,
+				 keepPixmapDataResident: true));
 
-			ContentProvider.AddContent(ContentPath_Checkerboard, new Texture(
-				Pixmap.Checkerboard, 
-				SizeMode.Default,
-				TextureMagFilter.Nearest,
-				TextureMinFilter.Nearest,
-				TextureWrapMode.Repeat,
-				TextureWrapMode.Repeat, 
-				keepPixmapDataResident: true));
-
-#endif
 			White				= ContentProvider.RequestContent<Texture>(ContentPath_White);
 			Checkerboard		= ContentProvider.RequestContent<Texture>(ContentPath_Checkerboard);
 		}
