@@ -57,26 +57,6 @@ namespace Duality.Resources
 		private const int ResFormat_Version_DxtCompressed	= 4;
 		
 		/// <summary>
-		/// [GET] A Pixmap showing the Duality icon.
-		/// </summary>
-		public static ContentRef<Pixmap> DualityIcon		{ get; private set; }
-		/// <summary>
-		/// [GET] A Pixmap showing the Duality icon without the text on it.
-		/// </summary>
-		public static ContentRef<Pixmap> DualityIconB		{ get; private set; }
-		/// <summary>
-		/// A Pixmap showing the Duality logo.
-		/// </summary>
-		public static ContentRef<Pixmap> DualityLogoBig		{ get; private set; }
-		/// <summary>
-		/// A Pixmap showing the Duality logo.
-		/// </summary>
-		public static ContentRef<Pixmap> DualityLogoMedium	{ get; private set; }
-		/// <summary>
-		/// A Pixmap showing the Duality logo.
-		/// </summary>
-		public static ContentRef<Pixmap> DualityLogoSmall	{ get; private set; }
-		/// <summary>
 		/// [GET] A plain white 1x1 Pixmap. Can be used as a dummy.
 		/// </summary>
 		public static ContentRef<Pixmap> White				{ get; private set; }
@@ -88,27 +68,12 @@ namespace Duality.Resources
 		internal static void InitDefaultContent()
 		{
 			const string VirtualContentPath				= ContentProvider.VirtualContentPath + "Pixmap:";
-			const string ContentPath_DualityIcon		= VirtualContentPath + "DualityIcon";
-			const string ContentPath_DualityIconB		= VirtualContentPath + "DualityIconB";
-			const string ContentPath_DualityLogoBig		= VirtualContentPath + "DualityLogoBig";
-			const string ContentPath_DualityLogoMedium	= VirtualContentPath + "DualityLogoMedium";
-			const string ContentPath_DualityLogoSmall	= VirtualContentPath + "DualityLogoSmall";
 			const string ContentPath_White				= VirtualContentPath + "White";
 			const string ContentPath_Checkerboard		= VirtualContentPath + "Checkerboard";
 
-			ContentProvider.AddContent(ContentPath_DualityIcon,		new Pixmap(DefaultContent.DualityIcon));
-			ContentProvider.AddContent(ContentPath_DualityIconB,		new Pixmap(DefaultContent.DualityIconB));
-			ContentProvider.AddContent(ContentPath_DualityLogoBig,		new Pixmap(DefaultContent.DualityLogoBig));
-			ContentProvider.AddContent(ContentPath_DualityLogoMedium,	new Pixmap(DefaultContent.DualityLogoMedium));
-			ContentProvider.AddContent(ContentPath_DualityLogoSmall,	new Pixmap(DefaultContent.DualityLogoSmall));
 			ContentProvider.AddContent(ContentPath_White,				new Pixmap(new Layer(1, 1, ColorRgba.White)));
 			ContentProvider.AddContent(ContentPath_Checkerboard,		new Pixmap(DefaultContent.Checkerboard));
 
-			DualityIcon			= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityIcon);
-			DualityIconB		= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityIconB);
-			DualityLogoBig		= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityLogoBig);
-			DualityLogoMedium	= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityLogoMedium);
-			DualityLogoSmall	= ContentProvider.RequestContent<Pixmap>(ContentPath_DualityLogoSmall);
 			White				= ContentProvider.RequestContent<Pixmap>(ContentPath_White);
 			Checkerboard		= ContentProvider.RequestContent<Pixmap>(ContentPath_Checkerboard);
 		}
