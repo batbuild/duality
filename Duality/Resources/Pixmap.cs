@@ -361,7 +361,6 @@ namespace Duality.Resources
 					new Rectangle(0, 0, bm.Width, bm.Height),
 					ImageLockMode.ReadOnly,
 					PixelFormat.Format32bppArgb);
-				int[] argbValues = new int[pixels];
 			
 				using(var argbValues = AllocateArray<int>(data.Width * data.Height))
 				{
@@ -379,13 +378,10 @@ namespace Duality.Resources
 				this.SetPixelDataRgba(data, bm.Width, bm.Height);
 #endif
 			}
-
 			private DisposableValue<T[]> AllocateArray<T>(int length)
 			{
 				return ArrayPool<T>.AllocateDisposable(length);
 			}
-
-
 			/// <summary>
 			/// Sets the layers pixel data in the ColorRgba format. Note that the specified data will be copied and thus modifying it
 			/// outside won't affect the Layer it has been inserted into.
