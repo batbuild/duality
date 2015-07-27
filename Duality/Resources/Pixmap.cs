@@ -14,6 +14,7 @@ using Duality.Editor;
 using Duality.Serialization;
 using Duality.Cloning;
 using Duality.Properties;
+using Duality.Utility.Memory;
 using ManagedSquish;
 using OpenTK;
 
@@ -136,6 +137,8 @@ namespace Duality.Resources
 			private	int height;
 			private	ColorRgba[]	data;
 			private byte[] compressedData;
+			private DisposableValue<ColorRgba[]> dataDisposable;
+			private DisposableValue<byte[]> compressedDataDisposable;
 
 			/// <summary>
 			/// [GET] The layers width in pixels
@@ -201,9 +204,13 @@ namespace Duality.Resources
 
 				this.width = width;
 				this.height = height;
-				this.data = new ColorRgba[width * height];
+				if(width == 0 || height == 0)
+					this.data = new ColorRgba[0];
 
-				for (int i = 0; i < this.data.Length; i++)
+				this.dataDisposable = AllocateArray<ColorRgba>(width * height);
+				this.data = this.dataDisposable.Value;
+
+				for (int i = 0; i < this.width * this.height; i++)
 					this.data[i] = backColor;
 			}
 			public Layer(int width, int height, ColorRgba[] data)
@@ -314,8 +321,8 @@ namespace Duality.Resources
 			/// <returns></returns>
 			public byte[] GetPixelDataByteRgba()
 			{
-				byte[] rgbaValues = new byte[this.data.Length * 4];
-				for (int i = 0; i < this.data.Length; i++)
+				byte[] rgbaValues = new byte[GetDataLength() * 4];
+				for (int i = 0; i < GetDataLength(); i++)
 				{
 					rgbaValues[i * 4 + 0] = this.data[i].R;
 					rgbaValues[i * 4 + 1] = this.data[i].G;
@@ -330,10 +337,10 @@ namespace Duality.Resources
 			/// <returns></returns>
 			public int[] GetPixelDataIntArgb()
 			{
-				int[] argbValues = new int[this.data.Length];
+				int[] argbValues = new int[GetDataLength()];
 				unchecked
 				{
-					for (int i = 0; i < this.data.Length; i++)
+					for (int i = 0; i < GetDataLength(); i++)
 						argbValues[i] = this.data[i].ToIntArgb();
 				}
 				return argbValues;
@@ -352,12 +359,20 @@ namespace Duality.Resources
 					PixelFormat.Format32bppArgb);
 			
 				int pixels = data.Width * data.Height;
-				int[] argbValues = new int[pixels];
-				System.Runtime.InteropServices.Marshal.Copy(data.Scan0, argbValues, 0, pixels);
-				bm.UnlockBits(data);
+				using(var argbValues = AllocateArray<int>(data.Width * data.Height))
+				{
+					Marshal.Copy(data.Scan0, argbValues.Value, 0, pixels);
+					bm.UnlockBits(data);
 				
-				this.SetPixelDataArgb(argbValues, bm.Width, bm.Height);
+					this.SetPixelDataArgb(argbValues.Value, bm.Width, bm.Height);
+				}
 			}
+
+			private DisposableValue<T[]> AllocateArray<T>(int length)
+			{
+				return ArrayPool<T>.AllocateDisposable(length);
+			}
+
 			/// <summary>
 			/// Sets the layers pixel data in the ColorRgba format. Note that the specified data will be copied and thus modifying it
 			/// outside won't affect the Layer it has been inserted into.
@@ -389,10 +404,9 @@ namespace Duality.Resources
 
 				this.width = width;
 				this.height = height;
-				if (this.data == null || this.data.Length != this.width * this.height)
-					this.data = new ColorRgba[this.width * this.height];
+				CreateDataArray();
 
-				for (int i = 0; i < this.data.Length; i++)
+				for (int i = 0; i < GetDataLength(); i++)
 				{
 					this.data[i].R = pixelData[i * 4 + 0];
 					this.data[i].G = pixelData[i * 4 + 1];
@@ -410,16 +424,15 @@ namespace Duality.Resources
 			{
 				if (width < 0) width = this.width;
 				if (height < 0) height = this.height;
-				if (pixelData.Length != width * height) throw new ArgumentException("Data length doesn't match width * height", "pixelData");
+				if (pixelData.Length < width * height) throw new ArgumentException("Data length doesn't match width * height", "pixelData");
 
 				this.width = width;
 				this.height = height;
-				if (this.data == null || this.data.Length != this.width * this.height) 
-					this.data = new ColorRgba[this.width * this.height];
+				CreateDataArray();
 
 				unchecked
 				{
-					var partitioner = Partitioner.Create(0, this.data.Length);
+					var partitioner = Partitioner.Create(0, this.width * this.height);
 					Parallel.ForEach(partitioner, (range, loopstate) =>
 					{
 						for (var i = range.Item1; i < range.Item2; i++)
@@ -427,6 +440,18 @@ namespace Duality.Resources
 							this.data[i].SetIntArgb(pixelData[i]);
 						}
 					});
+				}
+			}
+
+			private void CreateDataArray()
+			{
+				if (this.data == null || this.data.Length < this.width * this.height)
+				{
+					if (this.dataDisposable != null)
+						this.dataDisposable.Dispose();
+
+					this.dataDisposable = AllocateArray<ColorRgba>(this.width * this.height);
+					this.data = dataDisposable.Value;
 				}
 			}
 
@@ -511,6 +536,7 @@ namespace Duality.Resources
 				Layer tempLayer = new Layer(w, h, backColor);
 				this.DrawOnto(tempLayer, BlendMode.Solid, -x, -y);
 				tempLayer.CopyTo(this);
+				tempLayer.Dispose();
 			}
 			/// <summary>
 			/// Crops the Layer, removing transparent / empty border areas.
@@ -531,7 +557,7 @@ namespace Duality.Resources
 			public Rectangle OpaqueBounds()
 			{
 				Rectangle bounds = new Rectangle(this.width, this.height, 0, 0);
-				for (int i = 0; i < this.data.Length; i++)
+				for (int i = 0; i < GetDataLength(); i++)
 				{
 					if (this.data[i].A == 0) continue;
 					int x = i % this.width;
@@ -546,6 +572,12 @@ namespace Duality.Resources
 
 				return bounds;
 			}
+
+			private int GetDataLength()
+			{
+				return this.width * this.height;
+			}
+
 			/// <summary>
 			/// Determines the average color of a Layer.
 			/// </summary>
@@ -558,7 +590,7 @@ namespace Duality.Resources
 
 				if (weightTransparent)
 				{
-					for (int i = 0; i < this.data.Length; i++)
+					for (int i = 0; i < GetDataLength(); i++)
 					{
 						sum[0] += this.data[i].R * ((float)this.data[i].A / 255.0f);
 						sum[1] += this.data[i].G * ((float)this.data[i].A / 255.0f);
@@ -576,7 +608,7 @@ namespace Duality.Resources
 				}
 				else
 				{
-					for (int i = 0; i < this.data.Length; i++)
+					for (int i = 0; i < GetDataLength(); i++)
 					{
 						sum[0] += this.data[i].R;
 						sum[1] += this.data[i].G;
@@ -601,69 +633,72 @@ namespace Duality.Resources
 			/// </summary>
 			public void ColorTransparentPixels()
 			{
-				var dataCopy = new ColorRgba[this.data.Length];
-				Array.Copy(this.data, dataCopy, this.data.Length);
-
-				var partitioner = Partitioner.Create(0, this.data.Length);
-				Parallel.ForEach(partitioner, (range, loopstate) =>
+				using (var dataBuffer = AllocateArray<ColorRgba>(GetDataLength()))
 				{
-					Point pos = new Point();
-					int[] nPos = new int[8];
-					bool[] nOk = new bool[8];
-					int[] mixClr = new int[4];
+					var dataCopy = dataBuffer.Value;
+					Array.Copy(this.data, dataCopy, GetDataLength());
 
-					for (int i = range.Item1; i < range.Item2; i++)
+					var partitioner = Partitioner.Create(0, GetDataLength());
+					Parallel.ForEach(partitioner, (range, loopstate) =>
 					{
-						if (dataCopy[i].A != 0) return;
+						Point pos = new Point();
+						int[] nPos = new int[8];
+						bool[] nOk = new bool[8];
+						int[] mixClr = new int[4];
 
-						pos.Y = i/this.width;
-						pos.X = i - (pos.Y*this.width);
-
-						mixClr[0] = 0;
-						mixClr[1] = 0;
-						mixClr[2] = 0;
-						mixClr[3] = 0;
-
-						nPos[0] = i - this.width;
-						nPos[1] = i + this.width;
-						nPos[2] = i - 1;
-						nPos[3] = i + 1;
-						nPos[4] = i - this.width - 1;
-						nPos[5] = i + this.width - 1;
-						nPos[6] = i - this.width + 1;
-						nPos[7] = i + this.width + 1;
-
-						nOk[0] = pos.Y > 0;
-						nOk[1] = pos.Y < this.height - 1;
-						nOk[2] = pos.X > 0;
-						nOk[3] = pos.X < this.width - 1;
-						nOk[4] = nOk[2] && nOk[0];
-						nOk[5] = nOk[2] && nOk[1];
-						nOk[6] = nOk[3] && nOk[0];
-						nOk[7] = nOk[3] && nOk[1];
-
-						int nMult = 2;
-						for (int j = 0; j < 8; j++)
+						for (int i = range.Item1; i < range.Item2; i++)
 						{
-							if (!nOk[j]) continue;
-							if (dataCopy[nPos[j]].A == 0) continue;
+							if (dataCopy[i].A != 0) return;
 
-							mixClr[0] += dataCopy[nPos[j]].R*nMult;
-							mixClr[1] += dataCopy[nPos[j]].G*nMult;
-							mixClr[2] += dataCopy[nPos[j]].B*nMult;
-							mixClr[3] += nMult;
+							pos.Y = i/this.width;
+							pos.X = i - (pos.Y*this.width);
 
-							if (j > 3) nMult = 1;
+							mixClr[0] = 0;
+							mixClr[1] = 0;
+							mixClr[2] = 0;
+							mixClr[3] = 0;
+
+							nPos[0] = i - this.width;
+							nPos[1] = i + this.width;
+							nPos[2] = i - 1;
+							nPos[3] = i + 1;
+							nPos[4] = i - this.width - 1;
+							nPos[5] = i + this.width - 1;
+							nPos[6] = i - this.width + 1;
+							nPos[7] = i + this.width + 1;
+
+							nOk[0] = pos.Y > 0;
+							nOk[1] = pos.Y < this.height - 1;
+							nOk[2] = pos.X > 0;
+							nOk[3] = pos.X < this.width - 1;
+							nOk[4] = nOk[2] && nOk[0];
+							nOk[5] = nOk[2] && nOk[1];
+							nOk[6] = nOk[3] && nOk[0];
+							nOk[7] = nOk[3] && nOk[1];
+
+							int nMult = 2;
+							for (int j = 0; j < 8; j++)
+							{
+								if (!nOk[j]) continue;
+								if (dataCopy[nPos[j]].A == 0) continue;
+
+								mixClr[0] += dataCopy[nPos[j]].R*nMult;
+								mixClr[1] += dataCopy[nPos[j]].G*nMult;
+								mixClr[2] += dataCopy[nPos[j]].B*nMult;
+								mixClr[3] += nMult;
+
+								if (j > 3) nMult = 1;
+							}
+
+							if (mixClr[3] > 0)
+							{
+								this.data[i].R = (byte) Math.Round(mixClr[0]/(float) mixClr[3]);
+								this.data[i].G = (byte) Math.Round(mixClr[1]/(float) mixClr[3]);
+								this.data[i].B = (byte) Math.Round(mixClr[2]/(float) mixClr[3]);
+							}
 						}
-
-						if (mixClr[3] > 0)
-						{
-							this.data[i].R = (byte) Math.Round(mixClr[0]/(float) mixClr[3]);
-							this.data[i].G = (byte) Math.Round(mixClr[1]/(float) mixClr[3]);
-							this.data[i].B = (byte) Math.Round(mixClr[2]/(float) mixClr[3]);
-						}
-					}
-				});
+					});
+				}
 			}
 			/// <summary>
 			/// Sets the color of all transparent pixels to the specified color.
@@ -671,7 +706,7 @@ namespace Duality.Resources
 			/// <param name="transparentColor"></param>
 			public void ColorTransparentPixels(ColorRgba transparentColor)
 			{
-				for (int i = 0; i < this.data.Length; i++)
+				for (int i = 0; i < GetDataLength(); i++)
 				{
 					if (this.data[i].A != 0) continue;
 					this.data[i] = transparentColor;
@@ -1064,8 +1099,25 @@ namespace Duality.Resources
 				Layer targetLayer = targetObj as Layer;
 				targetLayer.width = this.width;
 				targetLayer.height = this.height;
-				targetLayer.data = this.data == null ? null : this.data.Clone() as ColorRgba[];
-				targetLayer.compressedData = this.compressedData == null ? null : this.compressedData.Clone() as byte[];
+				if (this.data != null)
+				{
+					if(targetLayer.dataDisposable != null)
+						targetLayer.dataDisposable.Dispose();
+
+					targetLayer.dataDisposable = AllocateArray<ColorRgba>(this.width * this.height);
+					targetLayer.data = targetLayer.dataDisposable.Value;
+					Array.Copy(this.data, targetLayer.data, this.width * this.height);
+				}
+
+				if (this.compressedData != null)
+				{
+					if(targetLayer.compressedDataDisposable != null)
+						targetLayer.compressedDataDisposable.Dispose();
+					
+					targetLayer.compressedDataDisposable = AllocateArray<byte>(this.width * this.height * 4);
+					targetLayer.compressedData = targetLayer.compressedDataDisposable.Value;
+					Array.Copy(this.compressedData, targetLayer.compressedData, this.width * this.height * 4);
+				}
 			}
 			void ISerializeExplicit.WriteData(IDataWriter writer)
 			{
@@ -1105,8 +1157,12 @@ namespace Duality.Resources
 				{
 					byte[] dataBlock;
 					reader.ReadValue("pixelData", out dataBlock);
-					Bitmap bm = dataBlock != null ? new Bitmap(new MemoryStream(dataBlock)) : null;
-					if (bm != null) this.FromBitmap(bm);
+
+					if (dataBlock == null) return;
+
+					using(var stream = new MemoryStream(dataBlock))
+					using(var bm = new Bitmap(stream))
+						this.FromBitmap(bm);
 				}
 				else if(version == ResFormat_Version_DxtCompressed)
 				{
@@ -1127,21 +1183,37 @@ namespace Duality.Resources
 						}
 
 						decompressedDataStream.Seek(0, SeekOrigin.Begin);
-						var dxtData = decompressedDataStream.ToArray();
+						var dxtData = AllocateArray<byte>(this.width * this.height * 4);
+						decompressedDataStream.Read(dxtData.Value, 0, (int)decompressedDataStream.Length);
 
 						if (DualityApp.ExecContext == DualityApp.ExecutionContext.Editor)
 						{
-							Squish.DecompressImage(dxtData, width, height, SquishFlags.Dxt5).AsColourArray(arr =>
+							Squish.DecompressImage(dxtData.Value, width, height, SquishFlags.Dxt5).AsColourArray(arr =>
 							{
 								this.data = arr;
 							});
 						}
-						this.compressedData = dxtData;
+						this.compressedDataDisposable = dxtData;
+						this.compressedData = dxtData.Value;
 					}
 				}
 			}
-		}
 
+			internal void Dispose()
+			{
+				if (this.dataDisposable != null)
+				{
+					this.dataDisposable.Dispose();
+					this.dataDisposable = null;
+				}
+
+				if (this.compressedDataDisposable != null)
+				{
+					this.compressedDataDisposable.Dispose();
+					this.compressedDataDisposable = null;
+				}
+			}
+		}
 
 		private	List<Layer>	layers				= new List<Layer>();
 		private	List<Rect>	atlas				= null;
@@ -1469,6 +1541,10 @@ namespace Duality.Resources
 			base.OnDisposing(manually);
 
 			// Get rid of the big data blob, so the GC can collect it.
+			foreach (var layer in this.layers)
+			{
+				layer.Dispose();
+			}
 			this.layers.Clear();
 		}
 
