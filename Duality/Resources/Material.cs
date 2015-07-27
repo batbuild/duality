@@ -44,26 +44,6 @@ namespace Duality.Resources
 		/// </summary>
 		public static ContentRef<Material> InvertWhite			{ get; private set; }
 		/// <summary>
-		/// A Material showing the Duality icon.
-		/// </summary>
-		public static ContentRef<Material> DualityIcon			{ get; private set; }
-		/// <summary>
-		/// A Material showing the Duality icon, but without the text on it.
-		/// </summary>
-		public static ContentRef<Material> DualityIconB			{ get; private set; }
-		/// <summary>
-		/// A Material showing the Duality logo.
-		/// </summary>
-		public static ContentRef<Material> DualityLogoBig		{ get; private set; }
-		/// <summary>
-		/// A Material showing the Duality logo.
-		/// </summary>
-		public static ContentRef<Material> DualityLogoMedium	{ get; private set; }
-		/// <summary>
-		/// A Material showing the Duality logo.
-		/// </summary>
-		public static ContentRef<Material> DualityLogoSmall		{ get; private set; }
-		/// <summary>
 		/// A Material showing a black and white checkerboard.
 		/// </summary>
 		public static ContentRef<Material> Checkerboard			{ get; private set; }
@@ -82,26 +62,8 @@ namespace Duality.Resources
 			string ContentPath_SolidWhite			= contentPath + "SolidWhite" + extension;
 			string ContentPath_SolidBlack			= contentPath + "SolidBlack" + extension;
 			string ContentPath_InvertWhite			= contentPath + "InvertWhite" + extension;
-			string ContentPath_DualityIcon			= contentPath + "DualityIcon" + extension;
-			string ContentPath_DualityIconB			= contentPath + "DualityIconB" + extension;
-			string ContentPath_DualityLogoBig		= contentPath + "DualityLogoBig" + extension;
-			string ContentPath_DualityLogoMedium	= contentPath + "DualityLogoMedium" + extension;
-			string ContentPath_DualityLogoSmall		= contentPath + "DualityLogoSmall" + extension;
 			string ContentPath_Checkerboard			= contentPath + "Checkerboard" + extension;
 
-#if ! __ANDROID__
-			ContentProvider.AddContent(ContentPath_DualityIcon, new Material(DrawTechnique.Mask, ColorRgba.White, Texture.DualityIcon));
-			ContentProvider.AddContent(ContentPath_DualityIconB, new Material(DrawTechnique.Mask, ColorRgba.White, Texture.DualityIconB));
-			ContentProvider.AddContent(ContentPath_DualityLogoBig, new Material(DrawTechnique.Alpha, ColorRgba.White, Texture.DualityLogoBig));
-			ContentProvider.AddContent(ContentPath_DualityLogoMedium, new Material(DrawTechnique.Alpha, ColorRgba.White, Texture.DualityLogoMedium));
-			ContentProvider.AddContent(ContentPath_DualityLogoSmall, new Material(DrawTechnique.Alpha, ColorRgba.White, Texture.DualityLogoSmall));
-
-			DualityIcon			= ContentProvider.RequestContent<Material>(ContentPath_DualityIcon);
-			DualityIconB		= ContentProvider.RequestContent<Material>(ContentPath_DualityIconB);
-			DualityLogoBig		= ContentProvider.RequestContent<Material>(ContentPath_DualityLogoBig);
-			DualityLogoMedium	= ContentProvider.RequestContent<Material>(ContentPath_DualityLogoMedium);
-			DualityLogoSmall	= ContentProvider.RequestContent<Material>(ContentPath_DualityLogoSmall);
-#endif
 			ContentProvider.AddContent(ContentPath_SolidWhite, new Material(DrawTechnique.Solid, ColorRgba.White));
 			ContentProvider.AddContent(ContentPath_SolidBlack, new Material(DrawTechnique.Solid, ColorRgba.Black));
 			ContentProvider.AddContent(ContentPath_InvertWhite, new Material(DrawTechnique.Invert, ColorRgba.White));
