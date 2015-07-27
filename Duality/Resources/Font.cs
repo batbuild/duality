@@ -526,6 +526,8 @@ namespace Duality.Resources
 			}
 			else
 			{
+				Init(this.pixelData);
+
 				CreateInternalTexture();
 				CreateInternalMaterial();
 				this.needsReload = true;
@@ -610,6 +612,8 @@ namespace Duality.Resources
 							}
 						}
 					}
+
+					glyphTemp.Dispose();
 				}
 			}
 			else
@@ -689,7 +693,7 @@ namespace Duality.Resources
 				Texture.SizeMode.Enlarge,
 				this.IsPixelGridAligned ? TextureMagFilter.Nearest : TextureMagFilter.Linear,
 				this.IsPixelGridAligned ? TextureMinFilter.Nearest : TextureMinFilter.LinearMipmapLinear,
-				keepPixmapDataResident: true);
+				keepPixmapDataResident: DualityApp.ExecContext == DualityApp.ExecutionContext.Editor || this.Characters == CharacterSet.Dynamic);
 		}
 
 		private void CreateInternalMaterial()
@@ -799,6 +803,11 @@ namespace Duality.Resources
 					glyphTemp.DrawOnto(pixelLayer, BlendMode.Solid, x, y);
 
 					x += glyphTemp.Width + MathF.Clamp((int) MathF.Ceiling(this.internalFont.Height*0.125f), 2, 10);
+					
+					if(glyphTempTypo != glyphTemp)
+						glyphTempTypo.Dispose();
+
+					glyphTemp.Dispose();
 				}
 			}
 

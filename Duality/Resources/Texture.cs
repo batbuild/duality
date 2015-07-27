@@ -567,6 +567,7 @@ namespace Duality.Resources
 						// Fill border pixels manually - that's cheaper than ColorTransparentPixels here.
 						oldData.DrawOnto(pixelData, BlendMode.Solid, this.pxWidth, 0, 1, this.pxHeight, this.pxWidth - 1, 0);
 						oldData.DrawOnto(pixelData, BlendMode.Solid, 0, this.pxHeight, this.pxWidth, 1, 0, this.pxHeight - 1);
+						pixelData.Dispose();
 					}
 					else
 						pixelData = pixelData.CloneRescale(this.texWidth, this.texHeight, Pixmap.FilterMethod.Linear);
