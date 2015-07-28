@@ -24,7 +24,7 @@ namespace Duality.Utility.Memory
 		public static DisposableValue<T[]> AllocateDisposable(int size)
 		{
 			var array = Allocate(size);
-			return DisposableValue<T[]>.Create(array, () => Free(array));
+			return DisposableValue<T[]>.Create(array, () => Free(array), size);
 		}
 
 		public static DisposableValue<T[]> Resize(DisposableValue<T[]> source, int size)
@@ -191,15 +191,16 @@ namespace Duality.Utility.Memory
 		}
 
 		public T Value { get; private set; }
+		public int RequestedSize { get; set; }
 
 		public void Dispose()
 		{
 			_dispose();
 		}
 
-		public static DisposableValue<T> Create(T value, Action dispose)
+		public static DisposableValue<T> Create(T value, Action dispose, int size)
 		{
-			return new DisposableValue<T>(value, dispose);
+			return new DisposableValue<T>(value, dispose){RequestedSize = size};
 		}
 	}
 }
