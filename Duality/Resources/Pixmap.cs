@@ -147,11 +147,27 @@ namespace Duality.Resources
 				get { return this.data; }
 			}
 			/// <summary>
+			/// [GET] The original image size in bytes. Don't use Data.Length to get the image byte size, as that
+			/// array is returned from a fixed size pool.
+			/// </summary>
+			public int ImageSize
+			{
+				get { return this.dataDisposable.RequestedSize; }
+			}
+			/// <summary>
 			/// [GET] The layers pixel data when DXT compression is being used
 			/// </summary>
 			public byte[] CompressedData
 			{
 				get { return compressedData; }
+			}
+			/// <summary>
+			/// [GET] The original compressed image size in bytes. Don't use CompressedData.Length to get a compressed image byte size, as that
+			/// array is returned from a fixed size pool.
+			/// </summary>
+			public int CompressedImageSize
+			{
+				get { return this.compressedDataDisposable.RequestedSize; }
 			}
 
 			public bool IsCompressed
@@ -1135,14 +1151,9 @@ namespace Duality.Resources
 				{
 					writer.WriteValue("version", ResFormat_Version_DxtCompressed);
 
-					MemoryStream memoryStream = new MemoryStream();
-					using (var zipStream = new GZipStream(memoryStream, CompressionLevel.Optimal, true))
-					{
-						zipStream.Write(compressedData, 0, compressedData.Length);
-					}
-					writer.WriteValue("pixelData", memoryStream.ToArray());
-					memoryStream.Close();
-					
+					byte[] bytesToSave = new byte[this.compressedDataDisposable.RequestedSize];
+					Array.Copy(this.compressedData, bytesToSave, this.compressedDataDisposable.RequestedSize);
+					writer.WriteValue("pixelData", bytesToSave);
 					writer.WriteValue("width", width);
 					writer.WriteValue("height", height);
 				}
@@ -1192,30 +1203,20 @@ namespace Duality.Resources
 					this.width = width;
 					this.height = height;
 
-					using (var decompressedDataStream = new MemoryStream())
+					var dxtData = AllocateArray<byte>(dataBlock.Length);
+					Array.Copy(dataBlock, dxtData.Value, dataBlock.Length);
+
+#if !__ANDROID__
+					if (DualityApp.ExecContext == DualityApp.ExecutionContext.Editor)
 					{
-						using(var compressedDataStream = new MemoryStream(dataBlock))
-						using (var zipStream = new GZipStream(compressedDataStream, CompressionMode.Decompress))
+						Squish.DecompressImage(dxtData.Value, width, height, SquishFlags.Dxt5).AsColourArray(arr =>
 						{
-							zipStream.CopyTo(decompressedDataStream);
-						}
-
-						decompressedDataStream.Seek(0, SeekOrigin.Begin);
-						var dxtData = AllocateArray<byte>(this.width * this.height * 4);
-						decompressedDataStream.Read(dxtData.Value, 0, (int)decompressedDataStream.Length);
-
-#if ! __ANDROID__
-						if (DualityApp.ExecContext == DualityApp.ExecutionContext.Editor)
-						{
-							Squish.DecompressImage(dxtData.Value, width, height, SquishFlags.Dxt5).AsColourArray(arr =>
-							{
-								this.data = arr;
-							});
-						}
-#endif
-						this.compressedDataDisposable = dxtData;
-						this.compressedData = dxtData.Value;
+							this.data = arr;
+						});
 					}
+#endif
+					this.compressedDataDisposable = dxtData;
+					this.compressedData = dxtData.Value;
 				}
 			}
 
