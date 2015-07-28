@@ -583,7 +583,7 @@ namespace Duality.Resources
 				if (Compressed && pixelData.CompressedData != null)
 				{
 					GL.CompressedTexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.CompressedRgbaS3tcDxt5Ext, pixelData.Width, pixelData.Height, 0, 
-						pixelData.CompressedData.Length, pixelData.CompressedData);
+						pixelData.CompressedImageSize, pixelData.CompressedData);
 				}
 				else
 				{
