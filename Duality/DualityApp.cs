@@ -8,7 +8,7 @@ using Duality.Utility;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Audio.OpenAL;
+
 
 using Duality.Resources;
 using Duality.Serialization;
@@ -413,8 +413,8 @@ namespace Duality
 				
 #if !__ANDROID__
 			joysticks.AddGlobalDevices();
-			gamepads.AddGlobalDevices();
 #endif
+			gamepads.AddGlobalDevices();
 
 			Log.Core.Write(
 				"DualityApp initialized" + Environment.NewLine +
