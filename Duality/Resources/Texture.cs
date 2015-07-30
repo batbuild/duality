@@ -611,7 +611,7 @@ namespace Duality.Resources
 
 			GL.BindTexture(TextureTarget.Texture2D, lastTexId);
 
-			if (this.keepPixmapDataResident == false)
+			if (this.keepPixmapDataResident == false && basePixmap.IsLoaded)
 				basePixmap.Res.Dispose();
 		}
 
