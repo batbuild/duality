@@ -42,6 +42,14 @@
       <HintPath>..\packages\Farseer.Duality.Android.0.1.10\lib\MonoAndroid\FarseerDuality.Android.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="LZ4.Android, Version=1.0.5.93, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Other\Dependencies\LZ4Net.Android\LZ4.Android.dll</HintPath>
+    </Reference>
+    <Reference Include="LZ4n.Android, Version=1.0.5.93, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Other\Dependencies\LZ4Net.Android\LZ4n.Android.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
     <Reference Include="OpenTK.Android">

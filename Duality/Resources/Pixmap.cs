@@ -14,6 +14,7 @@ using Duality.Serialization;
 using Duality.Cloning;
 using Duality.Properties;
 using Duality.Utility.Memory;
+using LZ4;
 #if ! __ANDROID__
 using System.Drawing.Imaging;
 using Bitmap=System.Drawing.Bitmap;
@@ -485,7 +486,18 @@ namespace Duality.Resources
 
 			public void SetPixelDataDxtCompressed(byte[] pixelData)
 			{
-				this.compressedData = pixelData;
+				if(this.compressedDataDisposable != null)
+					this.compressedDataDisposable.Dispose();
+
+				if (pixelData == null)
+				{
+					this.compressedData = null;
+					return;
+				}
+
+				this.compressedDataDisposable = AllocateArray<byte>(pixelData.Length);
+				Array.Copy(pixelData, this.compressedDataDisposable.Value, pixelData.Length);
+				this.compressedData = this.compressedDataDisposable.Value;
 			}
 
 			/// <summary>
@@ -1154,11 +1166,11 @@ namespace Duality.Resources
 				{
 					writer.WriteValue("version", ResFormat_Version_DxtCompressed);
 
-					byte[] bytesToSave = new byte[this.compressedDataDisposable.RequestedSize];
-					Array.Copy(this.compressedData, bytesToSave, this.compressedDataDisposable.RequestedSize);
-					writer.WriteValue("pixelData", bytesToSave);
+					var compressed = LZ4Codec.Encode(this.compressedData, 0, this.compressedDataDisposable.RequestedSize);
+					writer.WriteValue("pixelData", compressed);
 					writer.WriteValue("width", width);
 					writer.WriteValue("height", height);
+					writer.WriteValue("length", this.compressedDataDisposable.RequestedSize);
 				}
 				else
 				{
@@ -1199,16 +1211,17 @@ namespace Duality.Resources
 				else if(version == ResFormat_Version_DxtCompressed)
 				{
 					byte[] dataBlock;
-					int width, height;
+					int width, height, length;
 					reader.ReadValue("pixelData", out dataBlock);
 					reader.ReadValue("width", out width);
 					reader.ReadValue("height", out height);
+					reader.ReadValue("length", out length);
 					this.width = width;
 					this.height = height;
 
-					var dxtData = AllocateArray<byte>(dataBlock.Length);
-					Array.Copy(dataBlock, dxtData.Value, dataBlock.Length);
-
+					var dxtData = AllocateArray<byte>(length);
+					LZ4Codec.Decode(dataBlock, 0, dataBlock.Length, dxtData.Value, 0, length, true);
+						
 #if !__ANDROID__
 					if (DualityApp.ExecContext == DualityApp.ExecutionContext.Editor)
 					{
