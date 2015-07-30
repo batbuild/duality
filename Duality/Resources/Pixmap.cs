@@ -1118,7 +1118,7 @@ namespace Duality.Resources
 				{
 					writer.WriteValue("version", ResFormat_Version_DxtCompressed);
 
-					var compressed = LZ4Codec.Wrap(this.CompressedData, 0, this.compressedDataDisposable.RequestedSize);
+					var compressed = LZ4Codec.Encode(this.compressedData, 0, this.compressedDataDisposable.RequestedSize);
 					writer.WriteValue("pixelData", compressed);
 					writer.WriteValue("width", width);
 					writer.WriteValue("height", height);
@@ -1164,7 +1164,7 @@ namespace Duality.Resources
 					this.height = height;
 
 					var dxtData = AllocateArray<byte>(length);
-					LZ4Codec.Decode(dataBlock, 0, dataBlock.Length, dxtData.Value, 0);
+					LZ4Codec.Decode(dataBlock, 0, dataBlock.Length, dxtData.Value, 0, length, true);
 						
 					if (DualityApp.ExecContext == DualityApp.ExecutionContext.Editor)
 					{
