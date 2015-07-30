@@ -6,6 +6,9 @@ using System.IO;
 using System.Diagnostics;
 #if __ANDROID__
 using Android.Content.Res;
+using Duality.Android.Utility.Zip;
+using Duality.Android.Utility.Zip.Android;
+using OS=Android.OS;
 #endif
 using Duality.Resources;
 using Duality.Utility;
@@ -97,6 +100,9 @@ namespace Duality
 		/// <returns></returns>
 		public static bool IsDefaultContentPath(string resPath)
 		{
+			if(resPath.Contains("Data\\Default"))
+				return true;
+
 			int index = resPath.IndexOf(':');
 			return index > 1 || index == 0; // Ignore absolute paths like "C:\", but react to anything else that contains ':' chars.
 		}
@@ -434,12 +440,35 @@ namespace Duality
 		}
 
 #if __ANDROID__
+#if DEBUG
+		private static Duality.Android.Utility.Zip.IZipArchive _debugDataArchive;
+#endif
 
 		public static AssetManager AndroidAssetManager { get; private set; }
 
 		public static void SetAndroidAssetManager(AssetManager assets)
 		{
 			AndroidAssetManager = assets;
+
+#if DEBUG
+			
+#endif
+		}
+
+		public static Stream OpenAsset(string path)
+		{
+			try
+			{
+				return AndroidAssetManager.Open(FileHelper.NormalizePath(path));
+			}
+			catch (Exception e)
+			{
+				var stream = Duality.Android.DebugContent.Open(FileHelper.NormalizePath(path));
+				if(stream != null)
+					return stream;
+
+				throw e;
+			}
 		}
 #endif
 	}

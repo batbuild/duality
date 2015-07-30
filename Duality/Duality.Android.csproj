@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="Components\FrameCompleteEventArgs.cs" />
     <Compile Include="Components\PassCompleteEventArgs.cs" />
+    <Compile Include="DebugContent.cs" />
     <Compile Include="Drawing\CommonShaderVariables.cs" />
     <Compile Include="Drawing\GlobalDynamicIndexedVertexBuffer.cs" />
     <Compile Include="Drawing\IDrawBatch.cs" />
@@ -249,6 +250,12 @@
     <Compile Include="Drawing\VertexFormat\VertexC1P3T2.cs" />
     <Compile Include="Drawing\VertexFormat\VertexC1P3.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
+    <Compile Include="Utility\Zip\Android\AndroidZipArchive.cs" />
+    <Compile Include="Utility\Zip\Android\AndroidZipEntry.cs" />
+    <Compile Include="Utility\Zip\Android\ZipOutputStreamWriter.cs" />
+    <Compile Include="Utility\Zip\IZipArchive.cs" />
+    <Compile Include="Utility\Zip\IZipEntry.cs" />
+    <Compile Include="Utility\Zip\ZipArchiveMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -31,7 +31,14 @@ namespace Duality.Utility
 		public static bool FileExists(string path)
 		{
 #if __ANDROID__
-			return filesInDataDir.Contains(NormalizePath(path));
+			var fileExists = File.Exists(NormalizePath(path));
+			if(fileExists == false)
+				fileExists = filesInDataDir.Contains(NormalizePath(path));
+#if DEBUG
+			if(fileExists == false)
+				fileExists = Duality.Android.DebugContent.FileExists(path);
+#endif
+			return fileExists;
 #else
 			return File.Exists(path);
 #endif
@@ -42,16 +49,24 @@ namespace Duality.Utility
 #if !__ANDROID__
 			return File.OpenRead(path);
 #else
-			return ContentProvider.AndroidAssetManager.Open(NormalizePath(path));
+			// try opening a normal file first
+			try 
+			{
+				var stream = new FileStream(path, FileMode.Open);
+				return stream;
+			}
+			catch
+			{ 
+				return ContentProvider.AndroidAssetManager.Open(NormalizePath(path));
+			}
 #endif
-
 		}
 
 
 #if __ANDROID__
 		private static HashSet<string> filesInDataDir;
 
-		private static string NormalizePath(string path)
+		public static string NormalizePath(string path)
 		{
 			return path.Replace('\\', '/');
 		}
@@ -75,13 +90,11 @@ namespace Duality.Utility
 			{
 				Log.Core.WriteWarning("Problem building cache {0}", ex);
 				return false;
-
 			}
 		}
 
 		public static IEnumerable<string> EnumerateFiles(string dir, string searchPattern)
 		{
-
 			return filesInDataDir.Where(x => x.StartsWith(dir)).Where(file => AssertPatterMatchesTarget(file, searchPattern) == SearchResults.Found);
 		}
 #endif

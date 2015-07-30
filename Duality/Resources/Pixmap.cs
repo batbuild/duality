@@ -91,8 +91,11 @@ namespace Duality.Resources
 			 string ContentPath_White = contentPath + "White" + extension;
 			 string ContentPath_Checkerboard = contentPath + "Checkerboard" + extension;
 
+#if !__ANDROID__
 			ContentProvider.AddContent(ContentPath_White,				new Pixmap(new Layer(1, 1, ColorRgba.White)));
 			ContentProvider.AddContent(ContentPath_Checkerboard,		new Pixmap(new Layer(1, 1, ColorRgba.White)));	// not a checkerboard pattern:)
+#endif
+
 
 			White = ContentProvider.RequestContent<Pixmap>(ContentPath_White);
 			Checkerboard = ContentProvider.RequestContent<Pixmap>(ContentPath_Checkerboard);

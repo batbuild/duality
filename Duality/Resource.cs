@@ -5,15 +5,17 @@ using System.IO.Compression;
 using System.Linq;
 using System.IO;
 using System.Reflection;
-
+using Duality.Resources;
 using Duality.Serialization;
 using Duality.Editor;
 using Duality.Cloning;
 using Duality.Properties;
-#if !__ANDROID__
+using Duality.Utility;
 using LZ4;
-#endif
 using ICloneable = Duality.Cloning.ICloneExplicit;
+#if __ANDROID__
+using Duality.Utility;
+#endif
 
 namespace Duality
 {
@@ -107,7 +109,7 @@ namespace Duality
 			get
 			{
 				if (this.IsRuntimeResource) return this.GetHashCode().ToString(CultureInfo.InvariantCulture);
-				string nameTemp = this.path;
+				string nameTemp = FileHelper.NormalizePath(this.path);
 				if (this.IsDefaultContent) nameTemp = nameTemp.Replace(':', '/');
 				return System.IO.Path.GetFileNameWithoutExtension(System.IO.Path.GetFileNameWithoutExtension(nameTemp));
 			}
@@ -123,7 +125,11 @@ namespace Duality
 				if (this.IsRuntimeResource) return this.GetHashCode().ToString(CultureInfo.InvariantCulture);
 				string nameTemp = this.path;
 				if (this.IsDefaultContent) nameTemp = nameTemp.Replace(':', '/');
+#if !__ANDROID__
 				return System.IO.Path.Combine(System.IO.Path.GetDirectoryName(nameTemp), this.Name);
+#else
+				return System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FileHelper.NormalizePath(nameTemp)), this.Name).Replace("/", "\\");
+#endif
 			}
 		}
 		/// <summary>
@@ -415,6 +421,7 @@ namespace Duality
 					newContent = Load<T>(str, path, loadCallback, initResource);
 				}
 			}
+
 			return newContent;
 			
 #else
@@ -422,27 +429,26 @@ namespace Duality
 			try 
 			{
 				if(string.IsNullOrEmpty(path)) return null;
-				path = path.Replace("\\", "/");
 
-				using (Stream str = ContentProvider.AndroidAssetManager.Open(path))
+				path = ConvertDefaultContentPath<T>(path);
+
+				using (Stream str = ContentProvider.OpenAsset(FileHelper.NormalizePath(path)))
 				using(var memoryStream = new MemoryStream())
 				{
 					str.CopyTo(memoryStream);
+					memoryStream.Seek(0, SeekOrigin.Begin);
 
-					/* DEBT: lz4 need to compile LZ4 for android (or get dependency if already exists)
-					* 
-					*/
-	//				if (IsCompressedResource(str))
-	//				{
-	//					using (var memoryStream = new MemoryStream())
-	//					using (var stream = new LZ4Stream(str, CompressionMode.Decompress))
-	//					{
-	//						stream.CopyTo(memoryStream);
-	//						memoryStream.Seek(0, SeekOrigin.Begin);
-	//						newContent = Load<T>(memoryStream, path, loadCallback, initResource);
-	//					}
-	//				}
-	//				else
+					if (IsCompressedResource(memoryStream))
+					{
+						using (var compressedStream = new MemoryStream())
+						using (var stream = new LZ4.LZ4Stream(memoryStream, CompressionMode.Decompress))
+						{
+							stream.CopyTo(compressedStream);
+							compressedStream.Seek(0, SeekOrigin.Begin);
+							newContent = Load<T>(compressedStream, path, loadCallback, initResource);
+						}
+					}
+					else
 					{
 						memoryStream.Seek(0, SeekOrigin.Begin);
 						newContent = Load<T>(memoryStream, path, loadCallback, initResource);
@@ -456,7 +462,6 @@ namespace Duality
 			return newContent;
 #endif
 		}
-
 		/// <summary>
 		/// Loads the Resource from the specified <see cref="Stream"/>. You shouldn't need this method in almost all cases.
 		/// Only use it when you know exactly what you're doing. Consider requesting the Resource from the <see cref="ContentProvider"/> instead.
@@ -641,7 +646,7 @@ namespace Duality
 		/// </summary>
 		/// <param name="stream"></param>
 		/// <returns></returns>
-		private static bool IsCompressedResource(FileStream stream)
+		private static bool IsCompressedResource(Stream stream)
 		{
 
 			var magic = new byte[4];
@@ -649,17 +654,42 @@ namespace Duality
 			{
 				stream.Read(magic, 0, 4);
 
-#if !__ANDROID__
 				return magic[0] == 'L' && magic[1] == 'Z' && magic[2] == '4' && magic[3] == ' ';
-#else
-				return false;
-#endif
-
 			}
 			catch
 			{
 				return false;
 			}
+		}
+
+		/// <summary>
+		/// Takes a default Duality default content path (Default:VertexShader:Minimal) and turns it into a default
+		/// Android path.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		private static string ConvertDefaultContentPath<T>(string path) where T : Resource
+		{
+			if (path.IndexOf(":") != -1)
+			{
+				int index = path.IndexOf(':');
+				if (index <= 1 && index != 0) return path;
+
+				var components = path.Split(new[] { ':' });
+				path = @"Data\" + string.Join("\\", components);
+
+				if (components[1] == "VertexShader")
+				{
+					path += VertexShader.FileExt;
+				}
+				else if (components[1] == "FragmentShader")
+				{
+					path += FragmentShader.FileExt;
+				}
+			}
+
+			return path;
 		}
 	}
 
