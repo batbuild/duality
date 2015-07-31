@@ -582,16 +582,18 @@ namespace Duality.Resources
 				// Load pixel data to video memory
 				if (Compressed && pixelData.CompressedData != null)
 				{
+					var size = ((pixelData.Width + 3) / 4) * ((pixelData.Height + 3) / 4) * 16;
 					GL.CompressedTexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.CompressedRgbaS3tcDxt5Ext, pixelData.Width, pixelData.Height, 0, 
-						pixelData.CompressedImageSize, pixelData.CompressedData);
+						size, pixelData.CompressedData);
 				}
 				else
 				{
 					if (HasMipmaps)
 					{
-						GL.TexStorage2D(TextureTarget2d.Texture2D, 7, SizedInternalFormat.Rgba8, PixelWidth, PixelHeight);
-						GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, PixelWidth, PixelHeight,
-							GLPixelFormat.Rgba, PixelType.UnsignedByte, pixelData.Data);
+						GL.TexImage2D(TextureTarget.Texture2D, 0,
+							this.pixelformat, pixelData.Width, pixelData.Height, 0,
+							GLPixelFormat.Rgba, PixelType.UnsignedByte,
+							pixelData.Data);
 
 						GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 						GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) this.filterMin);
@@ -750,6 +752,11 @@ namespace Duality.Resources
 			// Setup pixel format
 			if (this.compressed)
 				this.pixelformat = PixelInternalFormat.CompressedRgbaS3tcDxt5Ext;
+
+			// this shouldn't be null but sometimes can be because the pixelType field was introduced quite late and not all assets have been
+			// serialized with it.
+			if (this.pixelType == 0)
+				this.pixelType = PixelType.UnsignedByte;
 
 			GL.TexImage2D(TextureTarget.Texture2D, 0,
 				this.pixelformat, this.texWidth, this.texHeight, 0,
