@@ -601,11 +601,7 @@ namespace Duality.Drawing
 					out projMat);
 
 				if (this.renderTarget.IsAvailable)
-				{
-					projMat = Matrix4.CreateTranslation(0, RenderTarget.BoundRT.Res.Height * 0.5f, 0) *
-						Matrix4.CreateScale(1, -1, 1) *
-						Matrix4.CreateTranslation(0, -RenderTarget.BoundRT.Res.Height * 0.5f, 0);
-				}
+					projMat *= Matrix4.CreateScale(1, -1, 1);
 				
 				// Flip Z direction from "out of the screen" to "into the screen".
 				projMat.M33 = -projMat.M33;
@@ -621,9 +617,6 @@ namespace Duality.Drawing
 					this.farZ,
 					out projMat);
 
-				if (this.renderTarget.IsAvailable)
-					projMat *= Matrix4.CreateScale(1, -1, 1);
-				
 				// Flip Z direction from "out of the screen" to "into the screen".
 				projMat.M33 = -projMat.M33;
 			}

@@ -636,6 +636,9 @@ namespace Duality.Components
 			{
 				Profile.TimePostProcessing.BeginMeasure();
 				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth, !p.Output.IsAvailable && UseViewportScaling);
+				
+				if(p.Output.IsAvailable == false)
+					CommonShaderVariables.Proj *= Matrix4.CreateScale(1, -1, 1);
 
 				Texture mainTex = p.Input.MainTexture.Res;
 				Vector2 uvRatio = mainTex != null ? mainTex.UVRatio : Vector2.One;
