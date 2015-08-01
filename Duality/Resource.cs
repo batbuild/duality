@@ -42,7 +42,8 @@ namespace Duality
 		
 
 		public static event EventHandler<ResourceEventArgs>	ResourceDisposing = null;
-		public static event EventHandler<ResourceEventArgs>	ResourceLoaded = null;
+		public static event EventHandler<ResourceEventArgs> ResourceLoading = null;
+		public static event EventHandler<ResourceEventArgs> ResourceLoaded = null;
 		public static event EventHandler<ResourceSaveEventArgs>	ResourceSaved = null;
 		public static event EventHandler<ResourceSaveEventArgs>	ResourceSaving = null;
 
@@ -385,6 +386,8 @@ namespace Duality
 		public static T Load<T>(string path, Action<T> loadCallback = null, bool initResource = true) where T : Resource
 		{
 			if (!File.Exists(path)) return null;
+
+			if (ResourceLoading != null) ResourceLoading(null, new ResourceEventArgs(path));
 
 			T newContent;
 			using (FileStream str = File.OpenRead(path))
