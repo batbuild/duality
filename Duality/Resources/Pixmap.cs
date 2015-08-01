@@ -156,7 +156,7 @@ namespace Duality.Resources
 			/// </summary>
 			public int ImageSize
 			{
-				get { return this.dataDisposable.RequestedSize; }
+				get { return this.dataDisposable.RequestedSize * 4; }
 			}
 			/// <summary>
 			/// [GET] The layers pixel data when DXT compression is being used
