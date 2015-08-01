@@ -109,7 +109,10 @@ namespace Duality
 			get
 			{
 				if (this.IsRuntimeResource) return this.GetHashCode().ToString(CultureInfo.InvariantCulture);
-				string nameTemp = FileHelper.NormalizePath(this.path);
+				string nameTemp = path;
+#if __ANDROID__
+				nameTemp = FileHelper.NormalizePath(this.path);
+#endif
 				if (this.IsDefaultContent) nameTemp = nameTemp.Replace(':', '/');
 				return System.IO.Path.GetFileNameWithoutExtension(System.IO.Path.GetFileNameWithoutExtension(nameTemp));
 			}
