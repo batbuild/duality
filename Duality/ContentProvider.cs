@@ -449,10 +449,6 @@ namespace Duality
 		public static void SetAndroidAssetManager(AssetManager assets)
 		{
 			AndroidAssetManager = assets;
-
-#if DEBUG
-			
-#endif
 		}
 
 		public static Stream OpenAsset(string path)
@@ -463,10 +459,11 @@ namespace Duality
 			}
 			catch (Exception e)
 			{
+#if DEBUG
 				var stream = Duality.Android.DebugContent.Open(FileHelper.NormalizePath(path));
 				if(stream != null)
 					return stream;
-
+#endif
 				throw e;
 			}
 		}
