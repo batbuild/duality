@@ -230,6 +230,11 @@ namespace Duality.Resources
 		/// to true for those special cases.
 		/// </summary>
 		private bool keepPixmapDataResident;
+		/// <summary>
+		/// If set to false, loads pixel data directly from the associated pixmap. Set this to true if the intention is to load pixel
+		/// data from some other source, using the LoadData(IntPtr...) override
+		/// </summary>
+		private bool useExternalPixelData;
 		
 		private	ContentRef<Pixmap>		basePixmap	= ContentRef<Pixmap>.Null;
 		private	Vector2					size		= Vector2.Zero;
@@ -444,6 +449,17 @@ namespace Duality.Resources
 				this.needsReload = true;
 			}
 		}
+		
+		/// <summary>
+		/// [GET / SET] If set to true, loads pixel data directly from the associated pixmap. Set this to false if the intention is to load pixel
+		/// data from some other source, using the LoadData(IntPtr...) override
+		/// </summary>
+		[EditorHintFlags(MemberFlags.Invisible)]
+		public bool UseExternalPixelData
+		{
+			get { return useExternalPixelData; }
+			set { useExternalPixelData = value; }
+		}
 
 		/// <summary>
 		/// Sets up a new, uninitialized Texture.
@@ -525,6 +541,7 @@ namespace Duality.Resources
 		{
 			this.LoadData(basePixmap, this.texSizeMode);
 		}
+
 		/// <summary>
 		/// Loads the specified <see cref="Duality.Resources.Pixmap">Pixmaps</see> pixel data.
 		/// </summary>
@@ -613,6 +630,51 @@ namespace Duality.Resources
 
 			if (this.keepPixmapDataResident == false && basePixmap.IsLoaded)
 				basePixmap.Res.Dispose();
+		}
+
+		public void LoadData(IntPtr data, int width, int height)
+		{
+			DualityApp.GuardSingleThreadState();
+			if (this.glTexId == 0) this.glTexId = GL.GenTexture();
+
+			int lastTexId;
+			GL.GetInteger(GetPName.TextureBinding2D, out lastTexId);
+			GL.BindTexture(TextureTarget.Texture2D, this.glTexId);
+
+			if (data == IntPtr.Zero)
+				return;
+			AdjustSize(width, height);
+			// Load pixel data to video memory
+			if (Compressed)
+			{
+				var imageSize = ((this.PixelWidth + 3) / 4) * ((this.PixelHeight + 3) / 4) * 16;
+				GL.CompressedTexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.CompressedRgbaS3tcDxt5Ext, this.PixelWidth,
+					this.PixelHeight, 0, imageSize, data);
+			}
+			else
+			{
+				GL.TexImage2D(TextureTarget.Texture2D, 0,
+					this.pixelformat, this.PixelWidth, this.PixelHeight, 0,
+					GLPixelFormat.Rgba, PixelType.UnsignedByte,
+					data);
+			}
+
+			// Adjust atlas to represent UV coordinates
+			if (this.atlas != null)
+			{
+				Vector2 scale;
+				scale.X = this.uvRatio.X/this.pxWidth;
+				scale.Y = this.uvRatio.Y/this.pxHeight;
+				for (int i = 0; i < this.atlas.Length; i++)
+				{
+					this.atlas[i].X *= scale.X;
+					this.atlas[i].W *= scale.X;
+					this.atlas[i].Y *= scale.Y;
+					this.atlas[i].H *= scale.Y;
+				}
+			}
+			
+			GL.BindTexture(TextureTarget.Texture2D, lastTexId);
 		}
 
 		/// <summary>
@@ -733,6 +795,9 @@ namespace Duality.Resources
 			if (this.compressed)
 				this.pixelformat = PixelInternalFormat.CompressedRgbaS3tcDxt5Ext;
 
+			if(this.pixelType == 0)
+				this.pixelType = PixelType.UnsignedByte;
+
 			GL.TexImage2D(TextureTarget.Texture2D, 0,
 				this.pixelformat, this.texWidth, this.texHeight, 0,
 				GLPixelFormat.Bgra, this.pixelType, IntPtr.Zero);
@@ -742,7 +807,9 @@ namespace Duality.Resources
 
 		protected override void OnLoaded()
 		{
-			this.LoadData(this.basePixmap, this.texSizeMode);
+			if(this.useExternalPixelData == false)
+				this.LoadData(this.basePixmap, this.texSizeMode);
+
 			base.OnLoaded();
 		}
 		protected override void OnDisposing(bool manually)
