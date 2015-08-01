@@ -48,7 +48,8 @@ namespace Duality
 		
 
 		public static event EventHandler<ResourceEventArgs>	ResourceDisposing = null;
-		public static event EventHandler<ResourceEventArgs>	ResourceLoaded = null;
+		public static event EventHandler<ResourceEventArgs> ResourceLoading = null;
+		public static event EventHandler<ResourceEventArgs> ResourceLoaded = null;
 		public static event EventHandler<ResourceSaveEventArgs>	ResourceSaved = null;
 		public static event EventHandler<ResourceSaveEventArgs>	ResourceSaving = null;
 
@@ -402,7 +403,9 @@ namespace Duality
 		{
 #if ! __ANDROID__
 			if (!File.Exists(path)) return null;
-			
+
+			if (ResourceLoading != null) ResourceLoading(null, new ResourceEventArgs(path));
+
 			T newContent = null;
 			using (FileStream str = File.OpenRead(path))
 			{
