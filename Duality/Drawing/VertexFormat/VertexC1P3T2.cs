@@ -43,7 +43,7 @@ namespace Duality.Drawing
 		
 		void IVertexData.SetupVBO(Resources.BatchInfo mat)
 		{
-			GL.VertexAttribPointer(0, 4, VertexAttribPointerType.UnsignedByte, false, Size, 0);		// colour
+			GL.VertexAttribPointer(0, 4, VertexAttribPointerType.UnsignedByte, true, Size, 0);		// colour
 			GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, Size, 4);			// pos
 			GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Size, 16);			// tex
 
