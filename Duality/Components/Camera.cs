@@ -356,7 +356,7 @@ namespace Duality.Components
 				this.drawDevice.ViewportRect = new Rect(this.pickingTex.PixelWidth, this.pickingTex.PixelHeight);
 
 				// Render Scene
-				this.drawDevice.BeginRendering(ClearFlag.All, ColorRgba.Black, 1.0f);
+				this.drawDevice.BeginRendering(ClearFlag.All, ColorRgba.Black, 1.0f, false);
 				this.CollectDrawcalls();
 				this.drawDevice.EndRendering();
 				this.drawDevice.PickingIndex = 0;
