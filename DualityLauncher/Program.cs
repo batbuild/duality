@@ -128,6 +128,7 @@ namespace Duality.Launcher
 					throw new ArgumentOutOfRangeException();
 			}
 
+			VSync = DualityApp.UserData.VSync ? VSyncMode.On : VSyncMode.Off;
 			DualityApp.TargetResolution = new Vector2(ClientSize.Width, ClientSize.Height);
 			DualityApp.TargetMode = Context.GraphicsMode;
 		}
