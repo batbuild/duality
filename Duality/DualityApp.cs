@@ -422,10 +422,11 @@ namespace Duality
 			initialized = true;
 			InitPlugins();
 		}
-		public static void SetResolution(int width, int height, bool fullscreen)
+		public static void SetResolution(int width, int height, float refreshRate, bool fullscreen)
 		{
 			userData.GfxWidth = width;
 			userData.GfxHeight = height;
+			userData.GfxRefreshRate = refreshRate;
 			userData.GfxMode = fullscreen ? ScreenMode.Fullscreen : ScreenMode.Window;
 
 			SaveUserData();
