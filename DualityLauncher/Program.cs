@@ -128,7 +128,7 @@ namespace Duality.Launcher
 					throw new ArgumentOutOfRangeException();
 			}
 
-			VSync = DualityApp.UserData.VSync ? VSyncMode.On : VSyncMode.Off;
+			SetVSyncMode(this);
 			DualityApp.TargetResolution = new Vector2(ClientSize.Width, ClientSize.Height);
 			DualityApp.TargetMode = Context.GraphicsMode;
 		}
@@ -199,12 +199,37 @@ namespace Duality.Launcher
 
 				// Run the DualityApp
 				launcherWindow.CursorVisible = isDebugging || DualityApp.UserData.SystemCursorVisible;
-				launcherWindow.VSync = (isProfiling || isDebugging || !DualityApp.UserData.VSync) ? VSyncMode.Off : VSyncMode.On;
+				SetVSyncMode(launcherWindow);
 				launcherWindow.Run();
 
 				// Shut down the DualityApp
 				DualityApp.Terminate();
 				DisplayDevice.Default.RestoreResolution();
+			}
+		}
+
+		private static void SetVSyncMode(GameWindow window)
+		{
+			if (isProfiling || isDebugging)
+			{
+				window.VSync = VSyncMode.Off;
+				return;
+			}
+
+			if (DualityApp.UserData.VSync)
+			{
+				window.VSync = VSyncMode.Adaptive;
+
+				// adaptive not supported?
+				if (window.VSync != VSyncMode.Adaptive)
+				{
+					Log.Game.WriteWarning("Adaptive vsync not supported. Using normal vsync instead");
+					window.VSync = VSyncMode.On;
+				}
+			}
+			else
+			{
+				window.VSync = VSyncMode.Off;
 			}
 		}
 
