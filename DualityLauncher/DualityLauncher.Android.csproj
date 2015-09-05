@@ -54,7 +54,7 @@
       <HintPath>..\packages\Farseer.Duality.Android.0.1.10\lib\MonoAndroid\FarseerDuality.Android.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK.Android, Version=0.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>True</SpecificVersion>
       <HintPath>..\packages\OpenTK.Duality.Android.0.1.51\lib\MonoAndroid\OpenTK.Android.dll</HintPath>
     </Reference>
     <Reference Include="System" />
