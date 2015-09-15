@@ -726,10 +726,11 @@ namespace Duality
 			Log.Core.Write("Scanning for core plugins...");
 			Log.Core.PushIndent();
 
-			var pluginLibPaths = GetPluginLibPaths("*.dll");
+			var dynamicAssembliesPaths = GetPluginLibPaths("*.dll");
+			var pluginLibPaths = dynamicAssembliesPaths.Where(s => s.EndsWith("core.dll"));
 
 #if __ANDROID__
-			foreach (string dllPath in pluginLibPaths)
+			foreach (string dllPath in dynamicAssembliesPaths)
 			{
 				ExtractAndSavePlugin(dllPath);
 			}
