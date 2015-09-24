@@ -440,7 +440,7 @@ namespace Duality
 		}
 
 #if __ANDROID__
-#if DEBUG
+#if DEBUGCONTENT
 		private static Duality.Android.Utility.Zip.IZipArchive _debugDataArchive;
 #endif
 
@@ -459,7 +459,7 @@ namespace Duality
 			}
 			catch (Exception e)
 			{
-#if DEBUG
+#if DEBUGCONTENT
 				var stream = Duality.Android.DebugContent.Open(FileHelper.NormalizePath(path));
 				if(stream != null)
 					return stream;
