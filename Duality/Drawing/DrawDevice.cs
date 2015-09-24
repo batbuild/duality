@@ -391,6 +391,8 @@ namespace Duality.Drawing
 		}
 		public void AddVertices<T>(BatchInfo material, VertexMode vertexMode, T[] vertexBuffer, int vertexCount) where T : struct, IVertexData
 		{
+			Profile.TimeAddVertices.BeginMeasure();
+
 			if (vertexCount == 0) return;
 			if (vertexBuffer == null || vertexBuffer.Length == 0) return;
 			if (vertexCount > vertexBuffer.Length) vertexCount = vertexBuffer.Length;
@@ -444,6 +446,8 @@ namespace Duality.Drawing
 					buffer.Add(new DrawBatch<T>(material, vertexMode, vertexBuffer, vertexCount, zSortIndex));
 			}
 			++this.numRawBatches;
+
+			Profile.TimeAddVertices.EndMeasure();
 		}
 
 		public void AddBatch(IDrawBatch drawBatch)

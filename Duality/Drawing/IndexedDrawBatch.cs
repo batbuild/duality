@@ -87,6 +87,8 @@ namespace Duality.Drawing
 
 		public void UploadToVBO(List<IDrawBatch> batches)
 		{
+			Profile.TimeUploadIndexedVertexData.BeginMeasure();
+
 			GlobalDynamicIndexedVertexBuffer<T>.Bind(this.vertices);
 
 			int vertexCount = 0;
@@ -134,6 +136,8 @@ namespace Duality.Drawing
 			// Submit vertex data to GPU
 			GlobalDynamicIndexedVertexBuffer<T>.UploadVertexData(vertexData, vertexCount);
 			GlobalDynamicIndexedVertexBuffer<T>.UploadIndexData(indexUploadBuffer, indexCount);
+
+			Profile.TimeUploadIndexedVertexData.EndMeasure();
 		}
 
 		private static void EnsureVertexBufferSize(int vertexCount)
@@ -180,6 +184,8 @@ namespace Duality.Drawing
 
 		public void Render(IDrawDevice device, ref int vertexOffset, ref IDrawBatch lastBatchRendered)
 		{
+			Profile.TimeDrawIndexedArrays.BeginMeasure();
+			
 			if (lastBatchRendered == null || lastBatchRendered.Material != this.material)
 				this.material.SetupForRendering(device, lastBatchRendered == null ? null : lastBatchRendered.Material);
 
@@ -188,6 +194,8 @@ namespace Duality.Drawing
 
 			vertexOffset += this.vertexCount;
 			lastBatchRendered = this;
+
+			Profile.TimeDrawIndexedArrays.EndMeasure();
 		}
 
 		public void FinishRendering()
