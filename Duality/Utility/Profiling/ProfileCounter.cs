@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System;
-
+using Duality.Utility;
 using OpenTK;
 
 using Duality.Resources;
@@ -35,7 +35,7 @@ namespace Duality
 		public string Name
 		{
 			get { return this.name; }
-			set { this.FullName = Path.Combine(this.parentName, value); }
+			set { this.FullName = Path.Combine(this.parentName, value.Replace("\\", "/")); }
 		}
 		/// <summary>
 		/// [GET / SET] The counters full name, including possibly existing parent counters.
@@ -45,9 +45,9 @@ namespace Duality
 			get { return this.path; }
 			set
 			{
-				this.path = value;
-				this.name = Path.GetFileName(value);
-				this.parentName = Path.GetDirectoryName(value);
+				this.path = value.Replace("\\", "/");
+				this.name = Path.GetFileName(this.path);
+				this.parentName = Path.GetDirectoryName(this.path);
 			}
 		}
 		/// <summary>

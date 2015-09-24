@@ -32,8 +32,13 @@ namespace Duality
 		public static readonly TimeCounter	TimeRender;
 		public static readonly TimeCounter	TimeSwapBuffers;
 		public static readonly TimeCounter	TimeCollectDrawcalls;
+		public static readonly TimeCounter	TimeAddVertices;
 		public static readonly TimeCounter	TimeOptimizeDrawcalls;
 		public static readonly TimeCounter	TimeProcessDrawcalls;
+		public static readonly TimeCounter	TimeUploadVertexData;
+		public static readonly TimeCounter	TimeDrawArrays;
+		public static readonly TimeCounter	TimeUploadIndexedVertexData;
+		public static readonly TimeCounter	TimeDrawIndexedArrays;
 		public static readonly TimeCounter	TimePostProcessing;
 		public static readonly TimeCounter	TimeLog;
 		public static readonly TimeCounter	TimeVisualPicking;
@@ -65,6 +70,13 @@ namespace Duality
 			TimeCollectDrawcalls		= RequestCounter<TimeCounter>(@"Duality\Frame\Render\CollectDrawcalls");
 			TimeOptimizeDrawcalls		= RequestCounter<TimeCounter>(@"Duality\Frame\Render\OptimizeDrawcalls");
 			TimeProcessDrawcalls		= RequestCounter<TimeCounter>(@"Duality\Frame\Render\ProcessDrawcalls");
+
+			TimeAddVertices				= RequestCounter<TimeCounter>(@"Duality\Frame\Render\CollectDrawcalls\AddVertices");
+			TimeUploadVertexData		= RequestCounter<TimeCounter>(@"Duality\Frame\Render\ProcessDrawcalls\UploadVertexData");
+			TimeDrawArrays				= RequestCounter<TimeCounter>(@"Duality\Frame\Render\ProcessDrawcalls\Render");
+			TimeUploadIndexedVertexData = RequestCounter<TimeCounter>(@"Duality\Frame\Render\ProcessDrawcalls\UploadIndexedVertexData");
+			TimeDrawIndexedArrays		= RequestCounter<TimeCounter>(@"Duality\Frame\Render\ProcessDrawcalls\RenderIndexed");
+
 			TimePostProcessing			= RequestCounter<TimeCounter>(@"Duality\Frame\Render\PostProcessing");
 			TimeLog						= RequestCounter<TimeCounter>(@"Duality\Frame\Log");
 			TimeVisualPicking			= RequestCounter<TimeCounter>(@"Duality\VisualPicking");
@@ -110,6 +122,8 @@ namespace Duality
 		public static T RequestCounter<T>(string name) where T : ProfileCounter, new()
 		{
 			if (name == null) return null;
+
+			name = name.Replace("\\", "/");
 
 			T c = GetCounter<T>(name);
 			if (c != null) return c;
