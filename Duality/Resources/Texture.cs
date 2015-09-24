@@ -605,26 +605,15 @@ namespace Duality.Resources
 				}
 				else
 				{
-					if (HasMipmaps)
-					{
-						GL.TexImage2D(TextureTarget.Texture2D, 0,
-							this.pixelformat, pixelData.Width, pixelData.Height, 0,
-							GLPixelFormat.Rgba, PixelType.UnsignedByte,
-							pixelData.Data);
+					GL.TexImage2D(TextureTarget.Texture2D, 0,
+						this.pixelformat, pixelData.Width, pixelData.Height, 0,
+						GLPixelFormat.Rgba, PixelType.UnsignedByte,
+						pixelData.Data);
+				}
 
-						GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-						GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) this.filterMin);
-						GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) this.filterMag);
-						GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) this.wrapX);
-						GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) this.wrapY);
-					}
-					else
-					{
-						GL.TexImage2D(TextureTarget.Texture2D, 0,
-							this.pixelformat, pixelData.Width, pixelData.Height, 0,
-							GLPixelFormat.Rgba, PixelType.UnsignedByte,
-							pixelData.Data);
-					}
+				if (HasMipmaps)
+				{
+					GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 				}
 				
 				// Adjust atlas to represent UV coordinates
@@ -667,6 +656,8 @@ namespace Duality.Resources
 			if (data == IntPtr.Zero)
 				return;
 			AdjustSize(width, height);
+			this.SetupOpenGLRes();
+
 			// Load pixel data to video memory
 			if (Compressed)
 			{
@@ -680,6 +671,11 @@ namespace Duality.Resources
 					this.pixelformat, this.PixelWidth, this.PixelHeight, 0,
 					GLPixelFormat.Rgba, PixelType.UnsignedByte,
 					data);
+			}
+
+			if (HasMipmaps)
+			{
+				GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 			}
 
 			// Adjust atlas to represent UV coordinates
