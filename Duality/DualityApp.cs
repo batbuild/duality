@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.IO;
@@ -728,7 +729,7 @@ namespace Duality
 			Log.Core.PushIndent();
 
 			var dynamicAssembliesPaths = GetPluginLibPaths("*.dll");
-			var pluginLibPaths = dynamicAssembliesPaths.Where(s => s.EndsWith("core.dll"));
+			var pluginLibPaths = dynamicAssembliesPaths.Where(s => s.EndsWith("core.dll", false, CultureInfo.CurrentCulture));
 
 #if __ANDROID__
 			foreach (string dllPath in dynamicAssembliesPaths)
