@@ -366,6 +366,8 @@ namespace Duality
 			if (String.IsNullOrEmpty(path)) return null;
 
 			// Return cached content
+			path = FileHelper.ConvertDefaultContentPath(path);
+
 			Resource res;
 			if (resLibrary.TryGetValue(path, out res) && !res.Disposed)
 			{

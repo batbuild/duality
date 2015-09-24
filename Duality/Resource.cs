@@ -436,7 +436,7 @@ namespace Duality
 			{
 				if(string.IsNullOrEmpty(path)) return null;
 
-				path = ConvertDefaultContentPath<T>(path);
+				path = FileHelper.ConvertDefaultContentPath(path);
 
 				using (Stream str = ContentProvider.OpenAsset(FileHelper.NormalizePath(path)))
 				using(var memoryStream = new MemoryStream())
@@ -666,36 +666,6 @@ namespace Duality
 			{
 				return false;
 			}
-		}
-
-		/// <summary>
-		/// Takes a default Duality default content path (Default:VertexShader:Minimal) and turns it into a default
-		/// Android path.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		private static string ConvertDefaultContentPath<T>(string path) where T : Resource
-		{
-			if (path.IndexOf(":") != -1)
-			{
-				int index = path.IndexOf(':');
-				if (index <= 1 && index != 0) return path;
-
-				var components = path.Split(new[] { ':' });
-				path = @"Data\" + string.Join("\\", components);
-
-				if (components[1] == "VertexShader")
-				{
-					path += VertexShader.FileExt;
-				}
-				else if (components[1] == "FragmentShader")
-				{
-					path += FragmentShader.FileExt;
-				}
-			}
-
-			return path;
 		}
 	}
 

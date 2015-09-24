@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 #if __ANDROID__
 using Android.Content.Res;
 #endif
+using Duality.Resources;
 
 namespace Duality.Utility
 {
@@ -60,6 +61,63 @@ namespace Duality.Utility
 				return ContentProvider.AndroidAssetManager.Open(NormalizePath(path));
 			}
 #endif
+		}
+
+		/// <summary>
+		/// Takes a default Duality default content path (Default:VertexShader:Minimal) and turns it into a default
+		/// Android path.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		public static string ConvertDefaultContentPath(string path)
+		{
+			if (path.IndexOf(":") != -1)
+			{
+				int index = path.IndexOf(':');
+				if (index <= 1 && index != 0) return path;
+
+				var components = path.Split(new[] { ':' });
+				path = @"Data\" + string.Join("\\", components);
+
+				switch (components[1])
+				{
+					case "VertexShader":
+						path += VertexShader.FileExt;
+						break;
+					case "FragmentShader":
+						path += FragmentShader.FileExt;
+						break;
+					case "ShaderProgram":
+						path += ShaderProgram.FileExt;
+						break;
+					case "AbstractShader":
+						path += AbstractShader.FileExt;
+						break;
+					case "Texture":
+						path += Texture.FileExt;
+						break;
+					case "Pixmap":
+						path += Pixmap.FileExt;
+						break;
+					case "DrawTechnique":
+						path += DrawTechnique.FileExt;
+						break;
+					case "GeometryShader":
+						path += GeometryShader.FileExt;
+						break;
+					case "RenderTarget":
+						path += RenderTarget.FileExt;
+						break;
+					case "Font":
+						path += Font.FileExt;
+						break;
+					case "Material":
+						path += Material.FileExt;
+						break;
+				}
+			}
+
+			return path;
 		}
 
 

@@ -58,7 +58,7 @@ namespace Duality.Resources
 
 		internal static void InitDefaultContent()
 		{
-			const string VirtualContentPath		= ContentProvider.VirtualContentPath + "ShaderProgram:";
+			const string VirtualContentPath		= "Data\\Default\\ShaderProgram\\";
 			const string ContentPath_Minimal	= VirtualContentPath + "Minimal";
 			const string ContentPath_Picking	= VirtualContentPath + "Picking";
 			const string ContentPath_SmoothAnim	= VirtualContentPath + "SmoothAnim";

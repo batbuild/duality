@@ -129,28 +129,28 @@ namespace Duality.Resources
 
 		internal static void InitDefaultContent()
 		{
-			const string VirtualContentPath		= ContentProvider.VirtualContentPath + "DrawTechnique:";
-			const string ContentDir_SmoothAnim	= VirtualContentPath + "SmoothAnim:";
+			const string VirtualContentPath		= "Data\\Default\\DrawTechnique\\";
+			const string ContentDir_SmoothAnim	= "Data\\Default\\DrawTechnique\\SmoothAnim\\";
 		
-			const string ContentPath_Solid					= VirtualContentPath + "Solid";
-			const string ContentPath_Mask					= VirtualContentPath + "Mask";
-			const string ContentPath_Add					= VirtualContentPath + "Add";
-			const string ContentPath_Alpha					= VirtualContentPath + "Alpha";
-			const string ContentPath_PremultipliedAlpha		= VirtualContentPath + "PremultipliedAlpha";
-			const string ContentPath_SharpMask				= VirtualContentPath + "SharpAlpha";
-			const string ContentPath_Multiply				= VirtualContentPath + "Multiply";
-			const string ContentPath_Light					= VirtualContentPath + "Light";
-			const string ContentPath_Invert					= VirtualContentPath + "Invert";
-			const string ContentPath_Picking				= VirtualContentPath + "Picking";
+			const string ContentPath_Solid					= VirtualContentPath + "Solid" + FileExt;
+			const string ContentPath_Mask					= VirtualContentPath + "Mask" + FileExt;
+			const string ContentPath_Add					= VirtualContentPath + "Add" + FileExt;
+			const string ContentPath_Alpha					= VirtualContentPath + "Alpha" + FileExt;
+			const string ContentPath_PremultipliedAlpha		= VirtualContentPath + "PremultipliedAlpha" + FileExt;
+			const string ContentPath_SharpMask				= VirtualContentPath + "SharpAlpha" + FileExt;
+			const string ContentPath_Multiply				= VirtualContentPath + "Multiply" + FileExt;
+			const string ContentPath_Light					= VirtualContentPath + "Light" + FileExt;
+			const string ContentPath_Invert					= VirtualContentPath + "Invert" + FileExt;
+			const string ContentPath_Picking				= VirtualContentPath + "Picking" + FileExt;
 		
-			const string ContentPath_SmoothAnim_Solid					= ContentDir_SmoothAnim + "Solid";
-			const string ContentPath_SmoothAnim_Mask					= ContentDir_SmoothAnim + "Mask";
-			const string ContentPath_SmoothAnim_Add						= ContentDir_SmoothAnim + "Add";
-			const string ContentPath_SmoothAnim_Alpha					= ContentDir_SmoothAnim + "Alpha";
-			const string ContentPath_SmoothAnim_PremultipliedAlpha		= ContentDir_SmoothAnim + "PremultipliedAlpha";
-			const string ContentPath_SmoothAnim_Multiply				= ContentDir_SmoothAnim + "Multiply";
-			const string ContentPath_SmoothAnim_Light					= ContentDir_SmoothAnim + "Light";
-			const string ContentPath_SmoothAnim_Invert					= ContentDir_SmoothAnim + "Invert";
+			const string ContentPath_SmoothAnim_Solid					= ContentDir_SmoothAnim + "Solid" + FileExt;
+			const string ContentPath_SmoothAnim_Mask					= ContentDir_SmoothAnim + "Mask" + FileExt;
+			const string ContentPath_SmoothAnim_Add						= ContentDir_SmoothAnim + "Add" + FileExt;
+			const string ContentPath_SmoothAnim_Alpha					= ContentDir_SmoothAnim + "Alpha" + FileExt;
+			const string ContentPath_SmoothAnim_PremultipliedAlpha		= ContentDir_SmoothAnim + "PremultipliedAlpha" + FileExt;
+			const string ContentPath_SmoothAnim_Multiply				= ContentDir_SmoothAnim + "Multiply" + FileExt;
+			const string ContentPath_SmoothAnim_Light					= ContentDir_SmoothAnim + "Light" + FileExt;
+			const string ContentPath_SmoothAnim_Invert					= ContentDir_SmoothAnim + "Invert" + FileExt;
 
 			ContentProvider.AddContent(ContentPath_Solid,				new DrawTechnique(BlendMode.Solid,					ShaderProgram.Minimal, VertexType_C1P3T2));
 			ContentProvider.AddContent(ContentPath_Mask,				new DrawTechnique(BlendMode.Mask,					ShaderProgram.AlphaTest, VertexType_C1P3T2));
