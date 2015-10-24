@@ -4,23 +4,42 @@ namespace Duality.Drawing
 {
 	public static class CommonShaderVariables
 	{
-		private static float[] _modelView = new float[16];
-		private static float[] _proj = new float[16];
+		private static float[] _modelViewData = new float[16];
+		private static float[] _projData = new float[16];
+		private static Matrix4 _modelView;
+		private static Matrix4 _proj;
 
-		public static Matrix4 ModelView { get; set; }
+		public static Matrix4 ModelView
+		{
+			get { return _modelView; }
+			set
+			{
+				_modelView = value;
+				MatrixToArray(ref _modelView, _modelViewData);
+			}
+		}
 
-		public static Matrix4 Proj { get; set; }
+		public static Matrix4 Proj
+		{
+			get { return _proj; }
+			set
+			{
+				_proj = value;
+				MatrixToArray(ref _proj, _projData);
+			}
+		}
 
 		public static float[] GetProjectionData()
 		{
-			return GetData(Proj, _proj);
-		}
-		public static float[] GetModelViewData()
-		{
-			return GetData(ModelView, _modelView);
+			return _projData;
 		}
 
-		private static float[] GetData(Matrix4 matrix, float[] floats)
+		public static float[] GetModelViewData()
+		{
+			return _modelViewData;
+		}
+
+		private static void MatrixToArray(ref Matrix4 matrix, float[] floats)
 		{
 			floats[0] = matrix.M11;
 			floats[1] = matrix.M21;
@@ -41,7 +60,6 @@ namespace Duality.Drawing
 			floats[13] = matrix.M24;
 			floats[14] = matrix.M34;
 			floats[15] = matrix.M44;
-			return floats;
 		}
 	}
 }
