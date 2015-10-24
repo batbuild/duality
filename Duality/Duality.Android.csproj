@@ -66,6 +66,7 @@
     <Compile Include="Components\PassCompleteEventArgs.cs" />
     <Compile Include="DebugContent.cs" />
     <Compile Include="Drawing\CommonShaderVariables.cs" />
+    <Compile Include="Drawing\DrawBatchPool.cs" />
     <Compile Include="Drawing\GlobalDynamicIndexedVertexBuffer.cs" />
     <Compile Include="Drawing\IDrawBatch.cs" />
     <Compile Include="Drawing\IndexedDrawBatch.cs" />

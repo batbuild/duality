@@ -11,6 +11,7 @@ namespace Duality.Drawing
 		VertexMode VertexMode { get; }
 		BatchInfo Material { get; }
 		int VertexTypeIndex { get; }
+		bool Pooled { get; set; }
 
 		void UploadToVBO(List<IDrawBatch> batches);
 		void SetupVBO();

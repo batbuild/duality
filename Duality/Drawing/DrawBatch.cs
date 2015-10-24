@@ -38,6 +38,9 @@ namespace Duality.Drawing
 		{
 			get { return this.vertices[0].TypeIndex; }
 		}
+
+		public bool Pooled { get; set; }
+
 		public BatchInfo Material
 		{
 			get { return this.material; }
@@ -45,11 +48,7 @@ namespace Duality.Drawing
 
 		public DrawBatch(BatchInfo material, VertexMode vertexMode, T[] vertices, int vertexCount, float zSortIndex)
 		{
-			if (vertices == null || vertices.Length == 0) throw new ArgumentException("A zero-vertex DrawBatch is invalid.");
-				
 			// Assign data
-			this.vertexCount = Math.Min(vertexCount, vertices.Length);
-			this.vertices = vertices;
 			this.material = material;
 			this.vertexMode = vertexMode;
 			this.zSortIndex = zSortIndex;
@@ -57,7 +56,7 @@ namespace Duality.Drawing
 			// Determine sorting index for non-Z-Sort materials
 			if (!this.material.Technique.Res.NeedsZSort)
 			{
-				int vTypeSI = vertices[0].TypeIndex;
+				int vTypeSI = default(T).TypeIndex;
 				int matHash = this.material.GetHashCode() % (1 << 23);
 
 				// Bit significancy is used to achieve sorting by multiple traits at once.
@@ -136,7 +135,11 @@ namespace Duality.Drawing
 			if (lastBatchRendered == null || lastBatchRendered.Material != this.material)
 				this.material.SetupForRendering(device, lastBatchRendered == null ? null : lastBatchRendered.Material);
 
-			GL.DrawArrays((PrimitiveType)this.vertexMode, vertexOffset, this.vertexCount);
+			var primitiveType = (PrimitiveType)this.vertexMode;
+			if(primitiveType == PrimitiveType.Quads)
+				primitiveType = PrimitiveType.Triangles;
+			
+			GL.DrawArrays(primitiveType, vertexOffset, this.vertexCount);
 
 			vertexOffset += this.vertexCount;
 			lastBatchRendered = this;
@@ -200,6 +203,41 @@ namespace Duality.Drawing
 		{
 			this.zSortIndex = CalcZSortIndex(this.vertices, this.vertexCount);
 			return this.zSortIndex;
+		}
+
+		public void SetVertices(T[] vertices, int vertexCount)
+		{
+			if (this.vertexMode == VertexMode.Quads)
+			{
+				// we don't support quads anymore, so just convert the verts into triangle data
+				// for every quad primitive, add two extra verts
+				var numVerts = vertices.Length + (vertices.Length / 4) * 2;
+				if (this.vertices == null || this.vertices.Length < numVerts)
+					this.vertices = new T[numVerts];
+
+				for (var i = 0; i < vertexCount; i += 4)
+				{
+					var triIndex = i / 4 * 6;
+					this.vertices[triIndex] = vertices[i];
+					this.vertices[triIndex + 1] = vertices[i + 1];
+					this.vertices[triIndex + 2] = vertices[i + 2];
+
+					this.vertices[triIndex + 3] = vertices[i];
+					this.vertices[triIndex + 4] = vertices[i + 2];
+					this.vertices[triIndex + 5] = vertices[i + 3];
+				}
+
+				this.vertexCount = Math.Min(vertexCount + (vertexCount / 4) * 2, this.vertices.Length);
+			}
+			else
+			{
+				if (this.vertices == null || this.vertices.Length < vertices.Length)
+					this.vertices = new T[vertices.Length];
+
+				Array.Copy(vertices, this.vertices, vertices.Length);
+
+				this.vertexCount = Math.Min(vertexCount, this.vertices.Length);
+			}
 		}
 
 		public void Append(DrawBatch<T> other)

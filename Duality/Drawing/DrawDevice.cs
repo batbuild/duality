@@ -37,8 +37,8 @@ namespace Duality.Drawing
 		private	ContentRef<RenderTarget> renderTarget = null;
 		private	uint				hndlPrimaryVBO		= 0;
 		private Vector2				nominalViewportSize = new Vector2(1280, 720);
-
-
+		private DrawBatchPool		drawBatchPool	= new DrawBatchPool();
+		
 		public bool Disposed
 		{
 			get { return this.disposed; }
@@ -439,11 +439,9 @@ namespace Duality.Drawing
 			}
 			else
 			{
-				if(vertexMode == VertexMode.Quads)
-					// fast path for quads for versions of GL where quads are deprecated
-					buffer.Add(new IndexedDrawBatch<T>(material, vertexBuffer, vertexCount, zSortIndex));
-				else
-					buffer.Add(new DrawBatch<T>(material, vertexMode, vertexBuffer, vertexCount, zSortIndex));
+				var drawBatch = drawBatchPool.Get<T>(material, vertexMode, zSortIndex);
+				((DrawBatch<T>) drawBatch).SetVertices(vertexBuffer, vertexCount);
+				buffer.Add(drawBatch);
 			}
 			++this.numRawBatches;
 
@@ -562,6 +560,19 @@ namespace Duality.Drawing
 			Profile.StatNumDrawcalls.Add(drawCalls);
 
 			this.FinishBatchRendering();
+
+			for (int i = 0; i < this.drawBuffer.Count; i++)
+			{
+				if (this.drawBuffer[i].Pooled)
+					this.drawBatchPool.Release(this.drawBuffer[i]);
+			}
+
+			for (int i = 0; i < this.drawBufferZSort.Count; i++)
+			{
+				if (this.drawBufferZSort[i].Pooled)
+					this.drawBatchPool.Release(this.drawBufferZSort[i]);
+			}
+
 			this.drawBuffer.Clear();
 			this.drawBufferZSort.Clear();
 		}
