@@ -35,8 +35,9 @@ namespace Duality
 		public string Name
 		{
 			get { return this.name; }
-			set { this.FullName = Path.Combine(this.parentName, value.Replace("\\", "/")); }
+			set { this.FullName = GetFullName(value); }
 		}
+
 		/// <summary>
 		/// [GET / SET] The counters full name, including possibly existing parent counters.
 		/// </summary>
@@ -45,11 +46,12 @@ namespace Duality
 			get { return this.path; }
 			set
 			{
-				this.path = value.Replace("\\", "/");
-				this.name = Path.GetFileName(this.path);
-				this.parentName = Path.GetDirectoryName(this.path);
+				this.path = value;
+				this.name = GetCounterName();
+				this.parentName = GetParentName();
 			}
 		}
+
 		/// <summary>
 		/// [GET] The name that this ProfileCounter uses for value display.
 		/// </summary>
@@ -124,6 +126,23 @@ namespace Duality
 		{
 			this.OnFrameTick();
 			if (this.lastUsed) this.hasData = true;
+		}
+
+		private string GetFullName(string value)
+		{
+			return this.parentName + @"\" + value;
+		}
+
+		private string GetCounterName()
+		{
+			var lastSeperator = this.path.LastIndexOf(@"\", StringComparison.Ordinal);
+			return lastSeperator == -1 ? this.path : this.path.Substring(lastSeperator + 1);
+		}
+
+		private string GetParentName()
+		{
+			var lastSeperator = this.path.LastIndexOf(@"\");
+			return lastSeperator == -1 ? string.Empty : path.Substring(0, lastSeperator);
 		}
 	}
 }
