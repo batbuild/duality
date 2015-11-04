@@ -28,6 +28,15 @@ namespace Duality.Resources
 		/// A DrawTechnique resources file extension.
 		/// </summary>
 		public new const string FileExt = ".DrawTechnique" + Resource.FileExt;
+
+		/// <summary>
+		/// Precalculated hash codes for common shader variable names, for faster comparisons.
+		/// </summary>
+		private static int MatModelView			= "matModelView".GetHashCode();
+		private static int MatProj				= "matProj".GetHashCode();
+		private static int CamPos				= "camPos".GetHashCode();
+		private static int CamZoom				= "camZoom".GetHashCode();
+		private static int CamParallax			= "camParallax".GetHashCode();
 		
 		/// <summary>
 		/// Renders solid geometry without utilizing the alpha channel. This is the fastest default DrawTechnique.
@@ -444,13 +453,26 @@ namespace Duality.Resources
 			{
 				if (varInfo[i].glVarLoc == -1) continue;
 
-				if (varInfo[i].name == "matModelView")
+				if (varInfo[i].nameHash == MatModelView)
 				{
 					varInfo[i].SetupUniform(CommonShaderVariables.GetModelViewData());
 				}
-				else if (varInfo[i].name == "matProj")
+				else if (varInfo[i].nameHash == MatProj)
 				{
 					varInfo[i].SetupUniform(CommonShaderVariables.GetProjectionData());
+				}
+				else if (varInfo[i].nameHash == CamPos)
+				{
+					var cameraPos = CommonShaderVariables.CameraPos;
+					varInfo[i].SetupUniform(new []{cameraPos.X, cameraPos.Y, cameraPos.Z});
+				}
+				else if (varInfo[i].nameHash == CamZoom)
+				{
+					varInfo[i].SetupUniform(new []{CommonShaderVariables.CamZoom});
+				}
+				else if (varInfo[i].nameHash == CamParallax)
+				{
+					varInfo[i].SetupUniform(new []{CommonShaderVariables.ApplyCameraParallax ? 1f : 0f});
 				}
 				else if (material.Uniforms != null)
 				{

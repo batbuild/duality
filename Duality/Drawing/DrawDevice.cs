@@ -541,8 +541,22 @@ namespace Duality.Drawing
 
 			// Upload and adjust matrices
 			this.UpdateMatrices();
+
 			CommonShaderVariables.ModelView = matModelView;
 			CommonShaderVariables.Proj = matProjection;
+
+			if (this.renderMode == RenderMatrix.OrthoScreen)
+			{
+				CommonShaderVariables.CameraPos = Vector3.Zero;
+				CommonShaderVariables.CamZoom = this.focusDist / DefaultFocusDist;
+			}
+			else
+			{
+				CommonShaderVariables.CameraPos = this.refPos;
+				CommonShaderVariables.CamZoom = this.focusDist;
+			}
+			
+			CommonShaderVariables.ApplyCameraParallax = this.RenderMode == RenderMatrix.PerspectiveWorld;
 		}
 		public void EndRendering()
 		{

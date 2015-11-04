@@ -9,6 +9,11 @@ namespace Duality.Drawing
 		private static Matrix4 _modelView;
 		private static Matrix4 _proj;
 
+
+		public static Vector3 CameraPos { get; set; }
+		public static float CamZoom { get; set; }
+		public static bool ApplyCameraParallax { get; set; }
+
 		public static Matrix4 ModelView
 		{
 			get { return _modelView; }

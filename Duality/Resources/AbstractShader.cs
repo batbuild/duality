@@ -114,6 +114,10 @@ namespace Duality.Resources
 		/// OpenGL handle of the variables memory location.
 		/// </summary>
 		public	int				glVarLoc;
+		/// <summary>
+		/// Stored hash of this variables name, for fast comparisons
+		/// </summary>
+		public int				nameHash;
 
 		/// <summary>
 		/// [GET] Returns whether the shader variable will be visible in the editor.
@@ -382,6 +386,7 @@ namespace Duality.Resources
 
 				curLineSplit = curLineSplit[2].Split(new char[] {'[', ']'}, StringSplitOptions.RemoveEmptyEntries);
 				varInfo.name = curLineSplit[0];
+				varInfo.nameHash = varInfo.name.GetHashCode();
 				varInfo.arraySize = (curLineSplit.Length > 1) ? int.Parse(curLineSplit[1]) : 1;
 				varInfo.glVarLoc = -1;
 
