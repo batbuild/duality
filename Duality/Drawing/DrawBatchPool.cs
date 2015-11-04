@@ -41,6 +41,8 @@ namespace Duality.Drawing
 			public VertexMode VertexMode;
 			public float ZSortIndex;
 
+			private int hashCode;
+
 			public static bool operator ==(PoolKey left, PoolKey right)
 			{
 				return left.Equals(right);
@@ -58,12 +60,16 @@ namespace Duality.Drawing
 
 			public override int GetHashCode()
 			{
+				if (this.hashCode != 0)
+					return this.hashCode;
+
 				unchecked
 				{
 					var hashCode = (Material != null ? Material.GetHashCode() : 0);
 					hashCode = (hashCode * 397) ^ (int)VertexMode;
 					hashCode = (hashCode * 397) ^ ZSortIndex.GetHashCode();
-					return hashCode;
+					this.hashCode = hashCode;
+					return this.hashCode;
 				}
 			}
 
