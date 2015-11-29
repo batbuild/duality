@@ -299,6 +299,24 @@ namespace Duality.Resources
 			}
 		}
 
+		public int GetUniformLocation(string uniformName)
+		{
+			DualityApp.GuardSingleThreadState();
+
+			if (this.glProgramId == 0)
+			{
+				Log.Game.WriteWarning("Can't get uniform location because the program Id is not value");
+				return -1;
+			}
+			if (!this.compiled)
+			{
+				Log.Game.WriteWarning("Can't get uniform location because the shader '{0}' hasn't been compiled", this.Name);
+				return -1;
+			}
+
+			return GL.GetUniformLocation(this.glProgramId, uniformName);
+		}
+
 		protected override void OnLoaded()
 		{
 			this.AttachShaders();
