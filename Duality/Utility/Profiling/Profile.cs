@@ -355,6 +355,7 @@ namespace Duality
 			return reportBuilder.ToString();;
 		}
 
+		[Conditional("PROFILE")]
 		internal static void FrameTick()
 		{
 			// Collect more globally available data
