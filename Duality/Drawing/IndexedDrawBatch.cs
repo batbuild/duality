@@ -80,6 +80,8 @@ namespace Duality.Drawing
 			get { return this.vertices[0].TypeIndex; }
 		}
 
+		public bool Pooled { get; set; }
+
 		public BatchInfo Material
 		{
 			get { return this.material; }
@@ -272,6 +274,11 @@ namespace Duality.Drawing
 		{
 			this.zSortIndex = CalcZSortIndex(this.vertices, this.vertexCount);
 			return this.zSortIndex;
+		}
+
+		public void SetVertices<T1>(T1[] vertexBuffer, int vertexCount)
+		{
+			throw new NotImplementedException();
 		}
 
 		public static float CalcZSortIndex(T[] vertices, int count = -1)
