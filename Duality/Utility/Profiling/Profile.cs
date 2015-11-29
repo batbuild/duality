@@ -123,8 +123,6 @@ namespace Duality
 		{
 			if (name == null) return null;
 
-			name = name.Replace("\\", "/");
-
 			T c = GetCounter<T>(name);
 			if (c != null) return c;
 			
