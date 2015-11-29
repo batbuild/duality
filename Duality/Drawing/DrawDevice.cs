@@ -144,6 +144,11 @@ namespace Duality.Drawing
 			get { return matProjection; }
 		}
 
+		public Matrix4 MatView
+		{
+			get { return this.matModelView; }
+		}
+
 		public bool IsRenderTargetActive
 		{
 			get { return this.renderTarget.IsAvailable; }

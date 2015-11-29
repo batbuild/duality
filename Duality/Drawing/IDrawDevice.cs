@@ -62,6 +62,8 @@ namespace Duality.Drawing
 		/// </summary>
 		Vector2 NominalViewportSize { get; set; }
 
+		Matrix4 MatView { get; }
+
 
 		/// <summary>
 		/// Returns the scale factor of objects that are located at the specified (world space) z-Coordinate.
