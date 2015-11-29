@@ -1201,6 +1201,7 @@ namespace Duality.Components.Physics
 			return hitData;
 		}
 
+#if __ANDROID__
 		public static void MultiRayCast(Vector2[] worldCoordA, Vector2[] worldCoordB, List<RayCastData>[] hitData, RayCastCallback callback = null)
 		{
 			if (callback == null) callback = Raycast_DefaultCallback;
@@ -1254,6 +1255,7 @@ namespace Duality.Components.Physics
 			Task.WaitAll(_rayCastJobs);
 			_rayCastQueryJobPool.ReleaseAll();
 		}
+#endif
 
 		private static float Raycast_DefaultCallback(RayCastData data)
 		{
