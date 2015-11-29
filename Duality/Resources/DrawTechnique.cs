@@ -5,7 +5,7 @@ using System.Linq;
 using Duality.Drawing;
 using Duality.Editor;
 using Duality.Properties;
-
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 namespace Duality.Resources
@@ -463,16 +463,15 @@ namespace Duality.Resources
 				}
 				else if (varInfo[i].nameHash == CamPos)
 				{
-					var cameraPos = CommonShaderVariables.CameraPos;
-					varInfo[i].SetupUniform(new []{cameraPos.X, cameraPos.Y, cameraPos.Z});
+					varInfo[i].SetupUniform(CommonShaderVariables.GetCameraPositionData());
 				}
 				else if (varInfo[i].nameHash == CamZoom)
 				{
-					varInfo[i].SetupUniform(new []{CommonShaderVariables.CamZoom});
+					varInfo[i].SetupUniform(CommonShaderVariables.GetCameraZoomData());
 				}
 				else if (varInfo[i].nameHash == CamParallax)
 				{
-					varInfo[i].SetupUniform(new []{CommonShaderVariables.ApplyCameraParallax ? 1f : 0f});
+					varInfo[i].SetupUniform(CommonShaderVariables.GetApplyParallaxData());
 				}
 				else if (material.Uniforms != null)
 				{
