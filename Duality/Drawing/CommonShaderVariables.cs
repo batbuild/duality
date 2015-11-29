@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using System.Runtime.InteropServices;
+using OpenTK;
 
 namespace Duality.Drawing
 {
@@ -6,13 +7,49 @@ namespace Duality.Drawing
 	{
 		private static float[] _modelViewData = new float[16];
 		private static float[] _projData = new float[16];
+
+		private static float[] _cameraPositionData = new float[3];
+		private static float[] _cameraZoomData = new float[1];
+		private static float[] _applyCameraParallaxData = new float[1];
+
 		private static Matrix4 _modelView;
 		private static Matrix4 _proj;
+		private static Vector3 _cameraPos;
+		private static float _camZoom;
+		private static bool _applyCameraParallax;
 
 
-		public static Vector3 CameraPos { get; set; }
-		public static float CamZoom { get; set; }
-		public static bool ApplyCameraParallax { get; set; }
+		public static Vector3 CameraPos
+		{
+			get { return _cameraPos; }
+			set
+			{
+				_cameraPos = value;
+				_cameraPositionData[0] = value.X;
+				_cameraPositionData[1] = value.Y;
+				_cameraPositionData[2] = value.Z;
+			}
+		}
+
+		public static float CamZoom
+		{
+			get { return _camZoom; }
+			set
+			{
+				_camZoom = value;
+				_cameraZoomData[0] = value;
+			}
+		}
+
+		public static bool ApplyCameraParallax
+		{
+			get { return _applyCameraParallax; }
+			set
+			{
+				_applyCameraParallax = value;
+				_applyCameraParallaxData[0] = value ? 1f : 0f;
+			}
+		}
 
 		public static Matrix4 ModelView
 		{
@@ -42,6 +79,21 @@ namespace Duality.Drawing
 		public static float[] GetModelViewData()
 		{
 			return _modelViewData;
+		}
+
+		public static float[] GetCameraPositionData()
+		{
+			return _cameraPositionData;
+		}
+
+		public static float[] GetCameraZoomData()
+		{
+			return _cameraZoomData;
+		}
+
+		public static float[] GetApplyParallaxData()
+		{
+			return _applyCameraParallaxData;
 		}
 
 		private static void MatrixToArray(ref Matrix4 matrix, float[] floats)
