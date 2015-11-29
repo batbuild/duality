@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Threading;
+using System.Threading.Tasks;
 using OpenTK;
 
 using FarseerPhysics.Dynamics;
@@ -10,6 +12,8 @@ using FarseerPhysics.Dynamics.Contacts;
 using Duality.Editor;
 using Duality.Resources;
 using Duality.Properties;
+using Duality.Utility;
+using Duality.Utility.Jobs;
 
 namespace Duality.Components.Physics
 {
@@ -1196,6 +1200,61 @@ namespace Duality.Components.Physics
 			hitData.StableSort((d1, d2) => (int)(1000000.0f * (d1.Fraction - d2.Fraction)));
 			return hitData;
 		}
+
+		public static void MultiRayCast(Vector2[] worldCoordA, Vector2[] worldCoordB, List<RayCastData>[] hitData, RayCastCallback callback = null)
+		{
+			if (callback == null) callback = Raycast_DefaultCallback;
+			Scene.PhysicsWorld.MultiRayCast(delegate(Fixture fixture, Vector2 pos, Vector2 normal, float fraction, int rayId)
+				{
+					RayCastData data = new RayCastData(
+						fixture.UserData as ShapeInfo,
+						PhysicsConvert.ToDualityUnit(pos),
+						normal,
+						fraction);
+					float result = callback(data);
+					if (result >= 0.0f) hitData[rayId].Add(data);
+					return result;
+				},
+				worldCoordA.Select(PhysicsConvert.ToPhysicalUnit).ToArray(), 
+				worldCoordB.Select(PhysicsConvert.ToPhysicalUnit).ToArray());
+
+			foreach (var rayCastData in hitData)
+			{
+				rayCastData.StableSort((d1, d2) => (int)(1000000.0f * (d1.Fraction - d2.Fraction)));
+			}
+		}
+
+		private static Pool<RayCastQueryJob> _rayCastQueryJobPool = new Pool<RayCastQueryJob>();
+		private static Task[] _rayCastJobs; 
+		/// <summary>
+		/// Performs multiple 2d physical raycast in world coordinates. Each raycast may be performed on a separate thread.
+		/// </summary>
+		/// <param name="worldCoordsA">The starting point.</param>
+		/// <param name="worldCoordsB">The desired end point.</param>
+		/// <param name="callback">
+		/// The callback that is invoked for each hit on the raycast. Note that the order in which each hit occurs isn't deterministic
+		/// and may appear random. Return -1 to ignore the curret shape, 0 to terminate the raycast, data.Fraction to clip the ray for current hit, or 1 to continue.
+		/// </param>
+		/// <returns>Returns a list of all occurred hits, ordered by their Fraction value.</returns>
+		public static void RayCast(Vector2[] worldCoordsA, Vector2[] worldCoordsB, List<RayCastData>[] hitData, RayCastCallback callback = null)
+		{
+			if (callback == null) callback = Raycast_DefaultCallback;
+
+			if(_rayCastJobs == null || _rayCastJobs.Length < worldCoordsA.Length)
+				_rayCastJobs = new Task[worldCoordsA.Length];
+
+			Array.Clear(_rayCastJobs, 0, _rayCastJobs.Length);
+
+			for (var i = 0; i < worldCoordsA.Length; i++)
+			{
+				var job = _rayCastQueryJobPool.Acquire(() => new RayCastQueryJob());
+				job.Query = new RayCastQuery(worldCoordsA[i], worldCoordsB[i], hitData[i], callback);
+				_rayCastJobs[i] = Task.Factory.StartNew(() => job.DoWork());
+			}
+			Task.WaitAll(_rayCastJobs);
+			_rayCastQueryJobPool.ReleaseAll();
+		}
+
 		private static float Raycast_DefaultCallback(RayCastData data)
 		{
 			return 1.0f;
@@ -1289,7 +1348,7 @@ namespace Duality.Components.Physics
 			MathF.CheckValidValue(this.body.AngularVelocity);
 		}
 	}
-	
+
 	/// <summary>
 	/// The type of a <see cref="RigidBody">Colliders</see> physical body.
 	/// </summary>

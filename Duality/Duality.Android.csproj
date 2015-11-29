@@ -38,8 +38,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerDuality.Android">
-      <HintPath>..\packages\Farseer.Duality.Android.0.1.10\lib\MonoAndroid\FarseerDuality.Android.dll</HintPath>
+    <Reference Include="FarseerDuality.Android, Version=0.1.11.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Farseer.Duality.Android.0.1.11\lib\MonoAndroid\FarseerDuality.Android.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="LZ4.Android, Version=1.0.5.93, Culture=neutral, processorArchitecture=MSIL">
@@ -81,7 +81,12 @@
     <Compile Include="Utility\FileHelper.cs" />
     <Compile Include="Utility\Grid.cs" />
     <Compile Include="Utility\IRendererVisibilityStrategy.cs" />
+    <Compile Include="Utility\Jobs\Job.cs" />
+    <Compile Include="Utility\Jobs\JobList.cs" />
+    <Compile Include="Utility\Jobs\RayCastQuery.cs" />
+    <Compile Include="Utility\Jobs\RayCastQueryJob.cs" />
     <Compile Include="Utility\Memory\ArrayPool.cs" />
+    <Compile Include="Utility\Pool.cs" />
     <Compile Include="Utility\Streams\SubStreamWrapper.cs" />
     <Compile Include="Utility\Streams\StreamWrapper.cs" />
     <Compile Include="Utility\Streams\NonClosingStreamWrapper.cs" />
