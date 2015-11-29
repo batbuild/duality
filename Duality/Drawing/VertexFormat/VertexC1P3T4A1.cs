@@ -48,13 +48,13 @@ namespace Duality.Drawing
 		
 		void IVertexData.SetupVBO(Resources.BatchInfo mat)
 		{
-			GL.EnableClientState(ArrayCap.ColorArray);
-			GL.EnableClientState(ArrayCap.VertexArray);
-			GL.EnableClientState(ArrayCap.TextureCoordArray);
+			GL.VertexAttribPointer(0, 4, VertexAttribPointerType.UnsignedByte, true, Size, 0);		// colour
+			GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, Size, 4);			// pos
+			GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, Size, 16);			// tex
 
-			GL.ColorPointer(4, ColorPointerType.UnsignedByte, Size, (IntPtr)OffsetColor);
-			GL.VertexPointer(3, VertexPointerType.Float, Size, (IntPtr)OffsetPos);
-			GL.TexCoordPointer(4, TexCoordPointerType.Float, Size, (IntPtr)OffsetTex0);
+			GL.EnableVertexAttribArray(0);
+			GL.EnableVertexAttribArray(1);
+			GL.EnableVertexAttribArray(2);
 
 			if (mat.Technique.Res.Shader.IsAvailable)
 			{
@@ -101,33 +101,7 @@ namespace Duality.Drawing
 		}
 		void IVertexData.FinishVBO(Resources.BatchInfo mat)
 		{
-			GL.DisableClientState(ArrayCap.ColorArray);
-			GL.DisableClientState(ArrayCap.VertexArray);
-			GL.DisableClientState(ArrayCap.TextureCoordArray);
-
-			if (mat.Technique.Res.Shader.IsAvailable)
-			{
-				Resources.ShaderVarInfo[] varInfo = mat.Technique.Res.Shader.Res.VarInfo;
-				for (int i = 0; i < varInfo.Length; i++)
-				{
-					if (varInfo[i].glVarLoc == -1) continue;
-					if (varInfo[i].scope != Resources.ShaderVarScope.Attribute) continue;
-					if (varInfo[i].type != Resources.ShaderVarType.Float) continue;
-				
-					GL.DisableVertexAttribArray(varInfo[i].glVarLoc);
-					break;
-				}
-			}
-
-			// --- From VertexP3T2A2 ---
-			//Resources.ShaderVarInfo[] varInfo = mat.Technique.Res.Shader.Res.VarInfo;
-			//for (int i = 0; i < varInfo.Length; i++)
-			//{
-			//    if (varInfo[i].glVarLoc == -1) continue;
-			//    if (varInfo[i].scope != Resources.ShaderVarScope.Attribute) continue;
-				
-			//    GL.DisableVertexAttribArray(varInfo[i].glVarLoc);
-			//}
+			
 		}
 		
 		/// <summary>
