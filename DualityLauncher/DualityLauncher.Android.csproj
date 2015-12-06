@@ -49,12 +49,12 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerDuality.Android, Version=0.1.12.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Farseer.Duality.Android.0.1.12\lib\MonoAndroid\FarseerDuality.Android.dll</HintPath>
+    <Reference Include="FarseerDuality.Android, Version=0.1.13.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Farseer.Duality.Android.0.1.13\lib\MonoAndroid\FarseerDuality.Android.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="OpenTK.Android, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenTK.Duality.Android.0.1.54\lib\MonoAndroid\OpenTK.Android.dll</HintPath>
+      <HintPath>..\packages\OpenTK.Duality.Android.0.1.55\lib\MonoAndroid\OpenTK.Android.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
