@@ -38,8 +38,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FarseerDuality.Android, Version=0.1.13.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Farseer.Duality.Android.0.1.13\lib\MonoAndroid\FarseerDuality.Android.dll</HintPath>
+    <Reference Include="FarseerDuality.Android, Version=0.1.14.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Farseer.Duality.Android.0.1.14\lib\MonoAndroid\FarseerDuality.Android.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="LZ4.Android, Version=1.0.5.93, Culture=neutral, processorArchitecture=MSIL">
@@ -53,7 +53,7 @@
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
     <Reference Include="OpenTK.Android, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenTK.Duality.Android.0.1.55\lib\MonoAndroid\OpenTK.Android.dll</HintPath>
+      <HintPath>..\packages\OpenTK.Duality.Android.0.1.56\lib\MonoAndroid\OpenTK.Android.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
