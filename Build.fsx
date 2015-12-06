@@ -33,9 +33,13 @@ Target "SetVersions" (fun _ ->
 )
 
 Target "RestorePackages" (fun _ ->
+    Rename "./Duality/packages.config" "./Duality/packages.Duality.Android.config"
+
     !! "./**/packages.config"
         |> Seq.iter (RestorePackage (fun p ->
             { p with Sources = ["https://www.myget.org/F/6416d9912a7c4d46bc983870fb440d25/"]}))
+
+    Rename "./Duality/packages.Duality.Android.config" "./Duality/packages.config"
 )
 
 Target "BuildUnsafe" (fun _ ->          
