@@ -56,6 +56,10 @@
       <HintPath>..\packages\OpenTK.Duality.Android.0.1.56\lib\MonoAndroid\OpenTK.Android.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SharpFont.Android, Version=3.0.1.200, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\SharpFont\SharpFont.Android.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -79,6 +83,7 @@
     <Compile Include="Utility\Extensions\ExtMethodsStream.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsXml.cs" />
     <Compile Include="Utility\FileHelper.cs" />
+    <Compile Include="Utility\FontAtlas.cs" />
     <Compile Include="Utility\Grid.cs" />
     <Compile Include="Utility\IRendererVisibilityStrategy.cs" />
     <Compile Include="Utility\Jobs\Job.cs" />
@@ -87,6 +92,7 @@
     <Compile Include="Utility\Jobs\RayCastQueryJob.cs" />
     <Compile Include="Utility\Memory\ArrayPool.cs" />
     <Compile Include="Utility\Pool.cs" />
+    <Compile Include="Utility\RectanglePacker.cs" />
     <Compile Include="Utility\Streams\SubStreamWrapper.cs" />
     <Compile Include="Utility\Streams\StreamWrapper.cs" />
     <Compile Include="Utility\Streams\NonClosingStreamWrapper.cs" />
@@ -272,7 +278,11 @@
     <Compile Include="Utility\Zip\ZipArchiveMode.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="LiberationMono-Regular.ttf" />
+    <EmbeddedResource Include="LiberationSans-Regular.ttf" />
+    <EmbeddedResource Include="LiberationSerif-Regular.ttf" />
     <None Include="packages.config" />
+    <None Include="packages.Duality.Android.config" />
     <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
   <ItemGroup>
