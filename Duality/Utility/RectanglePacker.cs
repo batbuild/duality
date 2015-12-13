@@ -120,6 +120,8 @@ namespace Duality.Utility
 			{
 				_nodes[i] = new Node();
 			}
+
+			_nextFreeNodeIndex = 0;
 		}
 
 		private struct Node : IEquatable<Node>
