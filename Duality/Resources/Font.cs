@@ -452,14 +452,9 @@ namespace Duality.Resources
 		{
 			// Determine Font properties
 
-			// The baseline-to-baseline distance between two consecutive lines of text
-			var lineSpacing = this.face.Size.Metrics.Height;
-
-			this.height = this.face.Height / 64;
+			this.height = this.face.Size.Metrics.Height.ToInt32();
 			this.ascent = this.face.Size.Metrics.Ascender.ToInt32();
-//			this.bodyAscent /= BodyAscentRef.Length;
 			this.descent = this.face.Size.Metrics.Descender.ToInt32();
-//			this.baseLine = (int)Math.Round(this.face.FontFamily.GetCellAscent(this.face.Style) * this.face.GetHeight() / this.face.FontFamily.GetLineSpacing(this.face.Style));
 		}
 
 		/// <summary>
