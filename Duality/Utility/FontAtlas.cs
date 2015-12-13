@@ -105,6 +105,7 @@ namespace Duality.Utility
 			Texture = new Texture(_textureSize, _textureSize, Texture.SizeMode.Enlarge,
 				_pixelGridAlign ? TextureMagFilter.Nearest : TextureMagFilter.Linear,
 				_pixelGridAlign ? TextureMinFilter.Nearest : TextureMinFilter.Linear);
+			Texture.Clear();
 			
 			if(Material != null)
 				Material.Dispose();

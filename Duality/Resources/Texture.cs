@@ -717,6 +717,22 @@ namespace Duality.Resources
 		}
 
 		/// <summary>
+		/// Clears the contents of this texture
+		/// </summary>
+		public void Clear()
+		{
+			DualityApp.GuardSingleThreadState();
+
+			int lastTexId;
+			GL.GetInteger(GetPName.TextureBinding2D, out lastTexId);
+			GL.BindTexture(TextureTarget.Texture2D, this.glTexId);
+
+			GL.ClearTexImage(this.glTexId, 0, GLPixelFormat.Rgba, this.pixelType, (IntPtr)null);
+
+			GL.BindTexture(TextureTarget.Texture2D, lastTexId);
+		}
+
+		/// <summary>
 		/// Retrieves the pixel data that is currently stored in video memory.
 		/// </summary>
 		/// <returns></returns>
