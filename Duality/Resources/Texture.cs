@@ -6,7 +6,7 @@ using BitmapPixelFormat = System.Drawing.Imaging.PixelFormat;
 using Duality.Editor;
 using Duality.Properties;
 using Duality.Drawing;
-
+using Duality.Helpers;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
@@ -693,6 +693,26 @@ namespace Duality.Resources
 				}
 			}
 			
+			GL.BindTexture(TextureTarget.Texture2D, lastTexId);
+		}
+
+		public void UploadSubImage(int x, int y, int width, int height, byte[] data)
+		{
+			DualityApp.GuardSingleThreadState();
+			Guard.NotNull(data);
+
+			if(width > this.TexelWidth)
+				throw new InvalidOperationException("Can't upload texture data as the source region width is larger than the texture");
+
+			if (height > this.TexelHeight)
+				throw new InvalidOperationException("Can't upload texture data as the source region height is larger than the texture");
+
+			int lastTexId;
+			GL.GetInteger(GetPName.TextureBinding2D, out lastTexId);
+			GL.BindTexture(TextureTarget.Texture2D, this.glTexId);
+
+			GL.TexSubImage2D(TextureTarget.Texture2D, 0, x, y, width, height, GLPixelFormat.Rgba, this.pixelType, data);
+
 			GL.BindTexture(TextureTarget.Texture2D, lastTexId);
 		}
 
