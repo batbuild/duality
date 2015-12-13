@@ -62,8 +62,6 @@ namespace Duality.Utility.Memory
 				Log.Core.Write("{0} bytes wasted on average in pool {1}", keyValuePair.Value, keyValuePair.Key);
 			}
 
-			ReportAllocationsByMethod();
-
 			Log.Core.PopIndent();
 		}
 
