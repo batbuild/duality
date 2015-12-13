@@ -1121,13 +1121,13 @@ namespace Duality.Drawing
 			for (int i = 0; i < text.Length; i++)
 			{
 				// Attempt to use Canvas buffering
-				if (vertices[i] == null || vertices[i].Length < text[i].Length * 4)
-					vertices[i] = this.buffer.RequestVertexArray(text[i].Length * 4);
+				if (vertices[i] == null || vertices[i].Length < text[i].Length * 6)
+					vertices[i] = this.buffer.RequestVertexArray(text[i].Length * 6);
 
 				int vertexCount = font.EmitTextVertices(text[i], ref vertices[i], pos.X, pos.Y, pos.Z, this.State.ColorTint * this.State.MaterialDirect.MainColor, 0.0f, scale);
 
 				this.State.TransformVertices(vertices[i], shapeHandle, scale);
-				device.AddVertices(customMat, VertexMode.Quads, vertices[i], vertexCount);
+				device.AddVertices(customMat, VertexMode.Triangles, vertices[i], vertexCount);
 
 				pos.Y += font.LineSpacing * scale;
 			}
@@ -1227,7 +1227,7 @@ namespace Duality.Drawing
 						this.State.TransformVertices(vertText[i], shapeHandle, scale);
 						BatchInfo customMat = new BatchInfo(this.State.MaterialDirect);
 						customMat.MainTexture = text.Fonts[i].Res.Material.MainTexture;
-						device.AddVertices(customMat, VertexMode.Quads, vertText[i], vertLen[i + 1]);
+						device.AddVertices(customMat, VertexMode.Triangles, vertText[i], vertLen[i + 1]);
 					}
 				}
 			}

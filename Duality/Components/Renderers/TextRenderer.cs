@@ -200,13 +200,13 @@ namespace Duality.Components.Renderers
 					{
 						if (this.customMat == null)
 						{
-							device.AddVertices(this.text.Fonts[i].Res.Material, VertexMode.Quads, this.vertFont[i], vertLen[i + 1]);
+							device.AddVertices(this.text.Fonts[i].Res.Material, VertexMode.Triangles, this.vertFont[i], vertLen[i + 1]);
 						}
 						else
 						{
 							BatchInfo cm = new BatchInfo(this.customMat);
 							cm.Textures = this.text.Fonts[i].Res.Material.Textures;
-							device.AddVertices(cm, VertexMode.Quads, this.vertFont[i], vertLen[i + 1]);
+							device.AddVertices(cm, VertexMode.Triangles, this.vertFont[i], vertLen[i + 1]);
 						}
 					}
 				}

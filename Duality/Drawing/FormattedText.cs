@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 
@@ -8,6 +9,7 @@ using Duality.Resources;
 using Duality.Drawing;
 
 using OpenTK;
+using Font = Duality.Resources.Font;
 
 
 namespace Duality.Drawing
@@ -465,7 +467,7 @@ namespace Duality.Drawing
 						if (this.parent.maxHeight != 0 && this.offset.Y + this.lineHeight > this.parent.maxHeight) return null;
 					}
 
-					this.vertTextIndex[this.fontIndex] += fittingText.Length * 4;
+					this.vertTextIndex[this.fontIndex] += fittingText.Length * 6;
 					this.offset.X += textElemSize.X;
 					this.lineWidth += textElemSize.X;
 					this.lineHeight = Math.Max(this.lineHeight, this.font.LineSpacing);
@@ -1182,7 +1184,7 @@ namespace Duality.Drawing
 					this.vertTextCache = new VertexC1P3T2[fontNum][];
 				for (int i = 0; i < this.vertTextCache.Length; i++)
 				{
-					int textVertCount = this.fontGlyphCount.Length > i ? this.fontGlyphCount[i] * 4 : 0;
+					int textVertCount = this.fontGlyphCount.Length > i ? this.fontGlyphCount[i] * 6 : 0;
 					this.vertCountCache[i + 1] = textVertCount;
 					if (this.vertTextCache[i] == null || this.vertTextCache[i].Length < textVertCount) 
 						this.vertTextCache[i] = new VertexC1P3T2[textVertCount];
