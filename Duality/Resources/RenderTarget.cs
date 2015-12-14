@@ -221,21 +221,33 @@ namespace Duality.Resources
 		/// </summary>
 		public int Width
 		{
-			get { return this.targetInfo.FirstOrDefault().target.IsAvailable ? this.targetInfo.FirstOrDefault().target.Res.PixelWidth : 0; }
+			get
+			{
+				TargetInfo targetInfo = this.targetInfo.Count > 0 ? this.targetInfo[0] : new TargetInfo();
+				return targetInfo.target.IsAvailable ? targetInfo.target.Res.PixelWidth : 0;
+			}
 		}
 		/// <summary>
 		/// [GET] Height of this RenderTarget. This values is derived by its <see cref="Targets"/>.
 		/// </summary>
 		public int Height
 		{
-			get { return this.targetInfo.FirstOrDefault().target.IsAvailable ? this.targetInfo.FirstOrDefault().target.Res.PixelHeight : 0; }
+			get
+			{
+				TargetInfo targetInfo = this.targetInfo.Count > 0 ? this.targetInfo[0] : new TargetInfo();
+				return targetInfo.target.IsAvailable ? targetInfo.target.Res.PixelHeight : 0;
+			}
 		}
 		/// <summary>
 		/// [GET] UVRatio of this RenderTarget. This values is derived by its <see cref="Targets"/>.
 		/// </summary>
 		public Vector2 UVRatio
 		{
-			get { return this.targetInfo.FirstOrDefault().target.IsAvailable ? this.targetInfo.FirstOrDefault().target.Res.UVRatio : Vector2.One; }
+			get
+			{
+				TargetInfo targetInfo = this.targetInfo.Count > 0 ? this.targetInfo[0] : new TargetInfo();
+				return targetInfo.target.IsAvailable ? targetInfo.target.Res.UVRatio : Vector2.One;
+			}
 		}
 		/// <summary>
 		/// [GET] The number of <see cref="Multisampling">Antialiazing</see> samples this RenderTarget uses.

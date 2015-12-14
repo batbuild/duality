@@ -38,7 +38,8 @@ namespace Duality.Drawing
 		private	uint				hndlPrimaryVBO		= 0;
 		private Vector2				nominalViewportSize = new Vector2(1280, 720);
 		private DrawBatchPool		drawBatchPool	= new DrawBatchPool();
-		
+		private List<IDrawBatch>	batchesSharingVbo = new List<IDrawBatch>();
+
 		public bool Disposed
 		{
 			get { return this.disposed; }
@@ -726,7 +727,7 @@ namespace Duality.Drawing
 			if (this.pickingIndex == 0) Profile.TimeProcessDrawcalls.BeginMeasure();
 
 			int drawCalls = 0;
-			List<IDrawBatch> batchesSharingVBO = new List<IDrawBatch>();
+			this.batchesSharingVbo.Clear();
 			IDrawBatch lastBatchRendered = null;
 
 			IDrawBatch lastBatch = null;
@@ -737,16 +738,16 @@ namespace Duality.Drawing
 
 				if (lastBatch == null || lastBatch.CanShareVBO(currentBatch))
 				{
-					batchesSharingVBO.Add(currentBatch);
+					batchesSharingVbo.Add(currentBatch);
 				}
 
-				if (batchesSharingVBO.Count > 0 && (nextBatch == null || !currentBatch.CanShareVBO(nextBatch)))
+				if (batchesSharingVbo.Count > 0 && (nextBatch == null || !currentBatch.CanShareVBO(nextBatch)))
 				{
 					int vertexOffset = 0;
-					batchesSharingVBO[0].UploadToVBO(batchesSharingVBO);
+					batchesSharingVbo[0].UploadToVBO(batchesSharingVbo);
 					drawCalls++;
 
-					foreach (IDrawBatch renderBatch in batchesSharingVBO)
+					foreach (IDrawBatch renderBatch in batchesSharingVbo)
 					{
 						renderBatch.SetupVBO();
 						renderBatch.Render(this, ref vertexOffset, ref lastBatchRendered);
@@ -754,7 +755,7 @@ namespace Duality.Drawing
 						drawCalls++;
 					}
 
-					batchesSharingVBO.Clear();
+					batchesSharingVbo.Clear();
 					lastBatch = null;
 				}
 				else
