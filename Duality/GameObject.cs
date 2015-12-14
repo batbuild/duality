@@ -350,6 +350,15 @@ namespace Duality
 				this.PrefabLink.Apply();
 			}
 		}
+		/// <summary>
+		/// Populates a list of all GameObjects that are directly or indirectly parented to this object, i.e. its
+		/// children, grandchildren, etc. Doesn't generate garbage.
+		/// <param name="children">A caller-allocated list that will be populated with the child game objects.</param>
+		/// </summary>
+		public void GetChildrenDeep(List<GameObject> children)
+		{
+			GetChildrenDeep(this, children);
+		}
 
 		/// <summary>
 		/// Sets or alters this GameObject's <see cref="Duality.Resources.PrefabLink"/> to reference the specified <see cref="Prefab"/>.
@@ -996,6 +1005,20 @@ namespace Duality
 			if (this.eventComponentRemoving != null)
 				this.eventComponentRemoving(this, new ComponentEventArgs(cmp));
 		}
+
+		private void GetChildrenDeep(GameObject parent, List<GameObject> children)
+		{
+			if (parent.children == null)
+				return;
+
+			var numChildren = parent.children.Count;
+			for (var i = 0; i < numChildren; i++)
+			{
+				var child = parent.children[i];
+				children.Add(child);
+				GetChildrenDeep(child, children);
+			}
+		} 
 
 		private void SetComponentExecutionOrder()
 		{
