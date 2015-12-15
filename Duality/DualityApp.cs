@@ -14,6 +14,8 @@ using OpenTK.Graphics.OpenGL;
 using Duality.Resources;
 using Duality.Serialization;
 using Duality.Drawing;
+using Environment = System.Environment;
+
 #if __ANDROID__
 using Android.Content.Res;
 #endif
@@ -1244,11 +1246,20 @@ namespace Duality
 					string libFileName = Path.GetFileNameWithoutExtension(libFile);
 					if (libFileName.Equals(assemblyNameStub, StringComparison.InvariantCultureIgnoreCase))
 					{
+						var path = libFile;
+#if __ANDROID__
+						if (path.Contains(PluginDirectory) == false)
+							path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), PluginDirectory, path);
+						else
+							path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), path);
+#endif
+
 						bool isPlugin = libFileName.EndsWith(".core", StringComparison.InvariantCultureIgnoreCase);
+						
 						if (isPlugin)
 						{
 							// It's a plugin that hasn't been loaded yet? Load it now.
-							plugin = LoadPlugin(libFile);
+							plugin = LoadPlugin(path);
 							blockRecursiveAssemblyResolvesList.Remove(assemblyNameStub);
 							if (plugin != null) return plugin.PluginAssembly;
 						}
@@ -1257,7 +1268,7 @@ namespace Duality
 							// Lock the Assembly file. Dynamically reloading Plugins is supported - but not reloading external libraries.
 							try
 							{
-								Assembly library = Assembly.LoadFrom(libFile);
+								Assembly library = Assembly.LoadFrom(path);
 								blockRecursiveAssemblyResolvesList.Remove(assemblyNameStub);
 								return library;
 							}
