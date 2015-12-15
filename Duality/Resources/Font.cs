@@ -45,6 +45,10 @@ namespace Duality.Resources
 
 		private const int Dpi = 96;
 
+		// this is probably a bit big but works around a bug for the moment where the atlas rect coordinates aren't being
+		// rebuilt correctly when the font atlas is resized. 128 is probably a better starting value.
+		private const int DefaultFontAtlasSize = 1024;
+
 		/// <summary>
 		/// A generic <see cref="MonoSpace">monospace</see> Font (Size 8) that has been loaded from your systems font library.
 		/// This is usually "Courier New".
@@ -874,7 +878,7 @@ namespace Duality.Resources
 			};
 
 			if (this.fontAtlas == null)
-				this.fontAtlas = new FontAtlas(128, this.renderMode, this.IsPixelGridAligned);
+				this.fontAtlas = new FontAtlas(DefaultFontAtlasSize, this.renderMode, this.IsPixelGridAligned);
 
 			if (text[index] == ' ')
 			{
