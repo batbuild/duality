@@ -321,6 +321,11 @@ namespace Duality.Resources
 
 		public static ReadOnlyCollection<Type> ComponentExecutionOrder { get { return new ReadOnlyCollection<Type>(componentExecutionOrder); } }
 
+		internal List<Component> Renderers
+		{
+			get { return renderers; }
+		}
+
 
 		/// <summary>
 		/// Creates a new, empty scene which does not contain any <see cref="GameObject">GameObjects</see>.

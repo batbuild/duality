@@ -9,7 +9,6 @@ using OpenTK;
 using Duality.Editor;
 using Duality.Drawing;
 using Duality.Resources;
-using Duality.Properties;
 
 namespace Duality.Components
 {
@@ -660,13 +659,13 @@ namespace Duality.Components
 			// If no visibility groups are met, don't bother looking for renderers
 			if ((this.drawDevice.VisibilityMask & VisibilityFlag.AllGroups) == VisibilityFlag.None) return;
 
-			// Query renderers
-			IEnumerable<ICmpRenderer> rendererQuery = Scene.Current.QueryVisibleRenderers(this.drawDevice);
-			foreach (Predicate<ICmpRenderer> p in this.editorRenderFilter) rendererQuery = rendererQuery.Where(r => p(r));
-
 			// Collect drawcalls
 			if (this.drawDevice.IsPicking)
 			{
+				// Query renderers
+				IEnumerable<ICmpRenderer> rendererQuery = Scene.Current.QueryVisibleRenderers(this.drawDevice);
+				foreach (Predicate<ICmpRenderer> p in this.editorRenderFilter) rendererQuery = rendererQuery.Where(r => p(r));
+
 				this.pickingMap = new List<ICmpRenderer>(rendererQuery);
 				foreach (ICmpRenderer r in this.pickingMap)
 				{
@@ -677,10 +676,19 @@ namespace Duality.Components
 			else
 			{
 				Profile.TimeCollectDrawcalls.BeginMeasure();
+				var renderers = Scene.Current.Renderers;
+				var count = renderers.Count;
+				for (int i = 0; i < count; i++)
+				{
+					ICmpRenderer r = (ICmpRenderer) renderers[i];
+					if (((Component) r).Active == false)
+						continue;
 
-				foreach (ICmpRenderer r in rendererQuery)
+					if (r.IsVisible(drawDevice) == false)
+						continue;
+
 					r.Draw(this.drawDevice);
-
+				}
 				Profile.TimeCollectDrawcalls.EndMeasure();
 			}
 		}
