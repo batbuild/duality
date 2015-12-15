@@ -174,16 +174,16 @@ namespace Duality.Components.Renderers
 
 			Rect rectTemp = this.rect.Transform(this.gameobj.Transform.Scale, this.gameobj.Transform.Scale);
 			Vector2 edge1 = rectTemp.TopLeft;
-			Vector2 edge2 = rectTemp.BottomLeft;
+			Vector2 edge2 = rectTemp.TopRight;
 			Vector2 edge3 = rectTemp.BottomRight;
-			Vector2 edge4 = rectTemp.TopRight;
+			Vector2 edge4 = rectTemp.BottomLeft;
 
 			MathF.TransformDotVec(ref edge1, ref xDot, ref yDot);
 			MathF.TransformDotVec(ref edge2, ref xDot, ref yDot);
 			MathF.TransformDotVec(ref edge3, ref xDot, ref yDot);
 			MathF.TransformDotVec(ref edge4, ref xDot, ref yDot);
 
-			if (vertices == null || vertices.Length != 4) vertices = new VertexC1P3T2[4];
+			if (vertices == null || vertices.Length != 6) vertices = new VertexC1P3T2[6];
 
 			vertices[0].Pos.X = posTemp.X + edge1.X;
 			vertices[0].Pos.Y = posTemp.Y + edge1.Y;
@@ -195,8 +195,8 @@ namespace Duality.Components.Renderers
 			vertices[1].Pos.X = posTemp.X + edge2.X;
 			vertices[1].Pos.Y = posTemp.Y + edge2.Y;
 			vertices[1].Pos.Z = posTemp.Z + this.VertexZOffset;
-			vertices[1].TexCoord.X = uvRect.X;
-			vertices[1].TexCoord.Y = uvRect.MaximumY;
+			vertices[1].TexCoord.X = uvRect.MaximumX;
+			vertices[1].TexCoord.Y = uvRect.Y;
 			vertices[1].Color = mainClr;
 
 			vertices[2].Pos.X = posTemp.X + edge3.X;
@@ -206,12 +206,26 @@ namespace Duality.Components.Renderers
 			vertices[2].TexCoord.Y = uvRect.MaximumY;
 			vertices[2].Color = mainClr;
 				
-			vertices[3].Pos.X = posTemp.X + edge4.X;
-			vertices[3].Pos.Y = posTemp.Y + edge4.Y;
+			vertices[3].Pos.X = posTemp.X + edge1.X;
+			vertices[3].Pos.Y = posTemp.Y + edge1.Y;
 			vertices[3].Pos.Z = posTemp.Z + this.VertexZOffset;
-			vertices[3].TexCoord.X = uvRect.MaximumX;
+			vertices[3].TexCoord.X = uvRect.X;
 			vertices[3].TexCoord.Y = uvRect.Y;
 			vertices[3].Color = mainClr;
+
+			vertices[4].Pos.X = posTemp.X + edge3.X;
+			vertices[4].Pos.Y = posTemp.Y + edge3.Y;
+			vertices[4].Pos.Z = posTemp.Z + this.VertexZOffset;
+			vertices[4].TexCoord.X = uvRect.MaximumX;
+			vertices[4].TexCoord.Y = uvRect.MaximumY;
+			vertices[4].Color = mainClr;
+
+			vertices[5].Pos.X = posTemp.X + edge4.X;
+			vertices[5].Pos.Y = posTemp.Y + edge4.Y;
+			vertices[5].Pos.Z = posTemp.Z + this.VertexZOffset;
+			vertices[5].TexCoord.X = uvRect.X;
+			vertices[5].TexCoord.Y = uvRect.MaximumY;
+			vertices[5].Color = mainClr;
 			
 			if (this.pixelGrid)
 			{
@@ -219,6 +233,8 @@ namespace Duality.Components.Renderers
 				vertices[1].Pos.X = MathF.Round(vertices[1].Pos.X);
 				vertices[2].Pos.X = MathF.Round(vertices[2].Pos.X);
 				vertices[3].Pos.X = MathF.Round(vertices[3].Pos.X);
+				vertices[4].Pos.X = MathF.Round(vertices[4].Pos.X);
+				vertices[5].Pos.X = MathF.Round(vertices[5].Pos.X);
 
 				if (MathF.RoundToInt(device.TargetSize.X) != (MathF.RoundToInt(device.TargetSize.X) / 2) * 2)
 				{
@@ -226,12 +242,16 @@ namespace Duality.Components.Renderers
 					vertices[1].Pos.X += 0.5f;
 					vertices[2].Pos.X += 0.5f;
 					vertices[3].Pos.X += 0.5f;
+					vertices[4].Pos.X += 0.5f;
+					vertices[5].Pos.X += 0.5f;
 				}
 
 				vertices[0].Pos.Y = MathF.Round(vertices[0].Pos.Y);
 				vertices[1].Pos.Y = MathF.Round(vertices[1].Pos.Y);
 				vertices[2].Pos.Y = MathF.Round(vertices[2].Pos.Y);
 				vertices[3].Pos.Y = MathF.Round(vertices[3].Pos.Y);
+				vertices[4].Pos.Y = MathF.Round(vertices[4].Pos.Y);
+				vertices[5].Pos.Y = MathF.Round(vertices[5].Pos.Y);
 
 				if (MathF.RoundToInt(device.TargetSize.Y) != (MathF.RoundToInt(device.TargetSize.Y) / 2) * 2)
 				{
@@ -239,6 +259,8 @@ namespace Duality.Components.Renderers
 					vertices[1].Pos.Y += 0.5f;
 					vertices[2].Pos.Y += 0.5f;
 					vertices[3].Pos.Y += 0.5f;
+					vertices[4].Pos.Y += 0.5f;
+					vertices[5].Pos.Y += 0.5f;
 				}
 			}
 		}
@@ -265,9 +287,9 @@ namespace Duality.Components.Renderers
 
 			this.PrepareVertices(ref this.vertices, device, mainClr, uvRect);
 			if (this.customMat != null)
-				device.AddVertices(this.customMat, VertexMode.Quads, this.vertices);
+				device.AddVertices(this.customMat, VertexMode.Triangles, this.vertices);
 			else
-				device.AddVertices(this.sharedMat, VertexMode.Quads, this.vertices);
+				device.AddVertices(this.sharedMat, VertexMode.Triangles, this.vertices);
 		}
 		protected override void OnCopyTo(Component target, Duality.Cloning.CloneProvider provider)
 		{
