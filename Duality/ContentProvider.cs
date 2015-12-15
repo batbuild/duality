@@ -366,8 +366,9 @@ namespace Duality
 			if (String.IsNullOrEmpty(path)) return null;
 
 			// Return cached content
+#if __ANDROID__
 			path = FileHelper.ConvertDefaultContentPath(path);
-
+#endif
 			Resource res;
 			if (resLibrary.TryGetValue(path, out res) && !res.Disposed)
 			{

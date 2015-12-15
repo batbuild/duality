@@ -10,7 +10,7 @@ using OS=Android.OS;
 
 namespace Duality.Android
 {
-#if DEBUG
+#if DEBUGCONTENT
 	public static class DebugContent
 	{
 		private static Duality.Android.Utility.Zip.IZipArchive _debugDataArchive;
