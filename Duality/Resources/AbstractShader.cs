@@ -58,7 +58,12 @@ namespace Duality.Resources
 		/// <summary>
 		/// Represents a texture binding and provides lookups.
 		/// </summary>
-		Sampler2D
+		Sampler2D,
+
+		/// <summary>
+		/// Represents a 2d texture array binding
+		/// </summary>
+		Sampler2DArray
 	}
 
 	/// <summary>
@@ -373,15 +378,16 @@ namespace Duality.Resources
 				string[] curLineSplit = curLine.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
 				switch (curLineSplit[1].ToUpper())
 				{
-					case "FLOAT":		varInfo.type = ShaderVarType.Float; break;
-					case "VEC2":		varInfo.type = ShaderVarType.Vec2; break;
-					case "VEC3":		varInfo.type = ShaderVarType.Vec3; break;
-					case "VEC4":		varInfo.type = ShaderVarType.Vec4; break;
-					case "MAT2":		varInfo.type = ShaderVarType.Mat2; break;
-					case "MAT3":		varInfo.type = ShaderVarType.Mat3; break;
-					case "MAT4":		varInfo.type = ShaderVarType.Mat4; break;
-					case "INT":			varInfo.type = ShaderVarType.Int; break;
-					case "SAMPLER2D":	varInfo.type = ShaderVarType.Sampler2D; break;
+					case "FLOAT":			varInfo.type = ShaderVarType.Float; break;
+					case "VEC2":			varInfo.type = ShaderVarType.Vec2; break;
+					case "VEC3":			varInfo.type = ShaderVarType.Vec3; break;
+					case "VEC4":			varInfo.type = ShaderVarType.Vec4; break;
+					case "MAT2":			varInfo.type = ShaderVarType.Mat2; break;
+					case "MAT3":			varInfo.type = ShaderVarType.Mat3; break;
+					case "MAT4":			varInfo.type = ShaderVarType.Mat4; break;
+					case "INT":				varInfo.type = ShaderVarType.Int; break;
+					case "SAMPLER2D":		varInfo.type = ShaderVarType.Sampler2D; break;
+					case "SAMPLER2DARRAY":	varInfo.type = ShaderVarType.Sampler2DArray; break;
 				}
 
 				curLineSplit = curLineSplit[2].Split(new char[] {'[', ']'}, StringSplitOptions.RemoveEmptyEntries);
