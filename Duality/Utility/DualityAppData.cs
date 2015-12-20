@@ -26,6 +26,7 @@ namespace Duality
 		private	bool				multisampleBackBuffer	= true;
 		private	object				customData				= null;
 		private float				minimumShaderVersion	= 3;
+		private string				packageName				= "Unknown";
 
 		/// <summary>
 		/// [GET / SET] The name of your application / game. It will also be used as a window title by the launcher app.
@@ -34,6 +35,14 @@ namespace Duality
 		{
 			get { return this.appName; }
 			set { this.appName = value; }
+		}
+		/// <summary>
+		/// [GET / SET] The Android package name. This has to be set from the main activity located in the launcher.
+		/// </summary>
+		public string PackageName
+		{
+			get { return packageName; }
+			set { packageName = value; }
 		}
 		/// <summary>
 		/// [GET / SET] The author name of your application. Might be your or your team's name or -nickname.

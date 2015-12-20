@@ -443,10 +443,6 @@ namespace Duality
 		}
 
 #if __ANDROID__
-#if DEBUGCONTENT
-		private static Duality.Android.Utility.Zip.IZipArchive _debugDataArchive;
-#endif
-
 		public static AssetManager AndroidAssetManager { get; private set; }
 
 		public static void SetAndroidAssetManager(AssetManager assets)
@@ -462,11 +458,9 @@ namespace Duality
 			}
 			catch (Exception e)
 			{
-#if DEBUGCONTENT
-				var stream = Duality.Android.DebugContent.Open(FileHelper.NormalizePath(path));
+				var stream = Android.ApkExpansionContentProvider.Open(FileHelper.NormalizePath(path));
 				if(stream != null)
 					return stream;
-#endif
 				throw e;
 			}
 		}

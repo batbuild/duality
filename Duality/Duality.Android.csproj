@@ -68,7 +68,7 @@
   <ItemGroup>
     <Compile Include="Components\FrameCompleteEventArgs.cs" />
     <Compile Include="Components\PassCompleteEventArgs.cs" />
-    <Compile Include="DebugContent.cs" />
+    <Compile Include="ApkExpansionContentProvider.cs" />
     <Compile Include="Drawing\CommonShaderVariables.cs" />
     <Compile Include="Drawing\DrawBatchPool.cs" />
     <Compile Include="Drawing\GlobalDynamicIndexedVertexBuffer.cs" />

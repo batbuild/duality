@@ -35,10 +35,8 @@ namespace Duality.Utility
 			var fileExists = File.Exists(NormalizePath(path));
 			if(fileExists == false)
 				fileExists = filesInDataDir.Contains(NormalizePath(path));
-#if DEBUGCONTENT
 			if(fileExists == false)
-				fileExists = Duality.Android.DebugContent.FileExists(path);
-#endif
+				fileExists = Android.ApkExpansionContentProvider.FileExists(path);
 			return fileExists;
 #else
 			return File.Exists(path);
