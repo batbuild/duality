@@ -100,6 +100,7 @@ namespace Duality
 		private	static	DualityMetaData				metaData			= null;
 		private	static	List<object>				disposeSchedule		= new List<object>();
 		private static	bool						windowFocused		= true;
+		private static	string						userDataPath		= "";
 
 		private static Dictionary<string, CorePlugin> plugins = new Dictionary<string, CorePlugin>();
 		private static List<Assembly> disposedPlugins = new List<Assembly>();
@@ -222,26 +223,12 @@ namespace Duality
 			get { return "appdata.dat"; }
 		}
 		/// <summary>
-		/// [GET] Returns the path where this DualityApp's <see cref="DualityUserData">user data</see> is located at.
+		/// [GET/SET] Gets and sets the path where this DualityApp's <see cref="DualityUserData">user data</see> is located at.
 		/// </summary>
 		public static string UserDataPath
 		{
-			get
-			{
-				if (AppData.LocalUserData)
-				{
-					return "userdata.dat";
-				}
-				else
-				{
-					return Path.Combine(
-						Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-						"Duality",
-						"AppData",
-						PathHelper.GetValidFileName(appData.AppName),
-						"userdata.dat");
-				}
-			}
+			get { return userDataPath; }
+			set { userDataPath = value; }
 		}
 		/// <summary>
 		/// [GET] Returns the path where this DualityApp's <see cref="DualityMetaData">meta data</see> is located at.
@@ -379,6 +366,9 @@ namespace Duality
 
 			LoadPlugins();
 			LoadAppData();
+
+			SetDefaultUserDataPath();
+			
 			LoadUserData();
 			LoadMetaData();
 
@@ -923,6 +913,23 @@ namespace Duality
 			}
 			CleanupAfterPlugins(plugins.Values);
 			plugins.Clear();
+		}
+		
+		private static void SetDefaultUserDataPath()
+		{
+			if (AppData.LocalUserData)
+			{
+				userDataPath = "userdata.dat";
+			}
+			else
+			{
+				userDataPath = Path.Combine(
+					Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+					"Duality",
+					"AppData",
+					PathHelper.GetValidFileName(appData.AppName),
+					"userdata.dat");
+			}
 		}
 
 		internal static void ReloadPlugin(string pluginFilePath)
