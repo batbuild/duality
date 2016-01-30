@@ -448,6 +448,7 @@ namespace Duality.Drawing
 				var drawBatch = drawBatchPool.Get<T>(material, vertexMode, zSortIndex);
 				((DrawBatch<T>) drawBatch).SetVertices(vertexBuffer, vertexCount);
 				buffer.Add(drawBatch);
+				drawBatch.ListSortIndex = buffer.Count - 1;
 			}
 			++this.numRawBatches;
 
@@ -659,10 +660,15 @@ namespace Duality.Drawing
 
 		private int DrawBatchComparer(IDrawBatch first, IDrawBatch second)
 		{
-			return first.SortIndex - second.SortIndex;
+			var diff = first.SortIndex - second.SortIndex;
+			return diff == 0 ? first.ListSortIndex.CompareTo(second.ListSortIndex) : diff;
 		}
 		private int DrawBatchComparerZSort(IDrawBatch first, IDrawBatch second)
 		{
+			// TODO: Check approximate equality instead
+			if (first.ZSortIndex == second.ZSortIndex)
+				return first.ListSortIndex.CompareTo(second.ListSortIndex);
+
 			return MathF.RoundToInt((second.ZSortIndex - first.ZSortIndex) * this.zSortAccuracy);
 		}
 		private void OptimizeBatches()
@@ -673,7 +679,7 @@ namespace Duality.Drawing
 			// Non-ZSorted
 			if (this.drawBuffer.Count > 1)
 			{
-				this.drawBuffer.StableSort(this.DrawBatchComparer);
+				this.drawBuffer.Sort(this.DrawBatchComparer);
 				this.drawBuffer = this.OptimizeBatches(this.drawBuffer);
 			}
 
@@ -681,7 +687,7 @@ namespace Duality.Drawing
 			if (this.drawBufferZSort.Count > 1)
 			{
 				// Stable sort assures maintaining draw order for batches of equal ZOrderIndex
-				this.drawBufferZSort.StableSort(this.DrawBatchComparerZSort);
+				this.drawBufferZSort.Sort(this.DrawBatchComparerZSort);
 				this.drawBufferZSort = this.OptimizeBatches(this.drawBufferZSort);
 			}
 

@@ -65,6 +65,8 @@ namespace Duality.Drawing
 			get { return this.zSortIndex; }
 		}
 
+		public int ListSortIndex { get; set; }
+
 		public int VertexCount
 		{
 			get { return this.vertexCount; }

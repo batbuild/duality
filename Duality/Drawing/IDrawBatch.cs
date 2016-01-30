@@ -7,6 +7,7 @@ namespace Duality.Drawing
 	{
 		int SortIndex { get; }
 		float ZSortIndex { get; }
+		int ListSortIndex { get; set; }
 		int VertexCount { get; }
 		VertexMode VertexMode { get; }
 		BatchInfo Material { get; }
