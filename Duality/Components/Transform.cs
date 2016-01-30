@@ -815,8 +815,10 @@ namespace Duality.Components
 
 			if (this.gameobj != null)
 			{
-				foreach (GameObject obj in this.gameobj.Children)
+				var count = this.gameobj.Children.Count;
+				for (int i = 0; i < count; i++)
 				{
+					GameObject obj = this.gameobj.Children[i];
 					Transform t = obj.Transform;
 					if (t == null) continue;
 					if (!t.ignoreParent)
