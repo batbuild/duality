@@ -181,6 +181,7 @@ namespace Duality.Components
 		[NonSerialized] private Rect				screenRect		= new Rect(0, 0, 1280, 720);
 		[NonSerialized]	private	List<Predicate<ICmpRenderer>>	editorRenderFilter	= new List<Predicate<ICmpRenderer>>();
 		[NonSerialized] private List<Component>		activeRenderers = new List<Component>();
+		[NonSerialized] private VertexC1P3T2[]		postProcessQuadVertices = new VertexC1P3T2[4];
 
 
 		/// <summary>
@@ -675,11 +676,12 @@ namespace Duality.Components
 				Rect targetRect = new Rect(this.drawDevice.TargetSize);
 
 				IDrawDevice device = this.drawDevice;
-				device.AddVertices(p.Input, VertexMode.Quads,
-					new VertexC1P3T2(targetRect.MinimumX,	targetRect.MinimumY,	0.0f,	0.0f,		0.0f),
-					new VertexC1P3T2(targetRect.MaximumX,	targetRect.MinimumY,	0.0f,	uvRatio.X,	0.0f),
-					new VertexC1P3T2(targetRect.MaximumX,	targetRect.MaximumY,	0.0f,	uvRatio.X,	uvRatio.Y),
-					new VertexC1P3T2(targetRect.MinimumX,	targetRect.MaximumY,	0.0f,	0.0f,		uvRatio.Y));
+				this.postProcessQuadVertices[0] = new VertexC1P3T2(targetRect.MinimumX, targetRect.MinimumY, 0.0f, 0.0f, 0.0f);
+				this.postProcessQuadVertices[1] = new VertexC1P3T2(targetRect.MaximumX, targetRect.MinimumY, 0.0f, uvRatio.X, 0.0f);
+				this.postProcessQuadVertices[2] = new VertexC1P3T2(targetRect.MaximumX, targetRect.MaximumY, 0.0f, uvRatio.X, uvRatio.Y);
+				this.postProcessQuadVertices[3] = new VertexC1P3T2(targetRect.MinimumX, targetRect.MaximumY, 0.0f, 0.0f, uvRatio.Y);
+
+				device.AddVertices(p.Input, VertexMode.Quads, this.postProcessQuadVertices);
 
 				this.drawDevice.EndRendering();
 				Profile.TimePostProcessing.EndMeasure();
