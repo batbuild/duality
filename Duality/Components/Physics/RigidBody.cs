@@ -75,6 +75,8 @@ namespace Duality.Components.Physics
 		[NonSerialized]	private	bool			isProcessingEvents	= false;
 		[NonSerialized]	private	Body			body				= null;
 		[NonSerialized]	private	List<ColEvent>	eventBuffer			= new List<ColEvent>();
+		[NonSerialized] private Vector2			previousBodyPos		= Vector2.Zero;
+		[NonSerialized] private double			previousBodyAngle	= 0;
 
 
 		internal Body PhysicsBody
@@ -1051,12 +1053,20 @@ namespace Duality.Components.Physics
 					float bodyAngleVel = this.body.AngularVelocity;
 					float bodyAngle = this.body.Rotation - bodyAngleVel * (1.0f - Scene.PhysicsAlpha) * Time.SPFMult;
 					t.IgnoreParent = true; // Force ignore parent!
-					t.MoveToAbs(new Vector3(
-						PhysicsConvert.ToDualityUnit(bodyPos.X), 
-						PhysicsConvert.ToDualityUnit(bodyPos.Y), 
-						t.Pos.Z));
-					t.TurnToAbs(bodyAngle);
+
+					if(this.previousBodyPos != bodyPos)
+						t.MoveToAbs(new Vector3(
+							PhysicsConvert.ToDualityUnit(bodyPos.X), 
+							PhysicsConvert.ToDualityUnit(bodyPos.Y), 
+							t.Pos.Z));
+
+					if(this.previousBodyAngle != bodyAngle)
+						t.TurnToAbs(bodyAngle);
+
 					t.CommitChanges(this);
+
+					this.previousBodyPos = bodyPos;
+					this.previousBodyAngle = bodyAngle;
 				}
 			}
 
