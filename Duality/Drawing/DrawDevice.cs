@@ -486,6 +486,7 @@ namespace Duality.Drawing
 			else
 			{
 				buffer.Add(drawBatch);
+				drawBatch.ListSortIndex = buffer.Count - 1;
 			}
 			++this.numRawBatches;
 		}
