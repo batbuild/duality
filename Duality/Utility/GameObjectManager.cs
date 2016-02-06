@@ -148,12 +148,32 @@ namespace Duality
 		public void GetActiveObjects(List<GameObject> buffer)
 		{
 			buffer.Clear();
+
+			// traverse the transform hierarchy depth first, from each root node down through it's children, culling out entire branches
+			// of the hierarchy for any parent that is inactive
 			foreach (var gameObject in allObj)
 			{
-				if (gameObject.Active == false)
+				if (gameObject.Parent != null)
 					continue;
 
-				buffer.Add(gameObject);
+				GetActiveObjectsPruned(gameObject, buffer);
+			}
+		}
+
+		private void GetActiveObjectsPruned(GameObject parent, List<GameObject> buffer)
+		{
+			// no need to check Active, as we've traversed down here from the parents. Any inactive parents would have already
+			// pruned this branch
+			if (parent.ActiveSingle == false)
+				return;
+
+			buffer.Add(parent);
+
+			var childCount = parent.Children.Count;
+			for (int i = 0; i < childCount; i++)
+			{
+				var gameObject = parent.Children[i];
+				GetActiveObjectsPruned(gameObject, buffer);
 			}
 		}
 
