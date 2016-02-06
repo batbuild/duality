@@ -357,9 +357,9 @@ namespace Duality
 		/// </summary>
 		public void GetChildrenDeep(List<GameObject> children)
 		{
+			children.Clear();
 			GetChildrenDeep(this, children);
 		}
-
 		/// <summary>
 		/// Sets or alters this GameObject's <see cref="Duality.Resources.PrefabLink"/> to reference the specified <see cref="Prefab"/>.
 		/// </summary>
@@ -481,7 +481,28 @@ namespace Duality
 			else
 				return false;
 		}
-		
+		/// <summary>
+		/// Given a game object, this method returns true if that game object is a descendant of this game object.
+		/// </summary>
+		/// <param name="gameObject"></param>
+		/// <returns>>True, if it is, false if not.</returns>
+		public bool IsAncestorOf(GameObject gameObject)
+		{
+			if (gameObject.Parent == null)
+				return false;
+
+			var parent = gameObject.Parent;
+			while (parent != null)
+			{
+				if (this == parent)
+					return true;
+
+				parent = parent.Parent;
+			}
+
+			return false;
+		}
+
 		/// <summary>
 		/// Returns a single <see cref="Component"/> that matches the specified <see cref="System.Type"/>.
 		/// </summary>
