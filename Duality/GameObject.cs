@@ -1027,7 +1027,7 @@ namespace Duality
 				this.eventComponentRemoving(this, new ComponentEventArgs(cmp));
 		}
 
-		private void GetChildrenDeep(GameObject parent, List<GameObject> children)
+		private static void GetChildrenDeep(GameObject parent, List<GameObject> children)
 		{
 			if (parent.children == null)
 				return;
