@@ -40,8 +40,11 @@ namespace Duality
 		private		bool						active		= true;
 		private		InitState					initState	= InitState.Initialized;
 		
-		[NonSerialized] private		List<int>	 executionOrder = new List<int>();
-		[NonSerialized] private List<GameObject> emptyList = new List<GameObject>();
+		[NonSerialized] private		List<GameObject>		emptyList				= new List<GameObject>();
+
+		// Specialized lists of components to avoid casts during the update loop
+		[NonSerialized] private		List<ICmpUpdatable>		updatableCompList		= new List<ICmpUpdatable>(); 
+		[NonSerialized] private		List<ICmpLateUpdatable> lateUpdatableCompList	= new List<ICmpLateUpdatable>(); 
 
 		// Built-in heavily used component lookup
 		private		Components.Transform		compTransform	= null;
@@ -657,6 +660,11 @@ namespace Duality
 			this.compMap.Add(cType, newComp);
 			this.compList.Add(newComp);
 
+			if(newComp is ICmpUpdatable)
+				this.updatableCompList.Add(newComp as ICmpUpdatable);
+			else if(newComp is ICmpLateUpdatable)
+				this.lateUpdatableCompList.Add(newComp as ICmpLateUpdatable);
+
 			SetComponentExecutionOrder();
 
 			if (newComp is Components.Transform) this.compTransform = (Components.Transform)(Component)newComp;
@@ -706,6 +714,11 @@ namespace Duality
 			this.compMap.Remove(cmp.GetType());
 			this.compList.Remove(cmp);
 
+			if (cmp is ICmpUpdatable)
+				this.updatableCompList.Remove((ICmpUpdatable) cmp);
+			else if (cmp is ICmpLateUpdatable)
+				this.lateUpdatableCompList.Remove((ICmpLateUpdatable) cmp);
+
 			if (cmp is Components.Transform) this.compTransform = null;
 
 			cmp.gameobj = null;
@@ -724,6 +737,8 @@ namespace Duality
 			}
 			this.compList.Clear();
 			this.compMap.Clear();
+			this.updatableCompList.Clear();
+			this.lateUpdatableCompList.Clear();
 			this.compTransform = null;
 		}
 
@@ -734,14 +749,15 @@ namespace Duality
 		/// <typeparam name="T">The base Type of Components that are iterated. May be an ICmp interface or similar.</typeparam>
 		/// <param name="forEach">The operation that is performed on each Component.</param>
 		/// <param name="where">An optional predicate that needs to return true in order to perform the operation.</param>
-		public void IterateComponents<T>(Action<T> forEach, Predicate<T> where = null) where T : class
+		public void IterateComponents<T>(Action<T> forEach, Predicate<Component> where = null) where T : class
 		{
-			for (int i = this.executionOrder.Count - 1; i >= 0; --i)
+			for (int i = this.compList.Count - 1; i >= 0; --i)
 			{
-				T cmp = this.compList[this.executionOrder[i]] as T;
+				var component = this.compList[i];
+				T cmp = component as T;
 
 				// Perform operation on elements matching predicate and Type
-				if (cmp != null && (where == null || where(cmp)))
+				if (cmp != null && (where == null || where(component)))
 				{
 					forEach(cmp);
 
@@ -876,24 +892,41 @@ namespace Duality
 
 		internal void Update()
 		{
-			// Update Components
-			this.IterateComponents<ICmpUpdatable>(
-				l => l.OnUpdate(),
-				l => (l as Component).Active);
+			for (int i = this.updatableCompList.Count - 1; i >= 0; --i)
+			{
+				var cmp = this.updatableCompList[i];
+
+				if (!((Component) cmp).ActiveSingle)
+					continue;
+
+				cmp.OnUpdate();
+
+				// Fix index, in case the collection changed
+				if (i > this.updatableCompList.Count) i = this.updatableCompList.Count;
+			}
 		}
 
 		internal void LateUpdate()
 		{
-			this.IterateComponents<ICmpLateUpdatable>(
-				l => l.OnUpdate(),
-				l => (l as Component).Active);
+			for (int i = this.lateUpdatableCompList.Count - 1; i >= 0; --i)
+			{
+				var cmp = this.lateUpdatableCompList[i];
+
+				if (!((Component)cmp).ActiveSingle)
+					continue;
+
+				cmp.OnUpdate();
+
+				// Fix index, in case the collection changed
+				if (i > this.lateUpdatableCompList.Count) i = this.lateUpdatableCompList.Count;
+			}
 		}
 		internal void EditorUpdate()
 		{
 			// Update Components
 			this.IterateComponents<ICmpEditorUpdatable>(
 				l => l.OnUpdate(),
-				l => (l as Component).Active);
+				l => l.Active);
 		}
 
 		/// <summary>
@@ -986,19 +1019,39 @@ namespace Duality
 		}
 		internal void OnActivate()
 		{
+			InitializedSpecializedComponentLists();
+
 			SetComponentExecutionOrder();
 
 			// Notify Components
 			this.IterateComponents<ICmpInitializable>(
 				l => l.OnInit(Component.InitContext.Activate),
-				l => (l as Component).ActiveSingle);
+				l => l.ActiveSingle);
 		}
+
+		private void InitializedSpecializedComponentLists()
+		{
+			this.updatableCompList.Clear();
+			this.lateUpdatableCompList.Clear();
+			for (int i = 0; i < this.compList.Count; i++)
+			{
+				Component cmp = this.compList[i];
+				if (cmp is ICmpUpdatable)
+					this.updatableCompList.Add((ICmpUpdatable) cmp);
+				else if (cmp is ICmpLateUpdatable)
+					this.lateUpdatableCompList.Add((ICmpLateUpdatable) cmp);
+			}
+
+			this.updatableCompList = SortByExecutionOrder(this.updatableCompList);
+			this.lateUpdatableCompList = SortByExecutionOrder(this.lateUpdatableCompList);
+		}
+
 		internal void OnDeactivate()
 		{
 			// Notify Components
 			this.IterateComponents<ICmpInitializable>(
 				l => l.OnShutdown(Component.ShutdownContext.Deactivate),
-				l => (l as Component).ActiveSingle);
+				l => l.ActiveSingle);
 		}
 		private void OnParentChanged(GameObject oldParent, GameObject newParent)
 		{
@@ -1043,26 +1096,12 @@ namespace Duality
 
 		private void SetComponentExecutionOrder()
 		{
-			this.executionOrder.Clear();
-			var compTypes = this.compList.Select(c => c.GetType()).ToList();
+			this.compList = SortByExecutionOrder(this.compList);
+		}
 
-			for (var i = 0; i < Scene.ComponentExecutionOrder.Count; i++)
-			{
-				var compIndex = compTypes.IndexOf(Scene.ComponentExecutionOrder[i]);
-				if (compIndex == -1)
-					continue;
-
-				this.executionOrder.Add(compIndex);
-			}
-
-			for (var i = 0; i < this.compList.Count; i++)
-			{
-				if(this.executionOrder.Contains(i) == false)
-					this.executionOrder.Add(i);
-			}
-
-			// the component collection will be iterated backwards, so reverse the order
-			this.executionOrder.Reverse();
+		private List<T> SortByExecutionOrder<T>(List<T> components)
+		{
+			return components.OrderByDescending(c => Scene.ComponentExecutionOrder.IndexOf(c.GetType())).ToList();
 		}
 
 		public override string ToString()
