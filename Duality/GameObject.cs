@@ -149,6 +149,39 @@ namespace Duality
 			}
 		}
 		/// <summary>
+		/// [GET / SET] Whether or not the GameObject is currently active. Unlike <see cref="Active"/>,
+		/// this property ignores parent activation states and depends only on this single GameObject.
+		/// Unlike ActiveSingle this property will only activate or deactivate children until it
+		/// hits an inactive branch. ActiveSingle ignores parent activation state and activates the
+		/// children even if their parents are inactive.
+		/// </summary>
+		/// <seealso cref="Active"/>
+		public bool ActiveSingleTree
+		{
+			get { return ActiveSingle; }
+			set
+			{
+				if (this.active != value)
+				{
+					if (this.scene != null && this.scene.IsCurrent)
+					{
+						if (value)
+						{
+							this.OnActivate();
+							ActivateChildren(this);
+						}
+						else
+						{
+							this.OnDeactivate();
+							DeactivateChildren(this);
+						}
+					}
+
+					this.active = value;
+				}
+			}
+		}
+		/// <summary>
 		/// [GET / SET] The name of this GameObject.
 		/// </summary>
 		public string Name
@@ -1103,6 +1136,35 @@ namespace Duality
 		{
 			return components.OrderByDescending(c => Scene.ComponentExecutionOrder.IndexOf(c.GetType())).ToList();
 		}
+
+		private static void ActivateChildren(GameObject gameObject)
+		{
+			var count = gameObject.Children.Count;
+			for (int i = 0; i < count; i++)
+			{
+				var child = gameObject.Children[i];
+				if (child.ActiveSingle == false)
+					continue;
+
+				child.OnActivate();
+				ActivateChildren(child);
+			}
+		}
+
+		private static void DeactivateChildren(GameObject gameObject)
+		{
+			var count = gameObject.Children.Count;
+			for (int i = 0; i < count; i++)
+			{
+				var child = gameObject.Children[i];
+				if (child.ActiveSingle == false)
+					continue;
+
+				child.OnDeactivate();
+				DeactivateChildren(child);
+			}
+		}
+
 
 		public override string ToString()
 		{
