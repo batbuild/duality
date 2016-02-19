@@ -201,8 +201,11 @@ namespace Duality.Resources
 					current.ResWeak.BreakPrefabLinks();
 
 				// Activate GameObjects
-				foreach (GameObject o in current.ResWeak.ActiveObjects.ToArray())
+				current.ResWeak.objectManager.GetActiveObjects(gameObjectScratchMemory);
+				foreach (GameObject o in gameObjectScratchMemory)
+				{
 					o.OnActivate();
+				}
 			}
 			isSwitching = false;
 			if (Entered != null) Entered(current, null);
