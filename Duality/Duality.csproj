@@ -122,6 +122,14 @@
     <Compile Include="Utility\Jobs\RayCastQuery.cs" />
     <Compile Include="Utility\Jobs\RayCastQueryJob.cs" />
     <Compile Include="Utility\Memory\ArrayPool.cs" />
+    <Compile Include="Utility\Profiling\ClientConnection.cs" />
+    <Compile Include="Utility\Profiling\FrameData.cs" />
+    <Compile Include="Utility\Profiling\FrameEvent.cs" />
+    <Compile Include="Utility\Profiling\FrameReceivedEventArgs.cs" />
+    <Compile Include="Utility\Profiling\MessageReader.cs" />
+    <Compile Include="Utility\Profiling\NetworkProfileServer.cs" />
+    <Compile Include="Utility\Profiling\NetworkProfileClient.cs" />
+    <Compile Include="Utility\Profiling\TcpChannel.cs" />
     <Compile Include="Utility\Streams\SubStreamWrapper.cs" />
     <Compile Include="Utility\Streams\StreamWrapper.cs" />
     <Compile Include="Utility\Streams\NonClosingStreamWrapper.cs" />

@@ -510,6 +510,7 @@ namespace Duality
 		{
 			isUpdating = true;
 			Profile.TimeUpdate.BeginMeasure();
+			NetworkProfileServer.BeginFrame();
 
 			Time.FrameTick();
 			Profile.FrameTick();
