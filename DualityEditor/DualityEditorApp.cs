@@ -1247,6 +1247,8 @@ namespace Duality.Editor
 					DualityApp.ExecutionContext lastContext = DualityApp.ExecContext;
 					if (fixedSingleStep) DualityApp.ExecContext = DualityApp.ExecutionContext.Game;
 
+					NetworkProfileServer.BeginFrame();
+
 					try
 					{
 						DualityApp.EditorUpdate(
