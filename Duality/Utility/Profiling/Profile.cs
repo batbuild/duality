@@ -3,6 +3,7 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System;
+using System.Diagnostics;
 using Duality.Drawing;
 
 namespace Duality
