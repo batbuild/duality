@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Duality
@@ -64,7 +65,9 @@ namespace Duality
 				var numEvents = reader.ReadInt32();
 				for (var i = 0; i < numEvents; i++)
 				{
-					var frameEvent = new FrameEvent {CounterName = reader.ReadString(), FrameTime = reader.ReadSingle()};
+					var nameLength = reader.ReadInt32();
+					var name = Encoding.ASCII.GetString(reader.ReadBytes(nameLength));
+					var frameEvent = new FrameEvent {CounterName = name, FrameTime = reader.ReadSingle()};
 					frameData.FrameEvents.Add(frameEvent);
 				}
 			}

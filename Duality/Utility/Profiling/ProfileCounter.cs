@@ -27,7 +27,9 @@ namespace Duality
 		protected	bool			lastUsed	= true;
 		private		bool			hasData		= false;
 		protected	int				sampleCount	= 0;
-
+		
+		// cache the byte version of the counter name to improve performance when using the network profiler
+		private		byte[]			fullNameBytes	= null;
 
 		/// <summary>
 		/// [GET / SET] The counters individual name, without any ancestor names included.
@@ -49,6 +51,7 @@ namespace Duality
 				this.path = value;
 				this.name = GetCounterName();
 				this.parentName = GetParentName();
+				this.fullNameBytes = Encoding.ASCII.GetBytes(this.path);
 			}
 		}
 
@@ -107,6 +110,13 @@ namespace Duality
 		{
 			get { return this.singleVal; }
 			set { this.singleVal = value; }
+		}
+		/// <summary>
+		/// [GET] The counter's name as a byte array.
+		/// </summary>
+		public byte[] FullNameBytes
+		{
+			get { return fullNameBytes; }
 		}
 
 

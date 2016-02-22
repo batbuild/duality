@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Diagnostics;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Duality
 {
@@ -32,11 +33,14 @@ namespace Duality
 			get { return this.valueGraphCursor; }
 		}
 
-
+		[MethodImpl(256)]
+		[Conditional("PROFILE")]
 		public void BeginMeasure()
 		{
 			this.watch.Restart();
 		}
+		[MethodImpl(256)]
+		[Conditional("PROFILE")]
 		public void EndMeasure()
 		{
 			this.value += this.watch.ElapsedTicks * 1000.0f / Stopwatch.Frequency;

@@ -367,7 +367,7 @@ namespace Duality
 			}
 
 			if(NetworkMode)
-				NetworkProfileServer.EndFrame(counterMap.Values.Where(c => c is TimeCounter).Cast<TimeCounter>().ToList());
+				NetworkProfileServer.EndFrame(GetUsedCounters().Where(c => c is TimeCounter).Cast<TimeCounter>().ToList());
 		}
 	}
 }

@@ -68,7 +68,8 @@ namespace Duality
 						writer.Write(numCounters);
 						foreach (var counter in counters)
 						{
-							writer.Write(counter.FullName);
+							writer.Write(counter.FullNameBytes.Length);
+							writer.Write(counter.FullNameBytes);
 							writer.Write(counter.LastValue);
 						}
 						
