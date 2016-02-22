@@ -186,9 +186,14 @@ namespace Duality.Resources
 			/// The glyphs kerning samples to the right.
 			/// </summary>
 			public	int[]	kerningSamplesRight;
+
+			public float offsetY;
+			public float advanceX;
+			public Rect uvRect;
 		}
 
-
+		private static Dictionary<Tuple<uint, uint>, Tuple<int, int>> kerningCache = new Dictionary<Tuple<uint, uint>, Tuple<int, int>>();
+		private static Dictionary<uint, GlyphData> glyphCache = new Dictionary<uint, GlyphData>();
 
 		private	string		familyName			= "LiberationSans-Regular";
 		private float size						= 8.0f;
@@ -865,45 +870,68 @@ namespace Duality.Resources
 
 		private void ProcessTextAdv(string text, int index, out GlyphData glyphData, out Rect uvRect, out float glyphXAdv, out float glyphXOff, out float glyphYOff)
 		{
-			if (this.face == null)
-				throw new InvalidOperationException("this.face is null for font " + this.familyName);
-
-			var charIndex = this.face.GetCharIndex(text[index]);
-			this.face.LoadGlyph(charIndex, LoadFlags.Render | LoadFlags.ForceAutohint, LoadTarget.Normal);
-
-			glyphData = new GlyphData
+			if (glyphCache.TryGetValue(text[index], out glyphData))
 			{
-				width = this.face.Glyph.Metrics.Width.ToInt32(),
-				height = this.face.Glyph.Metrics.Height.ToInt32()
-			};
-
-			if (this.fontAtlas == null)
-				this.fontAtlas = new FontAtlas(DefaultFontAtlasSize, this.renderMode, this.IsPixelGridAligned);
-
-			if (text[index] == ' ')
-			{
-				uvRect = Rect.Empty;
+				glyphXOff = 0;
+				glyphYOff = glyphData.offsetY;
+				uvRect = glyphData.uvRect;
 			}
 			else
 			{
-				uvRect = this.fontAtlas.GetTextureRect((int) charIndex);
-				if (uvRect == Rect.Empty)
-					uvRect = this.fontAtlas.Insert((int) charIndex, this.face);
-			}
+				if (this.face == null)
+					throw new InvalidOperationException("this.face is null for font " + this.familyName);
 
-			// what should glyphXOff actually be?
-			glyphXOff = 0;
-			glyphYOff = this.face.Size.Metrics.Ascender.ToInt32() - this.face.Glyph.GetGlyph().ToBitmapGlyph().Top;
+				var charIndex = this.face.GetCharIndex(text[index]);
+				this.face.LoadGlyph(charIndex, LoadFlags.Render | LoadFlags.ForceAutohint, LoadTarget.Normal);
+
+				glyphData = new GlyphData
+				{
+					width = this.face.Glyph.Metrics.Width.ToInt32(),
+					height = this.face.Glyph.Metrics.Height.ToInt32()
+				};
+
+				if (this.fontAtlas == null)
+					this.fontAtlas = new FontAtlas(DefaultFontAtlasSize, this.renderMode, this.IsPixelGridAligned);
+
+				if (text[index] == ' ')
+				{
+					uvRect = Rect.Empty;
+				}
+				else
+				{
+					uvRect = this.fontAtlas.GetTextureRect((int) charIndex);
+					if (uvRect == Rect.Empty)
+						uvRect = this.fontAtlas.Insert((int) charIndex, this.face);
+				}
+
+				// what should glyphXOff actually be?
+				glyphXOff = 0;
+				glyphYOff = this.face.Size.Metrics.Ascender.ToInt32() - this.face.Glyph.GetGlyph().ToBitmapGlyph().Top;
+
+				glyphData.offsetY = glyphYOff;
+				glyphData.advanceX = this.face.Glyph.Metrics.HorizontalAdvance.ToSingle();
+				glyphData.uvRect = uvRect;
+
+				glyphCache.Add(text[index], glyphData);
+			}
 
 			if (this.kerning && !this.monospace && index > 0 && this.face.HasKerning)
 			{
-				var previousIndex = this.face.GetCharIndex(text[index - 1]);
-				var kerning = this.face.GetKerning(charIndex, previousIndex, KerningMode.Default);
-				glyphXAdv = kerning.X.ToInt32();
+				Tuple<int, int> kerning;
+				if (kerningCache.TryGetValue(Tuple.Create<uint, uint>(text[index - 1], text[index]), out kerning) == false)
+				{
+					var previousIndex = this.face.GetCharIndex(text[index - 1]);
+					var charIndex = this.face.GetCharIndex(text[index]);
+					var ftKerning = this.face.GetKerning(charIndex, previousIndex, KerningMode.Default);
+					kerning = Tuple.Create(ftKerning.X.ToInt32(), ftKerning.Y.ToInt32());
+					kerningCache.Add(Tuple.Create<uint, uint>(text[index - 1], text[index]), kerning);
+				}
+
+				glyphXAdv = kerning.Item1;
 			}
 			else
 			{
-				glyphXAdv = this.face.Glyph.Metrics.HorizontalAdvance.ToSingle() + this.spacing;
+				glyphXAdv = glyphData.advanceX + this.spacing;
 			}
 		}
 

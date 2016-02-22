@@ -99,6 +99,16 @@ namespace Duality.Components.Renderers
 			this.text.Fonts = new[] { Font.GenericMonospace10 };
 		}
 
+		public void WarmUpFontCache(string characters)
+		{
+			if (this.text.Fonts == null) return;
+
+			for (int i = 0; i < this.text.Fonts.Length; i++)
+			{
+				this.text.Fonts[i].Res.MeasureText(characters);
+			}
+		}
+
 		public override void Draw(IDrawDevice device)
 		{
 			Vector3 posTemp = this.gameobj.Transform.Pos;
