@@ -1,16 +1,20 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using LZ4;
 
 namespace Duality
 {
 	public static class NetworkProfileServer
 	{
-		private static List<ClientConnection> _clients = new List<ClientConnection>();
-		private static object _syncLock = new object();
+		private static readonly TimeCounter TimeEndFrame = Profile.RequestCounter<TimeCounter>(@"NetworkProfiler\EndFrame");
+
+		private static BlockingCollection<byte[]> _transmitBuffer = new BlockingCollection<byte[]>();
+		private static ClientConnection _client;
 		private static bool _hasBeenInitialized;
 		private static TcpChannel _tcpChannel;
 		private static Stopwatch _frameTime;
@@ -22,20 +26,13 @@ namespace Duality
 
 			_tcpChannel = new TcpChannel(port);
 			_tcpChannel.ClientConnected += OnClientConnected;
+			Task.Factory.StartNew(TransmitData);
 
 			_frameTime = Stopwatch.StartNew();
 			_frameData = new FrameData {FrameEvents = new List<FrameEvent>()};
 			_hasBeenInitialized = true;
 		}
 
-		private static void OnClientConnected(TcpClient client)
-		{
-			lock (_syncLock)
-			{
-				_clients.Add(new ClientConnection { TcpClient = client, Stream = client.GetStream()});
-			}
-		}
-		
 		public static void BeginFrame()
 		{
 			if (_hasBeenInitialized == false)
@@ -50,70 +47,93 @@ namespace Duality
 			if (_hasBeenInitialized == false)
 				return;
 
-			Profile.BeginMeasure("NetworkProfiler\\EndFrame");
+			if (_client == null)
+				return;
+
+			TimeEndFrame.BeginMeasure();
 			_frameData.EndTime = _frameTime.ElapsedTicks;
 			var numCounters = counters.Count;
 
-			lock (_syncLock)
+			using (var memoryStream = new MemoryStream())
+			using (var writer = new BinaryWriter(memoryStream))
 			{
-				for (var i = _clients.Count - 1; i >= 0; i--)
+				writer.Write(_frameData.StartTime);
+				writer.Write(_frameData.EndTime);
+
+				writer.Write(numCounters);
+				foreach (var counter in counters)
 				{
-					var client = _clients[i];
-					using (var memoryStream = new MemoryStream())
-					using (var writer = new BinaryWriter(memoryStream))
-					{
-						writer.Write(_frameData.StartTime);
-						writer.Write(_frameData.EndTime);
-
-						writer.Write(numCounters);
-						foreach (var counter in counters)
-						{
-							writer.Write(counter.FullNameBytes.Length);
-							writer.Write(counter.FullNameBytes);
-							writer.Write(counter.LastValue);
-						}
-						
-						try
-						{
-							var compressed = LZ4Codec.Encode(memoryStream.ToArray(), 0, (int)memoryStream.Length);
-							client.Stream.Write(BitConverter.GetBytes(compressed.Length), 0, 4);
-							client.Stream.Write(BitConverter.GetBytes(memoryStream.Length), 0, 4);
-							client.Stream.Write(compressed, 0, compressed.Length);
-						}
-						catch (InvalidOperationException)
-						{ }
-						catch(IOException)
-						{ }
-						catch (SocketException)
-						{ }
-
-						if (client.TcpClient.Connected == false)
-						{
-							Log.Core.Write("Network profile client disconnected");
-							_clients.Remove(client);
-						}
-					}
+					writer.Write(counter.FullNameBytes.Length);
+					writer.Write(counter.FullNameBytes);
+					writer.Write(counter.LastValue);
 				}
+
+				_transmitBuffer.TryAdd(memoryStream.ToArray());
 			}
-			Profile.EndMeasure("NetworkProfiler\\EndFrame");
+
+			TimeEndFrame.EndMeasure();
 		}
 		
 		public static void Shutdown()
 		{
+			if (_transmitBuffer != null)
+				_transmitBuffer.CompleteAdding();
+
 			if (_tcpChannel != null)
 			{
 				_tcpChannel.Dispose();
 				_tcpChannel = null;
 			}
 
-			lock (_syncLock)
+			if (_client != null)
 			{
-				foreach (var tcpClient in _clients)
-				{
-					tcpClient.TcpClient.Close();
-				}
-				_clients.Clear();
+				_client.TcpClient.Close();
+				_client = null;
 			}
+		}
+
+		private static void TransmitData()
+		{
+			foreach (var data in _transmitBuffer.GetConsumingEnumerable())
+			{
+				if (_client == null || _client.TcpClient == null || _client.Stream == null)
+					continue;
+
+				try
+				{
+					var compressed = LZ4Codec.Encode(data, 0, data.Length);
+					_client.Stream.Write(BitConverter.GetBytes(compressed.Length), 0, 4);
+					_client.Stream.Write(BitConverter.GetBytes(data.Length), 0, 4);
+					_client.Stream.Write(compressed, 0, compressed.Length);
+				}
+				catch (InvalidOperationException e)
+				{
+					Log.Game.WriteError("An invalid operation occurred while sending data: {0}\nCallstack: {1}", e.Message, e.StackTrace);
+				}
+				catch (IOException e)
+				{
+					Log.Game.WriteError("An io exception occurred while sending data: {0}\nCallstack: {1}", e.Message, e.StackTrace);
+				}
+				catch (SocketException e)
+				{
+					Log.Game.WriteError("An socket exception occurred while sending data: {0}\nCallstack: {1}", e.Message, e.StackTrace);
+				}
+				catch (Exception e)
+				{
+					Log.Game.WriteError("An exception occurred while sending data: {0}\nCallstack: {1}", e.Message, e.StackTrace);
+				}
+
+				if (_client == null || _client.TcpClient.Connected == false)
+				{
+					Log.Core.Write("Network profile client disconnected");
+					_client = null;
+				}
+			}
+		}
+
+		private static void OnClientConnected(TcpClient client)
+		{
+			_client = new ClientConnection { TcpClient = client, Stream = client.GetStream() };
 		}
 	}
 }
