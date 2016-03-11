@@ -299,7 +299,10 @@ namespace Duality.Resources
 		[EditorHintFlags(MemberFlags.Invisible)]
 		public Material Material
 		{
-			get { return this.fontAtlas.Material; }
+			get
+			{
+				return this.fontAtlas == null ? null : this.fontAtlas.Material;
+			}
 		}
 		/// <summary>
 		/// [GET / SET] Additional spacing between each character. This is usually one tenth of the Fonts <see cref="Size"/>.
