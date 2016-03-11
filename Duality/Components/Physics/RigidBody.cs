@@ -1029,51 +1029,54 @@ namespace Duality.Components.Physics
 
 		void ICmpUpdatable.OnUpdate()
 		{
-			this.CheckValidTransform();
-
-			// Synchronize physical body / perform shape updates, etc.
-			this.RemoveDisposedJoints();
-			this.SynchronizeBodyShape();
-
-			// Update velocity and transform values
-			if (this.body != null)
+			using (Profile.TimeUpdateSceneRigidBody.ProfileScope)
 			{
-				this.linearVel = PhysicsConvert.ToDualityUnit(this.body.LinearVelocity) * Time.SPFMult;
-				this.angularVel = this.body.AngularVelocity * Time.SPFMult;
-				this.revolutions = this.body.Revolutions;
-				Transform t = this.gameobj.Transform;
-				if (this.bodyType == BodyType.Dynamic || this.bodyType == BodyType.Kinematic)
+				this.CheckValidTransform();
+
+				// Synchronize physical body / perform shape updates, etc.
+				this.RemoveDisposedJoints();
+				this.SynchronizeBodyShape();
+
+				// Update velocity and transform values
+				if (this.body != null)
 				{
-					// Make sure we're not overwriting any previously occuring changes
-					t.CommitChanges();
+					this.linearVel = PhysicsConvert.ToDualityUnit(this.body.LinearVelocity)*Time.SPFMult;
+					this.angularVel = this.body.AngularVelocity*Time.SPFMult;
+					this.revolutions = this.body.Revolutions;
+					Transform t = this.gameobj.Transform;
+					if (this.bodyType == BodyType.Dynamic || this.bodyType == BodyType.Kinematic)
+					{
+						// Make sure we're not overwriting any previously occuring changes
+						t.CommitChanges();
 
-					// The current PhysicsAlpha interpolation probably isn't the best one. Maybe replace later.
-					Vector2 bodyVel = this.body.LinearVelocity;
-					Vector2 bodyPos = this.body.Position - bodyVel * (1.0f - Scene.PhysicsAlpha) * Time.SPFMult;
-					float bodyAngleVel = this.body.AngularVelocity;
-					float bodyAngle = this.body.Rotation - bodyAngleVel * (1.0f - Scene.PhysicsAlpha) * Time.SPFMult;
-					t.IgnoreParent = true; // Force ignore parent!
+						// The current PhysicsAlpha interpolation probably isn't the best one. Maybe replace later.
+						Vector2 bodyVel = this.body.LinearVelocity;
+						Vector2 bodyPos = this.body.Position - bodyVel*(1.0f - Scene.PhysicsAlpha)*Time.SPFMult;
+						float bodyAngleVel = this.body.AngularVelocity;
+						float bodyAngle = this.body.Rotation - bodyAngleVel*(1.0f - Scene.PhysicsAlpha)*Time.SPFMult;
+						t.IgnoreParent = true; // Force ignore parent!
 
-					if(this.previousBodyPos != bodyPos)
-						t.MoveToAbs(new Vector3(
-							PhysicsConvert.ToDualityUnit(bodyPos.X), 
-							PhysicsConvert.ToDualityUnit(bodyPos.Y), 
-							t.Pos.Z));
+						if (this.previousBodyPos != bodyPos)
+							t.MoveToAbs(new Vector3(
+								PhysicsConvert.ToDualityUnit(bodyPos.X),
+								PhysicsConvert.ToDualityUnit(bodyPos.Y),
+								t.Pos.Z));
 
-					if(this.previousBodyAngle != bodyAngle)
-						t.TurnToAbs(bodyAngle);
+						if (this.previousBodyAngle != bodyAngle)
+							t.TurnToAbs(bodyAngle);
 
-					t.CommitChanges(this);
+						t.CommitChanges(this);
 
-					this.previousBodyPos = bodyPos;
-					this.previousBodyAngle = bodyAngle;
+						this.previousBodyPos = bodyPos;
+						this.previousBodyAngle = bodyAngle;
+					}
 				}
+
+				// Process events
+				this.ProcessCollisionEvents();
+
+				this.CheckValidTransform();
 			}
-
-			// Process events
-			this.ProcessCollisionEvents();
-
-			this.CheckValidTransform();
 		}
 		void ICmpEditorUpdatable.OnUpdate()
 		{

@@ -631,26 +631,29 @@ namespace Duality.Components
 
 		void ICmpUpdatable.OnUpdate()
 		{
-			this.CheckValidTransform();
-
-			// Calculate velocity values from last frames movement
-			if (MathF.Abs(Time.TimeMult) > float.Epsilon)
+			using (Profile.TimeUpdateSceneTransform.ProfileScope)
 			{
-				this.vel = this.tempVel;
-				this.velAbs = this.tempVelAbs;
-				this.angleVel = this.tempAngleVel;
-				this.angleVelAbs = this.tempAngleVelAbs;
-				this.tempVel = Vector3.Zero;
-				this.tempVelAbs = Vector3.Zero;
-				this.tempAngleVel = 0.0f;
-				this.tempAngleVelAbs = 0.0f;
+				this.CheckValidTransform();
+
+				// Calculate velocity values from last frames movement
+				if (MathF.Abs(Time.TimeMult) > float.Epsilon)
+				{
+					this.vel = this.tempVel;
+					this.velAbs = this.tempVelAbs;
+					this.angleVel = this.tempAngleVel;
+					this.angleVelAbs = this.tempAngleVelAbs;
+					this.tempVel = Vector3.Zero;
+					this.tempVelAbs = Vector3.Zero;
+					this.tempAngleVel = 0.0f;
+					this.tempAngleVelAbs = 0.0f;
+					this.CheckValidTransform();
+				}
+
+				// Clear change flags
+				this.CommitChanges();
+
 				this.CheckValidTransform();
 			}
-
-			// Clear change flags
-			this.CommitChanges();
-
-			this.CheckValidTransform();
 		}
 		void ICmpEditorUpdatable.OnUpdate()
 		{

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace Duality
 {
-	public class TimeCounter : ProfileCounter
+	public class TimeCounter : ProfileCounter, IDisposable
 	{
 		// Measurement
 		private	Stopwatch	watch				= new Stopwatch();
@@ -32,7 +32,14 @@ namespace Duality
 		{
 			get { return this.valueGraphCursor; }
 		}
-
+		public TimeCounter ProfileScope
+		{
+			get
+			{
+				BeginMeasure();
+				return this;
+			}
+		}
 		[MethodImpl(256)]
 		[Conditional("PROFILE")]
 		public void BeginMeasure()
@@ -45,6 +52,10 @@ namespace Duality
 		{
 			this.value += this.watch.ElapsedTicks * 1000.0f / Stopwatch.Frequency;
 			this.used = true;
+		}
+		public void Dispose()
+		{
+			EndMeasure();
 		}
 		public void Add(float value)
 		{

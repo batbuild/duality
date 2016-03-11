@@ -47,9 +47,12 @@ namespace Duality.Components
 		/// <returns></returns>
 		public virtual bool IsVisible(IDrawDevice device)
 		{
-			if ((device.VisibilityMask & VisibilityFlag.ScreenOverlay) != (this.visibilityGroup & VisibilityFlag.ScreenOverlay)) return false;
-			if ((this.visibilityGroup & device.VisibilityMask & VisibilityFlag.AllGroups) == VisibilityFlag.None) return false;
-			return device.IsCoordInView(this.gameobj.Transform.Pos, this.BoundRadius);
+			using (Profile.TimeIsVisible.ProfileScope)
+			{
+				if ((device.VisibilityMask & VisibilityFlag.ScreenOverlay) != (this.visibilityGroup & VisibilityFlag.ScreenOverlay)) return false;
+				if ((this.visibilityGroup & device.VisibilityMask & VisibilityFlag.AllGroups) == VisibilityFlag.None) return false;
+				return device.IsCoordInView(this.gameobj.Transform.Pos, this.BoundRadius);
+			}
 		}
 
 		protected override void OnCopyTo(Component target, Duality.Cloning.CloneProvider provider)
