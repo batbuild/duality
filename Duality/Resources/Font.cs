@@ -192,9 +192,6 @@ namespace Duality.Resources
 			public Rect uvRect;
 		}
 
-		private static Dictionary<Tuple<uint, uint>, Tuple<int, int>> kerningCache = new Dictionary<Tuple<uint, uint>, Tuple<int, int>>();
-		private static Dictionary<uint, GlyphData> glyphCache = new Dictionary<uint, GlyphData>();
-
 		private	string		familyName			= "LiberationSans-Regular";
 		private float size						= 8.0f;
 		private	FontStyle	style				= FontStyle.Regular;
@@ -205,6 +202,9 @@ namespace Duality.Resources
 		private	float		lineHeightFactor	= 1.0f;
 		private	bool		monospace			= true;
 		private	bool		kerning				= false;
+
+		[NonSerialized] private Dictionary<Tuple<uint, uint>, Tuple<int, int>>	kerningCache	= new Dictionary<Tuple<uint, uint>, Tuple<int, int>>();
+		[NonSerialized] private Dictionary<uint, GlyphData>						glyphCache		= new Dictionary<uint, GlyphData>();
 
 		[NonSerialized] private Library		library			= null;
 		[NonSerialized] private Face		face			= null;
