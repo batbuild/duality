@@ -260,7 +260,7 @@ namespace Duality.Resources
 						return;
 					}
 
-					this.face.SetCharSize(0, this.size, 0, Dpi);
+					this.face.SetPixelSizes((uint)this.size, (uint)this.size);
 					this.spacing = this.face.Size.Metrics.NominalWidth / 10.0f;
 				}
 			}
@@ -435,7 +435,7 @@ namespace Duality.Resources
 
 			library = new Library();
 			this.face = new Face(library, fontCache[this.familyName], 0);
-			this.face.SetCharSize(0, this.size, 0, Dpi);
+			this.face.SetPixelSizes((uint) this.Size, (uint) this.Size);
 
 			this.needsReload = false;
 
@@ -885,7 +885,7 @@ namespace Duality.Resources
 					throw new InvalidOperationException("this.face is null for font " + this.familyName);
 
 				var charIndex = this.face.GetCharIndex(text[index]);
-				this.face.LoadGlyph(charIndex, LoadFlags.Render | LoadFlags.ForceAutohint, LoadTarget.Normal);
+				this.face.LoadGlyph(charIndex, LoadFlags.Render, LoadTarget.Normal);
 
 				glyphData = new GlyphData
 				{
@@ -909,7 +909,7 @@ namespace Duality.Resources
 
 				// what should glyphXOff actually be?
 				glyphXOff = 0;
-				glyphYOff = this.face.Size.Metrics.Ascender.ToInt32() - this.face.Glyph.GetGlyph().ToBitmapGlyph().Top;
+				glyphYOff = this.face.Size.Metrics.Ascender.ToSingle() - this.face.Glyph.Metrics.HorizontalBearingY.ToSingle() + this.face.Size.Metrics.Descender.ToSingle();
 
 				glyphData.offsetY = glyphYOff;
 				glyphData.advanceX = this.face.Glyph.Metrics.HorizontalAdvance.ToSingle();
