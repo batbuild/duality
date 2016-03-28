@@ -206,6 +206,7 @@ namespace Duality
 		/// Saves a text report of the current profiling data to the specified file.
 		/// </summary>
 		/// <param name="filePath"></param>
+		[Conditional("PROFILE")]
 		public static void SaveTextReport(string filePath)
 		{
 			using (FileStream str = File.Open(filePath, FileMode.Create))
@@ -217,6 +218,7 @@ namespace Duality
 		/// Saves a text report of the current profiling data to the specified stream.
 		/// </summary>
 		/// <param name="filePath"></param>
+		[Conditional("PROFILE")]
 		public static void SaveTextReport(Stream stream)
 		{
 			string report = GetTextReport(counterMap.Values.Where(c => c.HasData), 
