@@ -121,6 +121,10 @@ namespace Duality
 		/// </summary>
 		public static event EventHandler Terminating = null;
 		/// <summary>
+		/// Called when Duality has completed a planned shutdown. It is also called in an editor environment.
+		/// </summary>
+		public static event EventHandler Terminated = null;
+		/// <summary>
 		/// Called when Duality needs to discard plugin data such as cached Types and values.
 		/// </summary>
 		public static event EventHandler DiscardPluginData = null;
@@ -501,6 +505,9 @@ namespace Duality
 
 			initialized = false;
 			execContext = ExecutionContext.Terminated;
+
+			if (unexpected == false)
+				OnTerminated();
 		}
 
 		/// <summary>
@@ -1111,6 +1118,11 @@ namespace Duality
 		{
 			if (Terminating != null)
 				Terminating(null, EventArgs.Empty);
+		}
+		private static void OnTerminated()
+		{
+			if (Terminated != null)
+				Terminated(null, EventArgs.Empty);
 		}
 		private static void OnDiscardPluginData()
 		{
