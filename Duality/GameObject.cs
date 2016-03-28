@@ -1071,7 +1071,7 @@ namespace Duality
 				Component cmp = this.compList[i];
 				if (cmp is ICmpUpdatable)
 					this.updatableCompList.Add((ICmpUpdatable) cmp);
-				else if (cmp is ICmpLateUpdatable)
+				if (cmp is ICmpLateUpdatable)
 					this.lateUpdatableCompList.Add((ICmpLateUpdatable) cmp);
 			}
 
