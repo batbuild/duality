@@ -327,30 +327,12 @@ namespace Duality.Components
 					continue;
 				
 				activeRenderers.Add(r);
-
-				// assume that each renderer is invisible in all camera passes, so that if it's visible in any, we can set this flag to
-				// false in that pass
-				if (r is ICmpNotifyWhenVisibilityChanges)
-					((ICmpNotifyWhenVisibilityChanges) r).IsInvisibleInAllCameraPasses = true;
 			}
 
 			foreach (Pass t in this.passes)
 			{
 				this.RenderSinglePass(viewportRect, t, activeRenderers);
 				OnPassRendered(t);
-			}
-
-			for (int i = 0; i < numActiveRenderers; i++)
-			{
-				var notifyVisibility = renderers[i] as ICmpNotifyWhenVisibilityChanges;
-				if (notifyVisibility == null)
-					continue;
-
-				if (notifyVisibility.WasVisible && notifyVisibility.IsInvisibleInAllCameraPasses)
-				{
-					notifyVisibility.WasVisible = false;
-					notifyVisibility.OnBecameInvisible();
-				}
 			}
 
 			OnFrameRendered();
@@ -718,18 +700,7 @@ namespace Duality.Components
 					
 					if (renderer.IsVisible(drawDevice) == false)
 						continue;
-
-					var comp = renderer as ICmpNotifyWhenVisibilityChanges;
-					if (comp != null)
-					{
-						if (comp.WasVisible == false)
-						{
-							comp.WasVisible = true;
-							comp.OnBecameVisible();
-						}
-						comp.IsInvisibleInAllCameraPasses = false;
-					}
-
+					
 					renderer.Draw(this.drawDevice);
 				}
 				Profile.TimeCollectDrawcalls.EndMeasure();

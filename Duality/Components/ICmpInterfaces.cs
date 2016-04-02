@@ -113,15 +113,6 @@ namespace Duality
 		void HandleMessage(GameObject sender, GameMessage msg);
 	}
 
-	public interface ICmpNotifyWhenVisibilityChanges
-	{
-		bool WasVisible { get; set; }
-		bool IsInvisibleInAllCameraPasses { get; set; }
-
-		void OnBecameVisible();
-		void OnBecameInvisible();
-	}
-
 	/// <summary>
 	/// Provides detailed information about a collision event.
 	/// </summary>
