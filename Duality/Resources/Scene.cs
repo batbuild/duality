@@ -248,7 +248,7 @@ namespace Duality.Resources
 		private	Vector2			globalGravity	= Vector2.UnitY * 33.0f;
 		private	GameObject[]	serializeObj	= null;
 		[NonSerialized] private	GameObjectManager					objectManager				= new GameObjectManager();
-		[NonSerialized] private	List<Component>						renderers					= new List<Component>();
+		[NonSerialized] private	List<ICmpRenderer>					renderers					= new List<ICmpRenderer>();
 		[NonSerialized] private Dictionary<Type,List<Component>>	componentyByType			= new Dictionary<Type,List<Component>>();
 		[NonSerialized] private IRendererVisibilityStrategy			visibilityStrategy;
 
@@ -324,7 +324,7 @@ namespace Duality.Resources
 
 		public static ReadOnlyCollection<Type> ComponentExecutionOrder { get { return new ReadOnlyCollection<Type>(componentExecutionOrder); } }
 
-		internal List<Component> Renderers
+		internal List<ICmpRenderer> Renderers
 		{
 			get { return renderers; }
 		}
@@ -336,8 +336,6 @@ namespace Duality.Resources
 		public Scene()
 		{
 			this.RegisterManagerEvents();
-
-			this.visibilityStrategy = new DefaultRendererVisibilityStrategy(renderers);
 		}
 
 		/// <summary>
@@ -576,12 +574,14 @@ namespace Duality.Resources
 		/// </summary>
 		/// <param name="device"></param>
 		/// <returns></returns>
-		public IEnumerable<ICmpRenderer> QueryVisibleRenderers(IDrawDevice device)
+		public IList<ICmpRenderer> QueryVisibleRenderers(IDrawDevice device)
 		{
 			if(this.visibilityStrategy == null)
-				return this.renderers.Where(r => r.Active && (r as ICmpRenderer).IsVisible(device)).OfType<ICmpRenderer>();
+				return this.renderers;
 
-			return this.visibilityStrategy.QueryVisibleRenderers(device);
+			var visibleRenderers = this.visibilityStrategy.QueryVisibleRenderers(device);
+			var list = visibleRenderers as IList<ICmpRenderer>;
+			return list ?? renderers.ToList();
 		}
 
 		/// <summary>
@@ -790,7 +790,8 @@ namespace Duality.Resources
 			cmpList.Add(cmp);
 
 			// Specialized lists
-			if (cmp is ICmpRenderer)	this.renderers.Add(cmp);
+			var renderer = cmp as ICmpRenderer;
+			if (renderer != null)	this.renderers.Add(renderer);
 		}
 		private void RemoveFromManagers(GameObject obj)
 		{
@@ -806,7 +807,8 @@ namespace Duality.Resources
 				cmpList.Remove(cmp);
 
 			// Specialized lists
-			if (cmp is ICmpRenderer)	this.renderers.Remove(cmp);
+			var renderer = cmp as ICmpRenderer;
+			if (renderer != null)	this.renderers.Remove(renderer);
 		}
 		private void RegisterManagerEvents()
 		{

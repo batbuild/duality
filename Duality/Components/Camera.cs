@@ -8,6 +8,7 @@ using OpenTK;
 
 using Duality.Editor;
 using Duality.Drawing;
+using Duality.Properties;
 using Duality.Resources;
 
 namespace Duality.Components
@@ -180,7 +181,7 @@ namespace Duality.Components
 		[NonSerialized]	private	byte[]				pickingBuffer	= new byte[4 * 256 * 256];
 		[NonSerialized] private Rect				screenRect		= new Rect(0, 0, 1280, 720);
 		[NonSerialized]	private	List<Predicate<ICmpRenderer>>	editorRenderFilter	= new List<Predicate<ICmpRenderer>>();
-		[NonSerialized] private List<Component>		activeRenderers = new List<Component>();
+		[NonSerialized] private List<ICmpRenderer>	activeRenderers = new List<ICmpRenderer>();
 		[NonSerialized] private VertexC1P3T2[]		postProcessQuadVertices = new VertexC1P3T2[4];
 
 
@@ -315,15 +316,16 @@ namespace Duality.Components
 			Profile.BeginMeasure(counterName);
 			Profile.TimeRender.BeginMeasure();
 
-			var renderers = Scene.Current.Renderers;
+			var renderers = Scene.Current.QueryVisibleRenderers(this.drawDevice);
 			activeRenderers.Clear();
 			var numActiveRenderers = renderers.Count;
 			for (int i = 0; i < numActiveRenderers; i++)
 			{
 				var r = renderers[i];
-				if (r.Active == false)
+				var cmp = r as Component;
+				if (cmp == null || cmp.Active == false)
 					continue;
-
+				
 				activeRenderers.Add(r);
 
 				// assume that each renderer is invisible in all camera passes, so that if it's visible in any, we can set this flag to
@@ -390,7 +392,7 @@ namespace Duality.Components
 
 				// Render Scene
 				this.drawDevice.BeginRendering(ClearFlag.All, ColorRgba.Black, 1.0f);
-				this.CollectDrawcalls(Scene.Current.Renderers.Where(r => r.Active).ToList());
+				this.CollectDrawcalls(Scene.Current.Renderers.Where(r => r is Component &&  ((Component)r).Active).ToList());
 				this.drawDevice.EndRendering();
 				this.drawDevice.PickingIndex = 0;
 
@@ -641,7 +643,7 @@ namespace Duality.Components
 			this.drawDevice.Perspective = this.perspective;
 			this.drawDevice.UseViewportScaling = this.UseViewportScaling;
 		}
-		private void RenderSinglePass(Rect viewportRect, Pass p, List<Component> activeRenderers)
+		private void RenderSinglePass(Rect viewportRect, Pass p, List<ICmpRenderer> renderers)
 		{
 			this.drawDevice.VisibilityMask = this.visibilityMask & p.VisibilityMask;
 			this.drawDevice.RenderMode = p.MatrixMode;
@@ -654,7 +656,7 @@ namespace Duality.Components
 				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth, p.Output.IsAvailable ? false : UseViewportScaling);
 				try
 				{
-					this.CollectDrawcalls(activeRenderers);
+					this.CollectDrawcalls(renderers);
 					p.NotifyCollectDrawcalls(this.drawDevice);
 				}
 				catch (Exception e)
@@ -687,7 +689,7 @@ namespace Duality.Components
 				Profile.TimePostProcessing.EndMeasure();
 			}
 		}
-		private void CollectDrawcalls(List<Component> activeRenderers)
+		private void CollectDrawcalls(List<ICmpRenderer> renderers)
 		{
 			// If no visibility groups are met, don't bother looking for renderers
 			if ((this.drawDevice.VisibilityMask & VisibilityFlag.AllGroups) == VisibilityFlag.None) return;
@@ -709,16 +711,15 @@ namespace Duality.Components
 			else
 			{
 				Profile.TimeCollectDrawcalls.BeginMeasure();
-				var count = activeRenderers.Count;
+				var count = renderers.Count;
 				for (int i = 0; i < count; i++)
 				{
-					var renderer = activeRenderers[i];
-					ICmpRenderer r = (ICmpRenderer) renderer;
+					var renderer = renderers[i];
 					
-					var comp = renderer as ICmpNotifyWhenVisibilityChanges;
-					if (r.IsVisible(drawDevice) == false)
+					if (renderer.IsVisible(drawDevice) == false)
 						continue;
-					
+
+					var comp = renderer as ICmpNotifyWhenVisibilityChanges;
 					if (comp != null)
 					{
 						if (comp.WasVisible == false)
@@ -729,7 +730,7 @@ namespace Duality.Components
 						comp.IsInvisibleInAllCameraPasses = false;
 					}
 
-					r.Draw(this.drawDevice);
+					renderer.Draw(this.drawDevice);
 				}
 				Profile.TimeCollectDrawcalls.EndMeasure();
 			}
