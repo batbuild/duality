@@ -719,7 +719,7 @@ namespace Duality.Resources
 		/// <summary>
 		/// Clears the contents of this texture
 		/// </summary>
-		public void Clear()
+		public unsafe void Clear()
 		{
 			DualityApp.GuardSingleThreadState();
 
@@ -727,7 +727,8 @@ namespace Duality.Resources
 			GL.GetInteger(GetPName.TextureBinding2D, out lastTexId);
 			GL.BindTexture(TextureTarget.Texture2D, this.glTexId);
 
-			GL.ClearTexImage(this.glTexId, 0, GLPixelFormat.Rgba, this.pixelType, (IntPtr)null);
+			var data = stackalloc byte[this.PixelWidth * this.PixelHeight * 4];
+			GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, this.PixelWidth, this.PixelHeight, (PixelFormat)this.pixelformat, this.pixelType, new IntPtr(data));
 
 			GL.BindTexture(TextureTarget.Texture2D, lastTexId);
 		}
