@@ -53,6 +53,7 @@ namespace Duality
 			this.value += this.watch.ElapsedTicks * 1000.0f / Stopwatch.Frequency;
 			this.used = true;
 		}
+		[MethodImpl(256)]
 		public void Dispose()
 		{
 			EndMeasure();
