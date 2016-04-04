@@ -1403,5 +1403,12 @@ namespace Duality
 				throw new ArgumentOutOfRangeException("value", string.Format("Invalid float value detected: {0}", value));
 			}
 		}
+
+		public static bool Approx(this float a, float b, double error)
+		{
+			double difference = Math.Abs(a - b);
+			double magnitude = Math.Max(Math.Abs(a), Math.Abs(b));
+			return difference <= error * magnitude;
+		}
 	}
 }

@@ -7,6 +7,7 @@ namespace Duality.Drawing
 	public class DrawBatchPool
 	{
 		private Dictionary<PoolKey, Queue<IDrawBatch>> _pool = new Dictionary<PoolKey, Queue<IDrawBatch>>();
+		private List<ActiveBatch> _activeBatches = new List<ActiveBatch>(); 
 
 		public IDrawBatch Get<T>(BatchInfo material, VertexMode vertexMode, float zSortIndex) where T : struct, IVertexData
 		{
@@ -18,21 +19,28 @@ namespace Duality.Drawing
 				_pool.Add(poolKey, queue);
 			}
 
-			return queue.Count == 0 ? new DrawBatch<T>(material, vertexMode, null, 0, zSortIndex) { Pooled = true } : queue.Dequeue();
+			var drawBatch = queue.Count == 0 ? new DrawBatch<T>(material, vertexMode, null, 0, zSortIndex) { Pooled = true} : queue.Dequeue();
+			_activeBatches.Add(new ActiveBatch(drawBatch, poolKey));
+			return drawBatch;
 		}
 
-		public void Release(IDrawBatch drawBatch)
+		public void ReleaseAll()
 		{
-			var poolKey = new PoolKey { Material = drawBatch.Material, VertexMode = drawBatch.VertexMode, ZSortIndex = drawBatch.ZSortIndex };
-
-			Queue<IDrawBatch> queue;
-			if (_pool.TryGetValue(poolKey, out queue) == false)
+			foreach (var activeBatch in _activeBatches)
 			{
-				queue = new Queue<IDrawBatch>();
-				_pool.Add(poolKey, queue);
+				var poolKey = activeBatch.PoolKey;
+
+				Queue<IDrawBatch> queue;
+				if (_pool.TryGetValue(poolKey, out queue) == false)
+				{
+					queue = new Queue<IDrawBatch>();
+					_pool.Add(poolKey, queue);
+				}
+
+				queue.Enqueue(activeBatch.DrawBatch);
 			}
 
-			queue.Enqueue(drawBatch);
+			_activeBatches.Clear();
 		}
 
 		private struct PoolKey : IEquatable<PoolKey>
@@ -78,6 +86,18 @@ namespace Duality.Drawing
 				if (ReferenceEquals(null, obj)) return false;
 				return obj is PoolKey && Equals((PoolKey)obj);
 			}
+		}
+
+		private struct ActiveBatch
+		{
+			public ActiveBatch(IDrawBatch drawBatch, PoolKey poolKey)
+			{
+				DrawBatch = drawBatch;
+				PoolKey = poolKey;
+			}
+
+			public IDrawBatch DrawBatch { get; private set; }
+			public PoolKey PoolKey { get; private set; }
 		}
 	}
 }

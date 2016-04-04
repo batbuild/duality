@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
 
@@ -583,17 +584,7 @@ namespace Duality.Drawing
 
 			this.FinishBatchRendering();
 
-			for (int i = 0; i < this.drawBuffer.Count; i++)
-			{
-				if (this.drawBuffer[i].Pooled)
-					this.drawBatchPool.Release(this.drawBuffer[i]);
-			}
-
-			for (int i = 0; i < this.drawBufferZSort.Count; i++)
-			{
-				if (this.drawBufferZSort[i].Pooled)
-					this.drawBatchPool.Release(this.drawBufferZSort[i]);
-			}
+			this.drawBatchPool.ReleaseAll();
 
 			this.drawBuffer.Clear();
 			this.drawBufferZSort.Clear();
@@ -667,7 +658,7 @@ namespace Duality.Drawing
 		private int DrawBatchComparerZSort(IDrawBatch first, IDrawBatch second)
 		{
 			// TODO: Check approximate equality instead
-			if (first.ZSortIndex == second.ZSortIndex)
+			if (first.ZSortIndex.Approx(second.ZSortIndex, 1 / this.zSortAccuracy))
 				return first.ListSortIndex.CompareTo(second.ListSortIndex);
 
 			return MathF.RoundToInt((second.ZSortIndex - first.ZSortIndex) * this.zSortAccuracy);
