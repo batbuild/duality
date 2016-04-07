@@ -18,6 +18,7 @@ namespace Duality
 		public static readonly TimeCounter	TimeFrame;
 		public static readonly TimeCounter	TimeUpdate;
 		public static readonly TimeCounter	TimeUpdateScene;
+		public static readonly TimeCounter	TimeUpdateSceneSendMessage;
 		public static readonly TimeCounter	TimeUpdateSceneTransform;
 		public static readonly TimeCounter	TimeUpdateSceneRigidBody;
 		public static readonly TimeCounter	TimeUpdateAudio;
@@ -60,6 +61,7 @@ namespace Duality
 			TimeUpdate					= RequestCounter<TimeCounter>(@"Duality\Frame\Update");
 			TimeUpdatePhysicsController	= RequestCounter<TimeCounter>(@"Duality\Frame\Update\Physics\Controller");
 			TimeUpdateScene				= RequestCounter<TimeCounter>(@"Duality\Frame\Update\Scene");
+			TimeUpdateSceneSendMessage	= RequestCounter<TimeCounter>(@"Duality\Frame\Update\Scene\SendMessage");
 			TimeUpdateSceneTransform	= RequestCounter<TimeCounter>(@"Duality\Frame\Update\Scene\TransformComponent");
 			TimeUpdateSceneRigidBody	= RequestCounter<TimeCounter>(@"Duality\Frame\Update\Scene\RigidBodyComponent");
 			TimeUpdatePhysicsContinous	= RequestCounter<TimeCounter>(@"Duality\Frame\Update\Physics\Continous");

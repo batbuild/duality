@@ -63,6 +63,7 @@ namespace Duality
 			this.value += value;
 			this.used = true;
 		}
+		[Conditional("PROFILE")]
 		public void Set(float value)
 		{
 			this.value = value;

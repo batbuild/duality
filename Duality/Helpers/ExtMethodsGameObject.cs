@@ -29,6 +29,12 @@ namespace Duality.Helpers
 
 		public static void SendMessage(this GameObject sender, GameMessage msg, GameObject target)
 		{
+			using(Profile.TimeUpdateSceneSendMessage.ProfileScope)
+				SendMessageProfiled(sender, msg, target);
+		}
+
+		private static void SendMessageProfiled(GameObject sender, GameMessage msg, GameObject target)
+		{
 			if (msg == null)
 			{
 				Log.Game.WriteWarning("ExtMethodsGameObject: Tried to send a null message.\n{0}", Environment.StackTrace);
@@ -48,8 +54,6 @@ namespace Duality.Helpers
 				if (!target.Active)
 				{
 					_currentReceivers = _receiverStack.Pop();
-
-					Log.Game.WriteWarning("{0}: Message type '{1}' sent to inactive game object '{2}'. Inactive game objects don't respond to messages", Log.CurrentMethod(), msg.GetType().Name, target);
 					return;
 				}
 
@@ -66,13 +70,13 @@ namespace Duality.Helpers
 				for (int i = _currentReceivers.Count - 1; i >= 0; i--)
 				{
 					var receiver = _currentReceivers[i];
-				
-					if (receiver == null || ((Component)receiver).Disposed || ((Component)receiver).Active == false)
+
+					if (receiver == null || ((Component) receiver).Disposed || ((Component) receiver).Active == false)
 						continue;
 
 					receiver.HandleMessage(sender, msg);
 
-					if (i > _currentReceivers.Count) 
+					if (i > _currentReceivers.Count)
 						i = _currentReceivers.Count;
 
 					if (msg.Handled)
