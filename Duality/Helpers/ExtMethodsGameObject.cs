@@ -48,8 +48,6 @@ namespace Duality.Helpers
 				if (!target.Active)
 				{
 					_currentReceivers = _receiverStack.Pop();
-
-					Log.Game.WriteWarning("{0}: Message type '{1}' sent to inactive game object '{2}'. Inactive game objects don't respond to messages", Log.CurrentMethod(), msg.GetType().Name, target);
 					return;
 				}
 
