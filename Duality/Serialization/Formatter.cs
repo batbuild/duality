@@ -29,7 +29,7 @@ namespace Duality.Serialization
 	/// <summary>
 	/// Base class for Dualitys serializers.
 	/// </summary>
-	public abstract class Formatter : IDisposable
+	public abstract class Formatter : IDisposable, IFormatter
 	{
 		/// <summary>
 		/// Declares a <see cref="System.Reflection.FieldInfo">field</see> blocker. If a field blocker
