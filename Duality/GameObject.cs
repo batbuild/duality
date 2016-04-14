@@ -26,6 +26,8 @@ namespace Duality
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageGameObject)]
 	public sealed class GameObject : IManageableObject, ICloneable, Serialization.IUniqueIdentifyable
 	{
+		private static List<GameObject>			emptyList	= new List<GameObject>();
+
 		[NonSerialized] 
 		private		Scene						scene		= null;
 		private		GameObject					parent		= null;
@@ -38,9 +40,8 @@ namespace Duality
 		private		bool						active		= true;
 		private		InitState					initState	= InitState.Initialized;
 		
-		[NonSerialized] private		List<int>	 executionOrder = new List<int>();
-		[NonSerialized] private List<GameObject> emptyList = new List<GameObject>();
-
+		[NonSerialized] private	List<int>		executionOrder = new List<int>();
+		
 		// Built-in heavily used component lookup
 		private		Components.Transform		compTransform	= null;
 		
