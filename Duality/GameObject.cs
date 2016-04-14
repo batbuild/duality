@@ -28,6 +28,8 @@ namespace Duality
 #endif
 	public sealed class GameObject : IManageableObject, ICloneable, Serialization.IUniqueIdentifyable
 	{
+		private static List<GameObject>			emptyList	= new List<GameObject>();
+
 		[NonSerialized] 
 		private		Scene						scene		= null;
 		private		GameObject					parent		= null;
@@ -40,7 +42,7 @@ namespace Duality
 		private		bool						active		= true;
 		private		InitState					initState	= InitState.Initialized;
 		
-		[NonSerialized] private		List<GameObject>		emptyList				= new List<GameObject>();
+
 
 		// Specialized lists of components to avoid casts during the update loop
 		[NonSerialized] private		List<ICmpUpdatable>		updatableCompList		= new List<ICmpUpdatable>(); 
