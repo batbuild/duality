@@ -212,6 +212,17 @@ namespace Duality
 			this.WriteToStream(str, out streamName);
 			this.CheckedOnSaved(null);
 		}
+		public void Save<T>(Stream str, IFormatter formatter) where T:Resource
+		{
+			if (this.Disposed) throw new ApplicationException("Can't save a Ressource that has been disposed.");
+
+			string streamName;
+
+			this.CheckedOnSaving(null);
+			this.WriteToStream<T>(str, out streamName, formatter);
+			this.CheckedOnSaved(null);
+		}
+
 		private void SaveCompressed(Stream str)
 		{
 			str.Write(BitConverter.GetBytes('L'), 0, 1);
@@ -234,8 +245,30 @@ namespace Duality
 			}
 		}
 
+		private void WriteToStream<T>(Stream str, out string streamName, IFormatter customFormatter) where T:Resource
+		{
+			streamName = GetStreamName(str);
+
+			if (customFormatter != null)
+				customFormatter.WriteObject((T)this);
+		}
+
 		private void WriteToStream(Stream str, out string streamName)
 		{
+			streamName = GetStreamName(str);
+
+			using (var formatter = Formatter.Create(str))
+			{
+				formatter.AddFieldBlocker(Resource.NonSerializedResourceBlocker);
+				if (this is Duality.Resources.Scene) // This is an unfortunate hack. Refactor when necessary.
+					formatter.AddFieldBlocker(Resource.PrefabLinkedFieldBlocker);
+				formatter.WriteObject(this);
+			}
+		}
+
+		private static string GetStreamName(Stream str)
+		{
+			string streamName;
 			if (str is FileStream)
 			{
 				FileStream fileStream = str as FileStream;
@@ -246,15 +279,9 @@ namespace Duality
 			}
 			else
 				streamName = str.ToString();
-
-			using (var formatter = Formatter.Create(str))
-			{
-				formatter.AddFieldBlocker(Resource.NonSerializedResourceBlocker);
-				if (this is Duality.Resources.Scene) // This is an unfortunate hack. Refactor when necessary.
-					formatter.AddFieldBlocker(Resource.PrefabLinkedFieldBlocker);
-				formatter.WriteObject(this);
-			}
+			return streamName;
 		}
+
 		private bool CheckedOnSaving(string saveAsPath)
 		{
 			if (this.initState != InitState.Initialized) return true;
@@ -507,13 +534,13 @@ namespace Duality
 		/// uninitialized Resources or register them in the ContentProvider.
 		/// </param>
 		/// <returns>The Resource that has been loaded.</returns>
-		public static T Load<T>(Formatter formatter, string resPath = null, Action<T> loadCallback = null, bool initResource = true) where T : Resource
+		public static T Load<T>(IFormatter formatter, string resPath = null, Action<T> loadCallback = null, bool initResource = true) where T : Resource
 		{
 			T newContent = null;
 
 			try
 			{
-				Resource res = formatter.ReadObject<Resource>();
+				Resource res = formatter.ReadObject<T>();
 				if (res == null) throw new ApplicationException("Loading Resource failed");
 
 				res.initState = InitState.Initializing;

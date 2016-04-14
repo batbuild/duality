@@ -110,6 +110,7 @@
     <Compile Include="Drawing\IndexedDrawBatch.cs" />
     <Compile Include="Drawing\Resolution.cs" />
     <Compile Include="Resources\GeometryShader.cs" />
+    <Compile Include="Serialization\IFormatter.cs" />
     <Compile Include="Utility\DefaultRendererVisibilityStrategy.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsStream.cs" />
     <Compile Include="Utility\Extensions\ExtMethodsXml.cs" />
