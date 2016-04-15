@@ -515,7 +515,15 @@ namespace Duality
 		{
 			using (var formatter = Formatter.Create(str))
 			{
-				return Load<T>(formatter, resPath, loadCallback, initResource);
+				try
+				{
+					formatter.SetErrorContextInfo("Loading resource " + resPath);
+					return Load<T>(formatter, resPath, loadCallback, initResource);
+				}
+				finally
+				{
+					formatter.SetErrorContextInfo("");
+				}
 			}
 		}
 		/// <summary>

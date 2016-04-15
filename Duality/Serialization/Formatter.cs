@@ -233,10 +233,11 @@ namespace Duality.Serialization
 		/// </summary>
 		protected	ObjectIdManager		idManager		= new ObjectIdManager();
 
-		private	bool	disposed	= false;
-		private	Log		log			= Log.Core;
+		private		bool	disposed			= false;
+		private		Log		log					= Log.Core;
+		protected	string	errorContextInfo	= "";
 
-		
+
 		/// <summary>
 		/// [GET] Can this serializer read data?
 		/// </summary>
@@ -555,12 +556,13 @@ namespace Duality.Serialization
 			if (result == null)
 			{
 				if (objId != uint.MaxValue)
-					this.log.WriteError("Can't resolve Type '{0}' in object Id {1}. Type not found.", typeId, objId);
+					this.log.WriteError(GetContextualErrorMessage("Can't resolve Type '{0}' in object Id {1}. Type not found.", typeId, objId));
 				else
-					this.log.WriteError("Can't resolve Type '{0}'. Type not found.", typeId);
+					this.log.WriteError(GetContextualErrorMessage("Can't resolve Type '{0}'. Type not found.", typeId));
 			}
 			return result;
 		}
+
 		/// <summary>
 		/// Resolves the specified Member.
 		/// </summary>
@@ -573,9 +575,9 @@ namespace Duality.Serialization
 			if (result == null)
 			{
 				if (objId != uint.MaxValue)
-					this.log.WriteError("Can't resolve Member '{0}' in object Id {1}. Member not found.", memberId, objId);
+					this.log.WriteError(GetContextualErrorMessage("Can't resolve Member '{0}' in object Id {1}. Member not found.", memberId, objId));
 				else
-					this.log.WriteError("Can't resolve Member '{0}'. Member not found.", memberId);
+					this.log.WriteError(GetContextualErrorMessage("Can't resolve Member '{0}'. Member not found.", memberId));
 			}
 			return result;
 		}
@@ -607,7 +609,7 @@ namespace Duality.Serialization
 				catch (Exception) {}
 			}
 			
-			this.log.WriteWarning("Can't parse enum value '{0}' of Type '{1}'. Using numerical value '{2}' instead.", enumField, Log.Type(enumType), value);
+			this.log.WriteWarning(GetContextualErrorMessage("Can't parse enum value '{0}' of Type '{1}'. Using numerical value '{2}' instead.", enumField, Log.Type(enumType), value));
 			return (Enum)Enum.ToObject(enumType, value);
 		}
 
@@ -676,6 +678,14 @@ namespace Duality.Serialization
 		internal static void ClearTypeCache()
 		{
 			surrogates = null;
+		}
+
+		protected string GetContextualErrorMessage(string value, params object[] args)
+		{
+			var message = string.Format(value, args);
+			if (!string.IsNullOrWhiteSpace(this.errorContextInfo))
+				message = message + string.Format("\nError context: {0}", this.errorContextInfo);
+			return message;
 		}
 
 		/// <summary>
@@ -814,6 +824,11 @@ namespace Duality.Serialization
 			{
 				formatter.WriteObject(obj);
 			}
+		}
+
+		public void SetErrorContextInfo(string message)
+		{
+			errorContextInfo = message;
 		}
 	}
 }
