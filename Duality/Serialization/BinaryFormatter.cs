@@ -166,10 +166,10 @@ namespace Duality.Serialization
 				// If anything goes wrong, assure the stream position is valid and points to the next data entry
 				this.reader.BaseStream.Seek(lastPos + offset, SeekOrigin.Begin);
 				// Log the error
-				this.LocalLog.WriteError("Error reading object at '{0:X8}'-'{1:X8}': {2}", 
+				this.LocalLog.WriteError(GetContextualErrorMessage("Error reading object at '{0:X8}'-'{1:X8}': {2}", 
 					lastPos,
 					lastPos + offset, 
-					e is ApplicationException ? e.Message : Log.Exception(e));
+					e is ApplicationException ? e.Message : Log.Exception(e)));
 			}
 
 			return result;

@@ -361,7 +361,7 @@ namespace Duality.Serialization
 			}
 			catch (Exception e)
 			{
-				this.LocalLog.WriteError("Error reading object: {0}", e is ApplicationException ? e.Message : Log.Exception(e));
+				this.LocalLog.WriteError(GetContextualErrorMessage("Error reading object: {0}", e is ApplicationException ? e.Message : Log.Exception(e)));
 			}
 
 			return result;
