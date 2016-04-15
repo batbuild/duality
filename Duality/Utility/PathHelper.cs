@@ -72,9 +72,15 @@ namespace Duality
 
 			path = Path.GetFullPath(path);
 			baseDir = Path.GetDirectoryName(Path.GetFullPath(baseDir));
+
+			if (baseDir == null)
+				return false;
+
 			do
 			{
 				path = Path.GetDirectoryName(path);
+				if (path == null)
+					return false;
 				if (path == baseDir) return true;
 				if (path.Length < baseDir.Length) return false;
 			} while (!String.IsNullOrEmpty(path));
