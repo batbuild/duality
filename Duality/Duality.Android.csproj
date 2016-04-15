@@ -76,6 +76,7 @@
     <Compile Include="Drawing\IndexedDrawBatch.cs" />
     <Compile Include="Drawing\Resolution.cs" />
     <Compile Include="Resources\GeometryShader.cs" />
+    <Compile Include="Serialization\IFormatter.cs" />
     <Compile Include="Utility\EditorHint.cs">
       <SubType>Code</SubType>
     </Compile>
