@@ -26,8 +26,9 @@ namespace Duality.Drawing
 
 		public void ReleaseAll()
 		{
-			foreach (var activeBatch in _activeBatches)
+			for (var i = _activeBatches.Count - 1; i >= 0; i--)
 			{
+				var activeBatch = _activeBatches[i];
 				var poolKey = activeBatch.PoolKey;
 
 				Queue<IDrawBatch> queue;

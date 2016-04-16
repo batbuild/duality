@@ -447,7 +447,7 @@ namespace Duality.Drawing
 			else
 			{
 				var drawBatch = drawBatchPool.Get<T>(material, vertexMode, zSortIndex);
-				((DrawBatch<T>) drawBatch).SetVertices(vertexBuffer, vertexCount);
+				((DrawBatch<T>) drawBatch).SetVertices(vertexBuffer, vertexCount, zSortIndex);
 				buffer.Add(drawBatch);
 				drawBatch.ListSortIndex = buffer.Count - 1;
 			}
@@ -657,8 +657,7 @@ namespace Duality.Drawing
 		}
 		private int DrawBatchComparerZSort(IDrawBatch first, IDrawBatch second)
 		{
-			// TODO: Check approximate equality instead
-			if (first.ZSortIndex.Approx(second.ZSortIndex, 1 / this.zSortAccuracy))
+			if (first.ZSortIndex.Approx(second.ZSortIndex, 1f / this.zSortAccuracy))
 				return first.ListSortIndex.CompareTo(second.ListSortIndex);
 
 			return MathF.RoundToInt((second.ZSortIndex - first.ZSortIndex) * this.zSortAccuracy);

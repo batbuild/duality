@@ -184,7 +184,7 @@ namespace Duality.Drawing
 			Array.Copy(data, 0, this.vertices, this.vertexCount, length);
 
 			if (this.material.Technique.Res.NeedsZSort)
-				this.zSortIndex = (SumZPositions(data) + this.VertexCount * zSortIndex) / (this.VertexCount + length);
+				this.zSortIndex = (this.zSortIndex + CalcZSortIndex(data)) / (this.vertexCount + length);
 
 			this.vertexCount += length;
 		}
@@ -208,7 +208,7 @@ namespace Duality.Drawing
 			return this.zSortIndex;
 		}
 
-		public void SetVertices(T[] vertices, int vertexCount)
+		public void SetVertices(T[] vertices, int vertexCount, float zSortIndex)
 		{
 			if (this.vertexMode == VertexMode.Quads)
 			{
@@ -241,6 +241,7 @@ namespace Duality.Drawing
 
 				this.vertexCount = Math.Min(vertexCount, this.vertices.Length);
 			}
+			this.zSortIndex = zSortIndex;
 		}
 
 		public void Append(DrawBatch<T> other)
