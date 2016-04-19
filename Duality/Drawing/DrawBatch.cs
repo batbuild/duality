@@ -184,7 +184,7 @@ namespace Duality.Drawing
 			Array.Copy(data, 0, this.vertices, this.vertexCount, length);
 
 			if (this.material.Technique.Res.NeedsZSort)
-				this.zSortIndex = (this.zSortIndex + CalcZSortIndex(data)) / (this.vertexCount + length);
+				this.zSortIndex = CalcZSortIndex();
 
 			this.vertexCount += length;
 		}
