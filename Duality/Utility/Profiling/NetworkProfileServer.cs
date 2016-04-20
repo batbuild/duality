@@ -33,6 +33,7 @@ namespace Duality
 			_hasBeenInitialized = true;
 		}
 
+		[Conditional("PROFILE")]
 		public static void BeginFrame()
 		{
 			if (_hasBeenInitialized == false)
@@ -42,6 +43,7 @@ namespace Duality
 			_frameData.FrameEvents.Clear();
 		}
 
+		[Conditional("PROFILE")]
 		public static void EndFrame(IList<TimeCounter> counters)
 		{
 			if (_hasBeenInitialized == false)
