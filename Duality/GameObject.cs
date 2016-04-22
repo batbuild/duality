@@ -934,7 +934,14 @@ namespace Duality
 				if (!((Component) cmp).ActiveSingle)
 					continue;
 
+#if PROFILE
+				var counter = Profile.RequestCounter<TimeCounter>(Profile.TimeUpdateScene.FullName + @"\" + cmp.GetType().Name);
+				counter.BeginMeasure();
+#endif
 				cmp.OnUpdate();
+#if PROFILE
+				counter.EndMeasure();
+#endif
 
 				// Fix index, in case the collection changed
 				if (i > this.updatableCompList.Count) i = this.updatableCompList.Count;
@@ -950,8 +957,14 @@ namespace Duality
 				if (!((Component)cmp).ActiveSingle)
 					continue;
 
+#if PROFILE
+				var counter = Profile.RequestCounter<TimeCounter>(Profile.TimeUpdateScene.FullName + @"\LateUpdate\" + cmp.GetType().Name);
+				counter.BeginMeasure();
+#endif
 				cmp.OnUpdate();
-
+#if PROFILE
+				counter.EndMeasure();
+#endif
 				// Fix index, in case the collection changed
 				if (i > this.lateUpdatableCompList.Count) i = this.lateUpdatableCompList.Count;
 			}
