@@ -644,6 +644,7 @@ namespace Duality.Resources
 			if (data == IntPtr.Zero)
 				return;
 			AdjustSize(width, height);
+			this.SetupOpenGLRes();
 			// Load pixel data to video memory
 			if (Compressed)
 			{
