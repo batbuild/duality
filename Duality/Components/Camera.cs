@@ -177,9 +177,10 @@ namespace Duality.Components
 		[NonSerialized]	private	Texture				pickingTex		= null;
 		[NonSerialized]	private	int					pickingLast		= -1;
 		[NonSerialized]	private	byte[]				pickingBuffer	= new byte[4 * 256 * 256];
+		[NonSerialized] private Rect				screenRect		= new Rect(0, 0, 1280, 720);
 		[NonSerialized]	private	List<Predicate<ICmpRenderer>>	editorRenderFilter	= new List<Predicate<ICmpRenderer>>();
 
-		
+
 		/// <summary>
 		/// [GET / SET] The lowest Z value that can be displayed by the device.
 		/// </summary>
@@ -305,6 +306,7 @@ namespace Duality.Components
 		{
 			this.MakeAvailable();
 			this.UpdateDeviceConfig();
+			this.screenRect = viewportRect;
 
 			string counterName = Path.Combine("Cameras", this.gameobj.Name);
 			Profile.BeginMeasure(counterName);
@@ -354,7 +356,7 @@ namespace Duality.Components
 				this.drawDevice.ViewportRect = new Rect(this.pickingTex.PixelWidth, this.pickingTex.PixelHeight);
 
 				// Render Scene
-				this.drawDevice.BeginRendering(ClearFlag.All, ColorRgba.Black, 1.0f);
+				this.drawDevice.BeginRendering(ClearFlag.All, ColorRgba.Black, 1.0f, false);
 				this.CollectDrawcalls();
 				this.drawDevice.EndRendering();
 				this.drawDevice.PickingIndex = 0;
@@ -549,6 +551,38 @@ namespace Duality.Components
 			this.UpdateDeviceConfig();
 			return this.drawDevice.IsCoordInView(c, boundRad);
 		}
+		/// <summary>
+		/// Transforms screen space coordinates to viewport coordinates.
+		/// </summary>
+		/// <param name="screenPos"></param>
+		/// <returns></returns>
+		public Vector2 ScreenToViewportCoord(Vector2 screenPos)
+		{
+			if (UseViewportScaling == false)
+				return screenPos;
+
+			// the draw device could have been disposed if switching between scenes
+			if (this.drawDevice == null)
+			{
+				Log.Game.WriteWarning("ScreenToViewportCoord called after camera has been disposed: {0}", Log.CurrentStackFrame());
+				return screenPos;
+			}
+
+			float width = this.screenRect.W;
+			var targetAspectRatio = this.drawDevice.NominalViewportSize.X / this.drawDevice.NominalViewportSize.Y;
+			float height = (width / targetAspectRatio + 0.5f);
+
+			if (height > this.screenRect.H)
+			{
+				height = this.screenRect.H;
+				width = height * targetAspectRatio + 0.5f;
+			}
+
+			screenPos = new Vector2(screenPos.X - ((screenRect.W / 2) - (width / 2)), screenPos.Y - ((screenRect.H / 2) - (height / 2)));
+			screenPos.X *= this.screenRect.W / width;
+			screenPos.Y *= this.screenRect.H / height;
+			return screenPos;
+		}
 
 		private void SetupDevice()
 		{
@@ -584,7 +618,7 @@ namespace Duality.Components
 			if (p.Input == null)
 			{
 				// Render Scene
-				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth);
+				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth, p.Output.IsAvailable ? false : UseViewportScaling);
 				try
 				{
 					this.CollectDrawcalls();
@@ -599,7 +633,7 @@ namespace Duality.Components
 			else
 			{
 				Profile.TimePostProcessing.BeginMeasure();
-				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth);
+				this.drawDevice.BeginRendering(p.ClearFlags, p.ClearColor, p.ClearDepth, !p.Output.IsAvailable && UseViewportScaling);
 
 				Texture mainTex = p.Input.MainTexture.Res;
 				Vector2 uvRatio = mainTex != null ? mainTex.UVRatio : Vector2.One;

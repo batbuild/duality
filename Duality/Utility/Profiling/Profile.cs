@@ -1,13 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System;
-
-using OpenTK;
-
-using Duality.Resources;
 using Duality.Drawing;
 
 namespace Duality
@@ -84,6 +79,8 @@ namespace Duality
 			StatMemoryGarbageCollect2.IsSingleValue = true;
 		}
 
+		public static bool NetworkMode { get; set; }
+		
 		/// <summary>
 		/// Returns an existing <see cref="ProfileCounter"/> with the specified name.
 		/// </summary>
@@ -354,6 +351,9 @@ namespace Duality
 			{
 				c.TickFrame();
 			}
+
+			if(NetworkMode)
+				NetworkProfileServer.EndFrame(counterMap.Values.Where(c => c is TimeCounter).Cast<TimeCounter>().ToList());
 		}
 	}
 }

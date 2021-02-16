@@ -87,7 +87,6 @@ namespace Duality
 		private	static	KeyboardInput				keyboard			= new KeyboardInput();
 		private	static	JoystickInputCollection		joysticks			= new JoystickInputCollection();
 		private	static	GamepadInputCollection		gamepads			= new GamepadInputCollection();
-		private	static	SoundDevice					sound				= null;
 		private	static	ExecutionEnvironment		environment			= ExecutionEnvironment.Unknown;
 		private	static	ExecutionContext			execContext			= ExecutionContext.Terminated;
 		private	static	DualityAppData				appData				= null;
@@ -173,13 +172,6 @@ namespace Duality
 		public static GamepadInputCollection Gamepads
 		{
 			get { return gamepads; }
-		}
-		/// <summary>
-		/// [GET] Provides access to the main <see cref="SoundDevice"/>.
-		/// </summary>
-		public static SoundDevice Sound
-		{
-			get { return sound; }
 		}
 		/// <summary>
 		/// [GET / SET] Provides access to Duality's current <see cref="DualityAppData">application data</see>. This is never null.
@@ -379,7 +371,6 @@ namespace Duality
 			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 			AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
 
-			sound = new SoundDevice();
 			LoadPlugins();
 			LoadAppData();
 			LoadUserData();
@@ -431,10 +422,11 @@ namespace Duality
 			initialized = true;
 			InitPlugins();
 		}
-		public static void SetResolution(int width, int height, bool fullscreen)
+		public static void SetResolution(int width, int height, int refreshRate, bool fullscreen)
 		{
 			userData.GfxWidth = width;
 			userData.GfxHeight = height;
+			userData.GfxRefreshRate = refreshRate;
 			userData.GfxMode = fullscreen ? ScreenMode.Fullscreen : ScreenMode.Window;
 
 			SaveUserData();
@@ -491,8 +483,6 @@ namespace Duality
 					SaveUserData();
 					SaveMetaData();
 				}
-				sound.Dispose();
-				sound = null;
 				ClearPlugins();
 				Profile.SaveTextReport(environment == ExecutionEnvironment.Editor ? "perflog_editor.txt" : "perflog.txt");
 				Log.Core.Write("DualityApp terminated");
@@ -521,6 +511,7 @@ namespace Duality
 		{
 			isUpdating = true;
 			Profile.TimeUpdate.BeginMeasure();
+			NetworkProfileServer.BeginFrame();
 
 			Time.FrameTick();
 			Profile.FrameTick();
@@ -528,10 +519,8 @@ namespace Duality
 			OnBeforeUpdate();
 			UpdateUserInput();
 			Scene.Current.Update();
-			sound.Update();
 			OnAfterUpdate();
 			VisualLog.PrepareRenderLogEntries();
-			CheckOpenALErrors();
 			//CheckOpenGLErrors();
 			RunCleanup();
 
@@ -627,10 +616,9 @@ namespace Duality
 				Scene.Current.EditorUpdate();
 				foreach (GameObject obj in updateObjects) obj.Update();
 			}
-			sound.Update();
+
 			OnAfterUpdate();
 			VisualLog.PrepareRenderLogEntries();
-			CheckOpenALErrors();
 			//CheckOpenGLErrors();
 			RunCleanup();
 
@@ -1222,31 +1210,6 @@ namespace Duality
 			Log.Core.Write("Assembly loaded: {0}", args.LoadedAssembly.GetShortAssemblyName());
 		}
 
-
-		/// <summary>
-		/// Checks for errors that might have occurred during audio processing.
-		/// </summary>
-		/// <param name="silent">If true, errors aren't logged.</param>
-		/// <returns>True, if an error occurred, false if not.</returns>
-		public static bool CheckOpenALErrors(bool silent = false)
-		{
-			if (sound != null && !sound.IsAvailable) return false;
-			ALError error;
-			bool found = false;
-			while ((error = AL.GetError()) != ALError.NoError)
-			{
-				if (!silent)
-				{
-					Log.Core.WriteError(
-						"Internal OpenAL error, code {0} at {1}",
-						error,
-						Log.CurrentMethod(1));
-				}
-				found = true;
-				if (!silent && System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-			}
-			return found;
-		}
 		/// <summary>
 		/// Checks for errors that might have occurred during video processing. You should avoid calling this method due to performance reasons.
 		/// Only use it on suspect.

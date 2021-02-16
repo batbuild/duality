@@ -3,7 +3,6 @@ using System.Linq;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Drawing;
-
 using Duality;
 using Duality.Resources;
 
@@ -129,6 +128,7 @@ namespace Duality.Launcher
 					throw new ArgumentOutOfRangeException();
 			}
 
+			SetVSyncMode(this);
 			DualityApp.TargetResolution = new Vector2(ClientSize.Width, ClientSize.Height);
 			DualityApp.TargetMode = Context.GraphicsMode;
 		}
@@ -179,6 +179,13 @@ namespace Duality.Launcher
 				Log.Editor.Write("Shading language version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
 				Log.Core.PopIndent();
 
+				if (ValidateMinimumGPUSpec() == false)
+				{
+					DualityApp.Terminate();
+					DisplayDevice.Default.RestoreResolution();
+					return;
+				}
+
 				DualityApp.TargetResolution = new Vector2(launcherWindow.ClientSize.Width, launcherWindow.ClientSize.Height);
 				DualityApp.TargetMode = launcherWindow.Context.GraphicsMode;
 				ContentProvider.InitDefaultContent();
@@ -192,13 +199,56 @@ namespace Duality.Launcher
 
 				// Run the DualityApp
 				launcherWindow.CursorVisible = isDebugging || DualityApp.UserData.SystemCursorVisible;
-				launcherWindow.VSync = (isProfiling || isDebugging || !DualityApp.UserData.VSync) ? VSyncMode.Off : VSyncMode.On;
+				SetVSyncMode(launcherWindow);
 				launcherWindow.Run();
 
 				// Shut down the DualityApp
 				DualityApp.Terminate();
 				DisplayDevice.Default.RestoreResolution();
 			}
+		}
+
+		private static void SetVSyncMode(GameWindow window)
+		{
+			if (isProfiling || isDebugging)
+			{
+				window.VSync = VSyncMode.Off;
+				return;
+			}
+
+			if (DualityApp.UserData.VSync)
+			{
+				window.VSync = VSyncMode.Adaptive;
+
+				// adaptive not supported?
+				if (window.VSync != VSyncMode.Adaptive)
+				{
+					Log.Game.WriteWarning("Adaptive vsync not supported. Using normal vsync instead");
+					window.VSync = VSyncMode.On;
+				}
+			}
+			else
+			{
+				window.VSync = VSyncMode.Off;
+			}
+		}
+
+		private static bool ValidateMinimumGPUSpec()
+		{
+			float shaderLanguageVersion;
+			if (float.TryParse(GL.GetString(StringName.ShadingLanguageVersion), out shaderLanguageVersion))
+			{
+				if (shaderLanguageVersion < DualityApp.AppData.MinimumShaderVersion)
+				{
+					NativeMethods.MessageBox(IntPtr.Zero, 
+						string.Format(
+@"Your graphics card is reported as '{0}', which does not meet the minimum specification to run Onikira. 
+If you are on a system with both a discreet and integrated GPU, try switching to your discreet or high-performance GPU in your graphics card's control panel and try to run the game again.", GL.GetString(StringName.Renderer)),
+						"GPU under minimum spec", 0);
+					return false;
+				}
+			}
+			return true;
 		}
 
 		private static bool hasConsole = false;

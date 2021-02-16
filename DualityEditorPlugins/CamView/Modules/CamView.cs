@@ -428,7 +428,6 @@ namespace Duality.Editor.Plugins.CamView
 			this.nativeCamObj = new GameObject();
 			this.nativeCamObj.Name = "CamView Camera " + this.runtimeId;
 			this.nativeCamObj.AddComponent<Transform>();
-			this.nativeCamObj.AddComponent<SoundListener>().MakeCurrent();
 
 			Camera c = this.nativeCamObj.AddComponent<Camera>();
 			c.ClearColor = ColorRgba.DarkGrey;

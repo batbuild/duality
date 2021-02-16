@@ -34,9 +34,9 @@ namespace Duality.VisualStudio
 				ContentProvider.InitDefaultContent();
 
 				// Run tests
-				BitmapDebuggerVisualizer.TestShow(Pixmap.DualityIcon.Res);
-				BitmapDebuggerVisualizer.TestShow(Pixmap.DualityIcon.Res.MainLayer);
-				BitmapDebuggerVisualizer.TestShow(Texture.DualityIcon.Res);
+				BitmapDebuggerVisualizer.TestShow(Pixmap.Checkerboard.Res);
+				BitmapDebuggerVisualizer.TestShow(Pixmap.Checkerboard.Res.MainLayer);
+				BitmapDebuggerVisualizer.TestShow(Texture.Checkerboard.Res);
 				BitmapDebuggerVisualizer.TestShow(Font.GenericMonospace10.Res.Material.MainTexture.Res);
 			}
 			DualityApp.Terminate();

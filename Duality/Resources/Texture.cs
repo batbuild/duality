@@ -33,26 +33,6 @@ namespace Duality.Resources
 		private const int ProcessedPixmapLayerIndex = 1;
 
 		/// <summary>
-		/// [GET] A Texture showing the Duality icon.
-		/// </summary>
-		public static ContentRef<Texture> DualityIcon		{ get; private set; }
-		/// <summary>
-		/// [GET] A Texture showing the Duality icon without the text on it.
-		/// </summary>
-		public static ContentRef<Texture> DualityIconB		{ get; private set; }
-		/// <summary>
-		/// A Texture showing the Duality logo.
-		/// </summary>
-		public static ContentRef<Texture> DualityLogoBig	{ get; private set; }
-		/// <summary>
-		/// A Texture showing the Duality logo.
-		/// </summary>
-		public static ContentRef<Texture> DualityLogoMedium	{ get; private set; }
-		/// <summary>
-		/// A Texture showing the Duality logo.
-		/// </summary>
-		public static ContentRef<Texture> DualityLogoSmall	{ get; private set; }
-		/// <summary>
 		/// [GET] A plain white 1x1 Texture. Can be used as a dummy.
 		/// </summary>
 		public static ContentRef<Texture> White				{ get; private set; }
@@ -64,33 +44,20 @@ namespace Duality.Resources
 		internal static void InitDefaultContent()
 		{
 			const string VirtualContentPath				= ContentProvider.VirtualContentPath + "Texture:";
-			const string ContentPath_DualityIcon		= VirtualContentPath + "DualityIcon";
-			const string ContentPath_DualityIconB		= VirtualContentPath + "DualityIconB";
-			const string ContentPath_DualityLogoBig		= VirtualContentPath + "DualityLogoBig";
-			const string ContentPath_DualityLogoMedium	= VirtualContentPath + "DualityLogoMedium";
-			const string ContentPath_DualityLogoSmall	= VirtualContentPath + "DualityLogoSmall";
+
 			const string ContentPath_White				= VirtualContentPath + "White";
 			const string ContentPath_Checkerboard		= VirtualContentPath + "Checkerboard";
 
-			ContentProvider.AddContent(ContentPath_DualityIcon, new Texture(Pixmap.DualityIcon));
-			ContentProvider.AddContent(ContentPath_DualityIconB, new Texture(Pixmap.DualityIconB));
-			ContentProvider.AddContent(ContentPath_DualityLogoBig, new Texture(Pixmap.DualityLogoBig));
-			ContentProvider.AddContent(ContentPath_DualityLogoMedium, new Texture(Pixmap.DualityLogoMedium));
-			ContentProvider.AddContent(ContentPath_DualityLogoSmall, new Texture(Pixmap.DualityLogoSmall));
-			ContentProvider.AddContent(ContentPath_White, new Texture(Pixmap.White));
+			ContentProvider.AddContent(ContentPath_White, new Texture(Pixmap.White, keepPixmapDataResident: true));
 			ContentProvider.AddContent(ContentPath_Checkerboard, new Texture(
 				Pixmap.Checkerboard, 
 				SizeMode.Default,
 				TextureMagFilter.Nearest,
 				TextureMinFilter.Nearest,
 				TextureWrapMode.Repeat,
-				TextureWrapMode.Repeat));
+				TextureWrapMode.Repeat, 
+				keepPixmapDataResident: true));
 
-			DualityIcon			= ContentProvider.RequestContent<Texture>(ContentPath_DualityIcon);
-			DualityIconB		= ContentProvider.RequestContent<Texture>(ContentPath_DualityIconB);
-			DualityLogoBig		= ContentProvider.RequestContent<Texture>(ContentPath_DualityLogoBig);
-			DualityLogoMedium	= ContentProvider.RequestContent<Texture>(ContentPath_DualityLogoMedium);
-			DualityLogoSmall	= ContentProvider.RequestContent<Texture>(ContentPath_DualityLogoSmall);
 			White				= ContentProvider.RequestContent<Texture>(ContentPath_White);
 			Checkerboard		= ContentProvider.RequestContent<Texture>(ContentPath_Checkerboard);
 		}
@@ -257,6 +224,17 @@ namespace Duality.Resources
 			return tex;
 		}
 
+		/// <summary>
+		/// For most textures, once they're uploaded to OpenGL, we can safely dispose the pixel data, but there are cases,
+		/// such as with non-pregenerated fonts, where we want to keep the data around. This flag is false by default but can be set
+		/// to true for those special cases.
+		/// </summary>
+		private bool keepPixmapDataResident;
+		/// <summary>
+		/// If set to false, loads pixel data directly from the associated pixmap. Set this to true if the intention is to load pixel
+		/// data from some other source, using the LoadData(IntPtr...) override
+		/// </summary>
+		private bool useExternalPixelData;
 		
 		private	ContentRef<Pixmap>		basePixmap	= ContentRef<Pixmap>.Null;
 		private	Vector2					size		= Vector2.Zero;
@@ -471,6 +449,17 @@ namespace Duality.Resources
 				this.needsReload = true;
 			}
 		}
+		
+		/// <summary>
+		/// [GET / SET] If set to true, loads pixel data directly from the associated pixmap. Set this to false if the intention is to load pixel
+		/// data from some other source, using the LoadData(IntPtr...) override
+		/// </summary>
+		[EditorHintFlags(MemberFlags.Invisible)]
+		public bool UseExternalPixelData
+		{
+			get { return useExternalPixelData; }
+			set { useExternalPixelData = value; }
+		}
 
 		/// <summary>
 		/// Sets up a new, uninitialized Texture.
@@ -493,7 +482,8 @@ namespace Duality.Resources
 			TextureWrapMode wrapX		= TextureWrapMode.ClampToEdge,
 			TextureWrapMode wrapY		= TextureWrapMode.ClampToEdge,
 			PixelInternalFormat format	= PixelInternalFormat.Rgba,
-			PixelType pixelType			= PixelType.UnsignedByte)
+			PixelType pixelType			= PixelType.UnsignedByte,
+			bool keepPixmapDataResident	= false)
 		{
 			this.filterMag = filterMag;
 			this.filterMin = filterMin;
@@ -501,6 +491,7 @@ namespace Duality.Resources
 			this.wrapY = wrapY;
 			this.pixelformat = format;
 			this.pixelType = pixelType;
+			this.keepPixmapDataResident = keepPixmapDataResident;
 			this.LoadData(basePixmap, sizeMode);
 		}
 		/// <summary>
@@ -550,6 +541,7 @@ namespace Duality.Resources
 		{
 			this.LoadData(basePixmap, this.texSizeMode);
 		}
+
 		/// <summary>
 		/// Loads the specified <see cref="Duality.Resources.Pixmap">Pixmaps</see> pixel data.
 		/// </summary>
@@ -592,6 +584,7 @@ namespace Duality.Resources
 						// Fill border pixels manually - that's cheaper than ColorTransparentPixels here.
 						oldData.DrawOnto(pixelData, BlendMode.Solid, this.pxWidth, 0, 1, this.pxHeight, this.pxWidth - 1, 0);
 						oldData.DrawOnto(pixelData, BlendMode.Solid, 0, this.pxHeight, this.pxWidth, 1, 0, this.pxHeight - 1);
+						pixelData.Dispose();
 					}
 					else
 						pixelData = pixelData.CloneRescale(this.texWidth, this.texHeight, Pixmap.FilterMethod.Linear);
@@ -601,7 +594,7 @@ namespace Duality.Resources
 				if (Compressed && pixelData.CompressedData != null)
 				{
 					GL.CompressedTexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.CompressedRgbaS3tcDxt5Ext, pixelData.Width, pixelData.Height, 0, 
-						pixelData.CompressedData.Length, pixelData.CompressedData);
+						pixelData.CompressedImageSize, pixelData.CompressedData);
 				}
 				else
 				{
@@ -633,6 +626,55 @@ namespace Duality.Resources
 				this.SetupOpenGLRes();
 			}
 
+			GL.BindTexture(TextureTarget.Texture2D, lastTexId);
+
+			if (this.keepPixmapDataResident == false && basePixmap.IsLoaded)
+				basePixmap.Res.Dispose();
+		}
+
+		public void LoadData(IntPtr data, int width, int height)
+		{
+			DualityApp.GuardSingleThreadState();
+			if (this.glTexId == 0) this.glTexId = GL.GenTexture();
+
+			int lastTexId;
+			GL.GetInteger(GetPName.TextureBinding2D, out lastTexId);
+			GL.BindTexture(TextureTarget.Texture2D, this.glTexId);
+
+			if (data == IntPtr.Zero)
+				return;
+			AdjustSize(width, height);
+			this.SetupOpenGLRes();
+			// Load pixel data to video memory
+			if (Compressed)
+			{
+				var imageSize = ((this.PixelWidth + 3) / 4) * ((this.PixelHeight + 3) / 4) * 16;
+				GL.CompressedTexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.CompressedRgbaS3tcDxt5Ext, this.PixelWidth,
+					this.PixelHeight, 0, imageSize, data);
+			}
+			else
+			{
+				GL.TexImage2D(TextureTarget.Texture2D, 0,
+					this.pixelformat, this.PixelWidth, this.PixelHeight, 0,
+					GLPixelFormat.Rgba, PixelType.UnsignedByte,
+					data);
+			}
+
+			// Adjust atlas to represent UV coordinates
+			if (this.atlas != null)
+			{
+				Vector2 scale;
+				scale.X = this.uvRatio.X/this.pxWidth;
+				scale.Y = this.uvRatio.Y/this.pxHeight;
+				for (int i = 0; i < this.atlas.Length; i++)
+				{
+					this.atlas[i].X *= scale.X;
+					this.atlas[i].W *= scale.X;
+					this.atlas[i].Y *= scale.Y;
+					this.atlas[i].H *= scale.Y;
+				}
+			}
+			
 			GL.BindTexture(TextureTarget.Texture2D, lastTexId);
 		}
 
@@ -754,6 +796,9 @@ namespace Duality.Resources
 			if (this.compressed)
 				this.pixelformat = PixelInternalFormat.CompressedRgbaS3tcDxt5Ext;
 
+			if(this.pixelType == 0)
+				this.pixelType = PixelType.UnsignedByte;
+
 			GL.TexImage2D(TextureTarget.Texture2D, 0,
 				this.pixelformat, this.texWidth, this.texHeight, 0,
 				GLPixelFormat.Bgra, this.pixelType, IntPtr.Zero);
@@ -763,7 +808,9 @@ namespace Duality.Resources
 
 		protected override void OnLoaded()
 		{
-			this.LoadData(this.basePixmap, this.texSizeMode);
+			if(this.useExternalPixelData == false)
+				this.LoadData(this.basePixmap, this.texSizeMode);
+
 			base.OnLoaded();
 		}
 		protected override void OnDisposing(bool manually)

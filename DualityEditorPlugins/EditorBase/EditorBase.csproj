@@ -71,7 +71,6 @@
   <ItemGroup>
     <Compile Include="EditorActions.cs" />
     <Compile Include="EditorBasePlugin.cs" />
-    <Compile Include="Importers\AudioDataFileImporter.cs" />
     <Compile Include="Importers\FontFileImporter.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -92,7 +91,6 @@
     <Compile Include="PropertyEditors\ComponentPropertyEditor.cs" />
     <Compile Include="PropertyEditors\Components\RigidBodyPropertyEditor.cs" />
     <Compile Include="PropertyEditors\Components\RigidBodyShapePropertyEditor.cs" />
-    <Compile Include="PropertyEditors\Components\SoundEmitterPropertyEditor.cs" />
     <Compile Include="PropertyEditors\Components\TransformPropertyEditor.cs" />
     <Compile Include="PropertyEditors\GameObjectOverviewPropertyEditor.cs" />
     <Compile Include="PropertyEditors\GameObjectPropertyEditor.cs" />
@@ -102,8 +100,6 @@
     <Compile Include="PropertyEditors\ObjectRefPropertyEditor.cs" />
     <Compile Include="PropertyEditors\ResourcePropertyEditor.cs" />
     <Compile Include="PropertyEditors\Resources\FontPropertyEditor.cs" />
-    <Compile Include="PropertyEditors\Resources\AudioDataPreviewPropertyEditor.cs" />
-    <Compile Include="PropertyEditors\Resources\AudioDataPropertyEditor.cs" />
     <Compile Include="PropertyEditors\Resources\FontPreviewPropertyEditor.cs" />
     <Compile Include="PropertyEditors\Resources\FontContentPropertyEditor.cs" />
     <Compile Include="PropertyEditors\Resources\DrawTechniquePropertyEditor.cs" />
@@ -127,9 +123,6 @@
     </Compile>
     <Compile Include="UndoRedoActions\DeleteRigidBodyJointAction.cs" />
     <Compile Include="UndoRedoActions\CreateRigidBodyJointAction.cs" />
-    <Compile Include="UndoRedoActions\CreateSoundEmitterSourceAction.cs" />
-    <Compile Include="UndoRedoActions\DeleteSoundEmitterSourceAction.cs" />
-    <Compile Include="UndoRedoActions\SoundEmitterSourceAction.cs" />
     <Compile Include="UndoRedoActions\ReparentRigidBodyJointAction.cs" />
     <Compile Include="UndoRedoActions\RigidBodyJointAction.cs" />
   </ItemGroup>

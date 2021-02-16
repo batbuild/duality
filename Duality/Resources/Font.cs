@@ -192,6 +192,7 @@ namespace Duality.Resources
 		/// <summary>
 		/// Contains data about a single glyph.
 		/// </summary>
+		[Serializable]
 		public struct GlyphData
 		{
 			/// <summary>
@@ -230,17 +231,18 @@ namespace Duality.Resources
 		private	byte[]		customFamilyData	= null;
 		// Data that is automatically acquired while loading the font
 		[NonSerialized]	private SysDrawFont	internalFont	= null;
-		[NonSerialized]	private	GlyphData[]	glyphs			= null;
 		[NonSerialized]	private	Material	mat				= null;
-		[NonSerialized]	private	Pixmap		pixelData		= null;
 		[NonSerialized]	private	Texture		texture			= null;
 		[NonSerialized] private	bool		needsReload		= true;
-		[NonSerialized] private	int			maxGlyphWidth	= 0;
-		[NonSerialized] private	int			height			= 0;
-		[NonSerialized] private	int			ascent			= 0;
-		[NonSerialized]	private	int			bodyAscent		= 0;
-		[NonSerialized] private	int			descent			= 0;
-		[NonSerialized] private	int			baseLine		= 0;
+		
+		private Pixmap		pixelData		= null;
+		private GlyphData[] glyphs			= null;
+		private int			maxGlyphWidth	= 0;
+		private	int			height			= 0;
+		private	int			ascent			= 0;
+		private	int			bodyAscent		= 0;
+		private	int			descent			= 0;
+		private	int			baseLine		= 0;
 
 
 		/// <summary>
@@ -430,7 +432,6 @@ namespace Duality.Resources
 			set
 			{
 				this.characters = value;
-				RemoveDynamicAssets();
 				this.needsReload = true;
 			}
 		}
@@ -494,31 +495,43 @@ namespace Duality.Resources
 		/// </summary>
 		public void ReloadData()
 		{
-			this.ReleaseResources();
-			this.UpdateInternalFont();
-
 			this.needsReload = false;
-			this.maxGlyphWidth = 0;
-			this.height = 0;
-			this.ascent = 0;
-			this.bodyAscent = 0;
-			this.descent = 0;
-			this.baseLine = 0;
-			this.glyphs = new GlyphData[SupportedChars.Length];
 
-			this.GenerateResources();
-
-			// Monospace offset adjustments
-			if (this.monospace)
+			if (this.Characters == CharacterSet.Dynamic || this.pixelData == null)
 			{
-				for (int i = 0; i < SupportedChars.Length; ++i)
-				{
-					this.glyphs[i].offsetX -= (int)Math.Round((this.maxGlyphWidth - this.glyphs[i].width) / 2.0f);
-				}
-			}
+				this.ReleaseResources();
+				this.UpdateInternalFont();
 
-			// Kerning data
-			this.UpdateKerningData();
+				this.maxGlyphWidth = 0;
+				this.height = 0;
+				this.ascent = 0;
+				this.bodyAscent = 0;
+				this.descent = 0;
+				this.baseLine = 0;
+				this.glyphs = new GlyphData[SupportedChars.Length];
+
+				this.GenerateResources();
+
+				// Monospace offset adjustments
+				if (this.monospace)
+				{
+					for (int i = 0; i < SupportedChars.Length; ++i)
+					{
+						this.glyphs[i].offsetX -= (int)Math.Round((this.maxGlyphWidth - this.glyphs[i].width) / 2.0f);
+					}
+				}
+
+				// Kerning data
+				this.UpdateKerningData();
+			}
+			else
+			{
+				Init(this.pixelData);
+
+				CreateInternalTexture();
+				CreateInternalMaterial();
+				this.needsReload = true;
+			}
 		}
 		/// <summary>
 		/// Updates this Fonts kerning sample data.
@@ -599,6 +612,8 @@ namespace Duality.Resources
 							}
 						}
 					}
+
+					glyphTemp.Dispose();
 				}
 			}
 			else
@@ -668,12 +683,21 @@ namespace Duality.Resources
 			this.descent = (int)Math.Round(this.internalFont.FontFamily.GetCellDescent(this.internalFont.Style) * this.internalFont.GetHeight() / this.internalFont.FontFamily.GetLineSpacing(this.internalFont.Style));
 			this.baseLine = (int)Math.Round(this.internalFont.FontFamily.GetCellAscent(this.internalFont.Style) * this.internalFont.GetHeight() / this.internalFont.FontFamily.GetLineSpacing(this.internalFont.Style));
 
-			// Create internal Texture Resource
-			this.texture = new Texture(this.pixelData, 
-				Texture.SizeMode.Enlarge, 
-				this.IsPixelGridAligned ? TextureMagFilter.Nearest : TextureMagFilter.Linear,
-				this.IsPixelGridAligned ? TextureMinFilter.Nearest : TextureMinFilter.LinearMipmapLinear);
+			CreateInternalTexture();
+			CreateInternalMaterial();
+		}
 
+		private void CreateInternalTexture()
+		{
+			this.texture = new Texture(this.pixelData,
+				Texture.SizeMode.Enlarge,
+				this.IsPixelGridAligned ? TextureMagFilter.Nearest : TextureMagFilter.Linear,
+				this.IsPixelGridAligned ? TextureMinFilter.Nearest : TextureMinFilter.LinearMipmapLinear,
+				keepPixmapDataResident: DualityApp.ExecContext == DualityApp.ExecutionContext.Editor || this.Characters == CharacterSet.Dynamic);
+		}
+
+		private void CreateInternalMaterial()
+		{
 			// Select DrawTechnique to use
 			ContentRef<DrawTechnique> technique;
 			if (this.renderMode == RenderMode.MonochromeBitmap)
@@ -696,14 +720,6 @@ namespace Duality.Resources
 
 		private void LoadOrCreatePixelData(int cols, int rows, TextRenderingHint textRenderingHint)
 		{
-			if (this.characters == CharacterSet.PreRendered)
-			{
-				if (File.Exists(GetPreGeneratedAssetPath()))
-				{
-					this.pixelData = Load<Pixmap>(GetPreGeneratedAssetPath());
-				}
-			}
-
 			Pixmap.Layer pixelLayer = new Pixmap.Layer(MathF.RoundToInt(cols*this.internalFont.Size*1.2f), MathF.RoundToInt(rows*this.internalFont.Height*1.2f));
 			Pixmap.Layer glyphTemp;
 			Pixmap.Layer glyphTempTypo;
@@ -787,6 +803,11 @@ namespace Duality.Resources
 					glyphTemp.DrawOnto(pixelLayer, BlendMode.Solid, x, y);
 
 					x += glyphTemp.Width + MathF.Clamp((int) MathF.Ceiling(this.internalFont.Height*0.125f), 2, 10);
+					
+					if(glyphTempTypo != glyphTemp)
+						glyphTempTypo.Dispose();
+
+					glyphTemp.Dispose();
 				}
 			}
 
@@ -798,11 +819,7 @@ namespace Duality.Resources
 				pixelLayer.Data[i].B = 255;
 			}
 			
-			this.pixelData = new Pixmap(pixelLayer);
-			this.pixelData.Atlas = new List<Rect>(atlas);
-
-			if(this.characters == CharacterSet.PreRendered)
-				this.pixelData.Save(GetPreGeneratedAssetPath());
+			this.pixelData = new Pixmap(pixelLayer) {Atlas = new List<Rect>(atlas)};
 		}
 
 		/// <summary>
@@ -1266,20 +1283,6 @@ namespace Duality.Resources
 			c.kerning = this.kerning;
 			c.spacing = this.spacing;
 			c.ReloadData();
-		}
-
-		private void RemoveDynamicAssets()
-		{
-			if (string.IsNullOrEmpty(this.Path))
-				return;
-
-			if (File.Exists(GetPreGeneratedAssetPath()))
-				File.Delete(GetPreGeneratedAssetPath());
-		}
-
-		private string GetPreGeneratedAssetPath()
-		{
-			return System.IO.Path.Combine(System.IO.Path.GetDirectoryName(this.Path), FontAssetPath, this.Name + Pixmap.FileExt);
 		}
 
 		/// <summary>

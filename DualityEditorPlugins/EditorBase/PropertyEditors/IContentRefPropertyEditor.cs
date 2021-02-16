@@ -115,10 +115,6 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 			if (this.prevImageHash == prevHash) return;
 			this.prevImageHash = prevHash;
 			
-			this.StopPreviewSound();
-			if (this.prevSound != null) this.prevSound.Dispose();
-			this.prevSound = null;
-
 			if (this.prevImage != null) this.prevImage.Dispose();
 			this.prevImage = null;
 			this.Height = 22;
@@ -133,8 +129,6 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 					var avgColor = this.prevImage.GetAverageColor();
 					this.prevImageLum = avgColor.GetLuminance();
 				}
-
-				this.prevSound = PreviewProvider.GetPreviewSound(res);
 			}
 		}
 
@@ -151,11 +145,6 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 				Pixmap basePx = convOp.Perform<Pixmap>().FirstOrDefault();
 				Pixmap.Layer basePxLayer = basePx != null ? basePx.MainLayer : null;
 				return basePxLayer != null ? basePxLayer.GetHashCode() : 0;
-			}
-			else if (convOp.CanPerform<AudioData>())
-			{
-				AudioData audioData = convOp.Perform<AudioData>().FirstOrDefault();
-				return (audioData != null && audioData.OggVorbisData != null) ? audioData.OggVorbisData.GetHashCode() : 0;
 			}
 
 			return this.contentPath.GetHashCode();

@@ -26,6 +26,8 @@ namespace Duality
 	[EditorHintImage(typeof(CoreRes), CoreResNames.ImageGameObject)]
 	public sealed class GameObject : IManageableObject, ICloneable, Serialization.IUniqueIdentifyable
 	{
+		private static List<GameObject>			emptyList	= new List<GameObject>();
+
 		[NonSerialized] 
 		private		Scene						scene		= null;
 		private		GameObject					parent		= null;
@@ -38,16 +40,15 @@ namespace Duality
 		private		bool						active		= true;
 		private		InitState					initState	= InitState.Initialized;
 		
-		[NonSerialized] 
-		private		List<int>					executionOrder = new List<int>(); 
-
+		[NonSerialized] private	List<int>		executionOrder = new List<int>();
+		
 		// Built-in heavily used component lookup
 		private		Components.Transform		compTransform	= null;
 		
 		[NonSerialized] private EventHandler<GameObjectParentChangedEventArgs>	eventParentChanged		= null;
 		[NonSerialized] private EventHandler<ComponentEventArgs>				eventComponentAdded		= null;
 		[NonSerialized] private EventHandler<ComponentEventArgs>				eventComponentRemoving	= null;
-
+		
 
 		/// <summary>
 		/// [GET / SET] This GameObject's parent object in the scene graph.
@@ -144,6 +145,39 @@ namespace Duality
 			}
 		}
 		/// <summary>
+		/// [GET / SET] Whether or not the GameObject is currently active. Unlike <see cref="Active"/>,
+		/// this property ignores parent activation states and depends only on this single GameObject.
+		/// Unlike ActiveSingle this property will only activate or deactivate children until it
+		/// hits an inactive branch. ActiveSingle ignores parent activation state and activates the
+		/// children even if their parents are inactive.
+		/// </summary>
+		/// <seealso cref="Active"/>
+		public bool ActiveSingleTree
+		{
+			get { return ActiveSingle; }
+			set
+			{
+				if (this.active != value)
+				{
+					if (this.scene != null && this.scene.IsCurrent)
+					{
+						if (value)
+						{
+							this.OnActivate();
+							ActivateChildren(this);
+						}
+						else
+						{
+							this.OnDeactivate();
+							DeactivateChildren(this);
+						}
+					}
+
+					this.active = value;
+				}
+			}
+		}
+		/// <summary>
 		/// [GET / SET] The name of this GameObject.
 		/// </summary>
 		public string Name
@@ -186,15 +220,11 @@ namespace Duality
 		/// <summary>
 		/// [GET] Enumerates this objects child GameObjects.
 		/// </summary>
-		public IEnumerable<GameObject> Children
+		public List<GameObject> Children
 		{
 			get
 			{
-				if (this.children == null) yield break;
-				foreach (GameObject c in this.children)
-				{
-					yield return c;
-				}
+				return this.children ?? emptyList;
 			}
 		}
 		/// <summary>
@@ -497,6 +527,21 @@ namespace Duality
 		public IEnumerable<T> GetComponents<T>() where T : class
 		{
 			return this.compList.OfType<T>();
+		}
+		/// <summary>
+		/// Enumerates all <see cref="Component"/>s of this GameObject that match the specified <see cref="Type"/> or subclass it and populates
+		/// the supplied list with those components. This method is the same as the overloads but doesn't generate garbage.
+		/// </summary>
+		/// <typeparam name="T">The base Type to match when iterating through the Components.</typeparam>
+		/// <returns>An enumeration of all Components that match the specified conditions.</returns>
+		/// <seealso cref="GetComponents(System.Type)"/>
+		public void GetComponents<T>(List<T> components) where T : class
+		{
+			for (var i = 0; i < compList.Count; i++)
+			{
+				if(compList[i] is T)
+					components.Add(compList[i] as T);
+			}
 		}
 		/// <summary>
 		/// Enumerates all <see cref="Component"/>s of this object's child GameObjects that match the specified <see cref="Type"/> or subclass it.
@@ -1007,6 +1052,35 @@ namespace Duality
 			// the component collection will be iterated backwards, so reverse the order
 			this.executionOrder.Reverse();
 		}
+
+		private static void ActivateChildren(GameObject gameObject)
+		{
+			var count = gameObject.Children.Count;
+			for (int i = 0; i < count; i++)
+			{
+				var child = gameObject.Children[i];
+				if (child.ActiveSingle == false)
+					continue;
+
+				child.OnActivate();
+				ActivateChildren(child);
+			}
+		}
+
+		private static void DeactivateChildren(GameObject gameObject)
+		{
+			var count = gameObject.Children.Count;
+			for (int i = 0; i < count; i++)
+			{
+				var child = gameObject.Children[i];
+				if (child.ActiveSingle == false)
+					continue;
+
+				child.OnDeactivate();
+				DeactivateChildren(child);
+			}
+		}
+
 
 		public override string ToString()
 		{

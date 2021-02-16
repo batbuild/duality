@@ -30,10 +30,20 @@ namespace Duality
 		/// </summary>
 		public const string FileExt = ".res";
 
-		private	static	List<Resource>	finalizeSched	= new List<Resource>();
+		/// <summary>
+		/// The finalizer adds resources to this list
+		/// </summary>
+		private	static	List<Resource>	finalizeSched		= new List<Resource>();
+
+		/// <summary>
+		/// We use this list as a bit of scratch memory, for copying items to be disposed from the finalizeSched list.
+		/// </summary>
+		private static	List<Resource>	finalizeSchedCopy	= new List<Resource>();
+		
 
 		public static event EventHandler<ResourceEventArgs>	ResourceDisposing = null;
-		public static event EventHandler<ResourceEventArgs>	ResourceLoaded = null;
+		public static event EventHandler<ResourceEventArgs> ResourceLoading = null;
+		public static event EventHandler<ResourceEventArgs> ResourceLoaded = null;
 		public static event EventHandler<ResourceSaveEventArgs>	ResourceSaved = null;
 		public static event EventHandler<ResourceSaveEventArgs>	ResourceSaving = null;
 
@@ -189,6 +199,17 @@ namespace Duality
 			this.WriteToStream(str, out streamName);
 			this.CheckedOnSaved(null);
 		}
+		public void Save<T>(Stream str, IFormatter formatter) where T:Resource
+		{
+			if (this.Disposed) throw new ApplicationException("Can't save a Ressource that has been disposed.");
+
+			string streamName;
+
+			this.CheckedOnSaving(null);
+			this.WriteToStream<T>(str, out streamName, formatter);
+			this.CheckedOnSaved(null);
+		}
+
 		private void SaveCompressed(Stream str)
 		{
 			str.Write(BitConverter.GetBytes('L'), 0, 1);
@@ -208,8 +229,31 @@ namespace Duality
 				}
 			}
 		}
+
+		private void WriteToStream<T>(Stream str, out string streamName, IFormatter customFormatter) where T:Resource
+		{
+			streamName = GetStreamName(str);
+
+			if (customFormatter != null)
+				customFormatter.WriteObject((T)this);
+		}
+
 		private void WriteToStream(Stream str, out string streamName)
 		{
+			streamName = GetStreamName(str);
+
+			using (var formatter = Formatter.Create(str))
+			{
+				formatter.AddFieldBlocker(Resource.NonSerializedResourceBlocker);
+				if (this is Duality.Resources.Scene) // This is an unfortunate hack. Refactor when necessary.
+					formatter.AddFieldBlocker(Resource.PrefabLinkedFieldBlocker);
+				formatter.WriteObject(this);
+			}
+		}
+
+		private static string GetStreamName(Stream str)
+		{
+			string streamName;
 			if (str is FileStream)
 			{
 				FileStream fileStream = str as FileStream;
@@ -220,15 +264,9 @@ namespace Duality
 			}
 			else
 				streamName = str.ToString();
-
-			using (var formatter = Formatter.Create(str))
-			{
-				formatter.AddFieldBlocker(Resource.NonSerializedResourceBlocker);
-				if (this is Duality.Resources.Scene) // This is an unfortunate hack. Refactor when necessary.
-					formatter.AddFieldBlocker(Resource.PrefabLinkedFieldBlocker);
-				formatter.WriteObject(this);
-			}
+			return streamName;
 		}
+
 		private bool CheckedOnSaving(string saveAsPath)
 		{
 			if (this.initState != InitState.Initialized) return true;
@@ -313,7 +351,10 @@ namespace Duality
 
 		~Resource()
 		{
-			finalizeSched.Add(this);
+			// this is almost definitely not a good idea. If anything else takes a lock on this object, and deadlocks, no more
+			// finalizers will run!
+			lock (finalizeSched)
+				finalizeSched.Add(this);
 		}
 		/// <summary>
 		/// Disposes the Resource.
@@ -374,6 +415,8 @@ namespace Duality
 		{
 			if (!File.Exists(path)) return null;
 
+			if (ResourceLoading != null) ResourceLoading(null, new ResourceEventArgs(path));
+
 			T newContent;
 			using (FileStream str = File.OpenRead(path))
 			{
@@ -416,7 +459,15 @@ namespace Duality
 		{
 			using (var formatter = Formatter.Create(str))
 			{
-				return Load<T>(formatter, resPath, loadCallback, initResource);
+				try
+				{
+					formatter.SetErrorContextInfo("Loading resource " + resPath);
+					return Load<T>(formatter, resPath, loadCallback, initResource);
+				}
+				finally
+				{
+					formatter.SetErrorContextInfo("");
+				}
 			}
 		}
 		/// <summary>
@@ -435,13 +486,13 @@ namespace Duality
 		/// uninitialized Resources or register them in the ContentProvider.
 		/// </param>
 		/// <returns>The Resource that has been loaded.</returns>
-		public static T Load<T>(Formatter formatter, string resPath = null, Action<T> loadCallback = null, bool initResource = true) where T : Resource
+		public static T Load<T>(IFormatter formatter, string resPath = null, Action<T> loadCallback = null, bool initResource = true) where T : Resource
 		{
 			T newContent = null;
 
 			try
 			{
-				Resource res = formatter.ReadObject<Resource>();
+				Resource res = formatter.ReadObject<T>();
 				if (res == null) throw new ApplicationException("Loading Resource failed");
 
 				res.initState = InitState.Initializing;
@@ -549,15 +600,25 @@ namespace Duality
 
 		internal static void RunCleanup()
 		{
-			if (finalizeSched.Count > 0)
+			lock (finalizeSched)
 			{
-				Resource[] finalizeSchedArray = finalizeSched.NotNull().ToArray();
-				finalizeSched.Clear();
-				foreach (Resource res in finalizeSchedArray)
+				if (finalizeSched.Count <= 0) return;
+
+				for (int i = 0; i < finalizeSched.Count; i++)
 				{
-					res.Dispose(false);
+					if (finalizeSched[i] == null)
+						continue;
+
+					finalizeSchedCopy.Add(finalizeSched[i]);
 				}
+				finalizeSched.Clear();
 			}
+			
+			foreach (Resource res in finalizeSchedCopy)
+			{
+				res.Dispose(false);
+			}
+			finalizeSchedCopy.Clear();
 		}
 
 		/// <summary>
